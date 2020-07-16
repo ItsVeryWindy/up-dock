@@ -1,0 +1,11 @@
+# IDE
+.vscode/
+.idea/
+.vs/
+*.user
+
+# Build Results
+[Dd]ebug/
+[Rr]elease/
+[Bb]in/
+[Oo]bj/

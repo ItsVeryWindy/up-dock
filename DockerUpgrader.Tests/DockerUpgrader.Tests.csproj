@@ -1,0 +1,33 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Files\another_file.txt" />
+    <EmbeddedResource Include="Files\another_file_expected.txt" />
+    <EmbeddedResource Include="tags_response.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Files\Dockerfile_expected" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Files\Dockerfile" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.5.0" />
+    <PackageReference Include="NUnit" Version="3.12.0" />
+    <PackageReference Include="NUnit3TestAdapter" Version="3.16.1">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\DockerUpgrader\DockerUpgrader.csproj" />
+  </ItemGroup>
+</Project>
