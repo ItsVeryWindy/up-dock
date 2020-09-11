@@ -25,6 +25,10 @@ jobs:
       run: dotnet test --no-restore --verbosity normal
     - name: Publish Windows
       run: dotnet publish -r win-x64 --configuration Release -p:PublishSingleFile=true -p:PublishTrimmed=true
+    - name: Publish Mac
+      run: dotnet publish -r osx-x64 --configuration Release -p:PublishSingleFile=true -p:PublishTrimmed=true
+    - name: Publish Linux
+      run: dotnet publish -r linux-x64 --configuration Release -p:PublishSingleFile=true -p:PublishTrimmed=true
     - name: Create Release
       id: create_release
       uses: actions/create-release@v1
