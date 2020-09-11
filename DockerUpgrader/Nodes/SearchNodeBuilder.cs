@@ -60,7 +60,7 @@ namespace DockerUpgrader.Nodes
 
             public void Add(DockerImageTemplatePattern pattern) => Add(pattern, pattern.Part);
 
-            private void Add(DockerImageTemplatePattern pattern, IDockerImagePatternPart part)
+            private void Add(DockerImageTemplatePattern pattern, IDockerImagePatternPart? part)
             {
                 if (part == EmptyDockerImagePatternPart.Instance)
                 {
@@ -95,14 +95,14 @@ namespace DockerUpgrader.Nodes
                     return;
                 }
 
-                throw new InvalidOperationException($"Part type {part.GetType()} is not supported");
+                throw new InvalidOperationException($"Part type {(part is null ? "null" : part.GetType().ToString())} is not supported");
             }
 
-            private void Add(DockerImageTemplatePattern pattern, IDockerImagePatternPart part, ReadOnlySpan<char> span)
+            private void Add(DockerImageTemplatePattern pattern, IDockerImagePatternPart? part, ReadOnlySpan<char> span)
             {
                 if (span.IsEmpty)
                 {
-                    Add(pattern, part.Next);
+                    Add(pattern, part?.Next);
                     return;
                 }
 
@@ -127,7 +127,7 @@ namespace DockerUpgrader.Nodes
                     case TreeNodeType.Root:
                         return new MultipleSearchNode(Children.Select(x => x.Build(nodes)));
                     case TreeNodeType.End:
-                        return new DockerImageTemplatePatternNode(Pattern);
+                        return new DockerImageTemplatePatternNode(Pattern!);
                 }
 
                 var nodesWithThis = nodes.Add(this);
@@ -165,7 +165,7 @@ namespace DockerUpgrader.Nodes
 
             private TextSearchNode CreateTextNode(ImmutableList<TreeNode> nodes)
             {
-                var str = new string(nodes.Select(x => x.Character.Value).ToArray());
+                var str = new string(nodes.Select(x => x.Character!.Value).ToArray());
 
                 return new TextSearchNode(str, BuildChildren());
             }

@@ -20,7 +20,7 @@ namespace DockerUpgrader.Tests
             var result = node.Search("abcd1234:1.2.3").Pattern;
 
             Assert.That(result, Is.Not.Null);
-            Assert.That(result.Image, Is.Not.Null);
+            Assert.That(result!.Image, Is.Not.Null);
             Assert.That(result.Image.Repository, Is.EqualTo(DockerImageTemplate.DefaultRepository));
             Assert.That(result.Image.Image, Is.EqualTo("library/abcd1234"));
             Assert.That(result.Image.Tag, Is.EqualTo("1.2.3"));
@@ -42,7 +42,7 @@ namespace DockerUpgrader.Tests
             var result = node.Search("abcd12345:1.2.3").Pattern;
 
             Assert.That(result, Is.Not.Null);
-            Assert.That(result.Image, Is.Not.Null);
+            Assert.That(result!.Image, Is.Not.Null);
             Assert.That(result.Image.Repository, Is.EqualTo(DockerImageTemplate.DefaultRepository));
             Assert.That(result.Image.Image, Is.EqualTo("library/abcd12345"));
             Assert.That(result.Image.Tag, Is.EqualTo("1.2.3"));
@@ -66,7 +66,8 @@ namespace DockerUpgrader.Tests
             var result = node.Search(search);
 
             Assert.That(result, Is.Not.Null);
-            Assert.That(result.Pattern.Image, Is.Not.Null);
+            Assert.That(result.Pattern, Is.Not.Null);
+            Assert.That(result.Pattern!.Image, Is.Not.Null);
             Assert.That(result.Pattern.Image.Repository, Is.EqualTo(DockerImageTemplate.DefaultRepository));
             Assert.That(result.Pattern.Image.Image, Is.EqualTo("library/abcd1234"));
             Assert.That(result.Pattern.Image.Tag, Is.EqualTo("1.2.3"));

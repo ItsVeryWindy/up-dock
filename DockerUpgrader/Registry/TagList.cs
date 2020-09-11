@@ -6,9 +6,9 @@ namespace DockerUpgrader.Registry
     public class TagList
     {
         [JsonPropertyName("name")]
-        public string Name { get; set; }
+        public string Name { get; set; } = null!;
 
         [JsonPropertyName("tags")]
-        public IReadOnlyList<string> Tags { get; set; }
+        public IReadOnlyList<string> Tags { get; set; } = null!;
     }
 }

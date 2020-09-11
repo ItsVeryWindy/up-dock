@@ -68,7 +68,7 @@ namespace DockerUpgrader
             if (repoSplit.Length < 2)
                 throw new FormatException("Missing authentication separator");
 
-            return (repo, new AuthenticationOptions { Password = strSplit[1], Username = strSplit[0] });
+            return (repo, new AuthenticationOptions(strSplit[0], strSplit[1]));
         }
     }
 }

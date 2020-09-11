@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using CommandLine;
 using DockerUpgrader.Files;
 using DockerUpgrader.Git;
-using DockerUpgrader.Nodes;
 using DockerUpgrader.Registry;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -21,17 +20,16 @@ namespace DockerUpgrader
         {
             var result = Parser.Default.ParseArguments<CommandLineOptions>(args);
 
-            return result.WithParsedAsync(Main);
+            return result.WithParsedAsync(Execute);
         }
 
-        public static async Task Main(CommandLineOptions options)
+        private static async Task Execute(CommandLineOptions options)
         {
             var cts = new CancellationTokenSource();
 
             Console.CancelKeyPress += (sender, args) => { cts.Cancel(); };
 
-            var services = CreateServices(options, cts.Token)
-                .BuildServiceProvider();
+            var services = CreateServices(options, cts.Token).BuildServiceProvider();
 
             await services.GetRequiredService<IGitRepositoryProcessor>().ProcessAsync();
         }

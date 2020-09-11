@@ -26,8 +26,11 @@ namespace DockerUpgrader.Nodes
             _parts = new List<object>(parts);
         }
 
-        public int CompareTo(DockerImage other)
+        public int CompareTo(DockerImage? other)
         {
+            if (other == null)
+                return 1;
+
             if (Repository == null && other.Repository != null)
                 return -1;
 

@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using CommandLine;
 
 namespace DockerUpgrader.Files
 {
@@ -23,17 +21,9 @@ namespace DockerUpgrader.Files
 
         public IFileInfo CreateTemporaryFile()
         {
-            try
-            {
-                var tempFileName = Path.GetTempFileName();
+            var tempFileName = Path.GetTempFileName();
 
-                return new PhysicalFileInfo(new FileInfo(tempFileName));
-            }
-            catch(Exception ex)
-            {
-                throw;
-            }
-
+            return new PhysicalFileInfo(new FileInfo(tempFileName));
         }
     }
 

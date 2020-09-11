@@ -6,10 +6,10 @@ namespace DockerUpgrader
     public class AuthToken
     {
         [JsonPropertyName("access_token")]
-        public string AccessToken { get; set; }
+        public string AccessToken { get; set; } = null!;
 
         [JsonPropertyName("token")]
-        public string Token { get; set; }
+        public string Token { get; set; } = null!;
 
         [JsonPropertyName("expires_in")]
         public int ExpiresIn { get; set; }

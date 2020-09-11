@@ -5,7 +5,7 @@ namespace DockerUpgrader.Imaging.Parts
 {
     public interface IDockerImagePatternPart
     {
-        IDockerImagePatternPart Next { get; }
+        IDockerImagePatternPart? Next { get; }
 
         void EnsureExecution(IEnumerable<NuGetVersion> versions);
 

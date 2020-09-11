@@ -34,26 +34,24 @@ namespace DockerUpgrader.Tests
     internal class StubFileInfo : IFileInfo
     {
         private readonly Dictionary<string, Stream> _files;
-        private readonly string _path;
 
         public StubFileInfo(Dictionary<string, Stream> files, string path)
         {
             _files = files;
-            _path = path;
+            Path = path;
         }
 
         public void Delete()
         {
-            _files.Remove(_path);
+            _files.Remove(Path);
         }
 
         public IDirectoryInfo? Parent { get; }
-        public string Name { get; }
         public string Path { get; }
         public bool Exists { get; }
-        public Stream CreateWriteStream() => _files[_path] = new MemoryStream();
+        public Stream CreateWriteStream() => _files[Path] = new MemoryStream();
 
-        public Stream CreateReadStream() => _files[_path];
+        public Stream CreateReadStream() => _files[Path];
 
         public void Move(IFileInfo file)
         {

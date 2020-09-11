@@ -38,7 +38,7 @@ namespace DockerUpgrader.Nodes
             return new SearchTreeNodeResult();
         }
 
-        public int CompareTo(ISearchTreeNode other)
+        public int CompareTo(ISearchTreeNode? other)
         {
             if (other is TextSearchNode textSearchNode)
             {

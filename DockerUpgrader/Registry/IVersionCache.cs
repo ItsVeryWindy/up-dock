@@ -9,6 +9,6 @@ namespace DockerUpgrader.Registry
     {
         Task UpdateCacheAsync(IEnumerable<DockerImageTemplatePattern> patterns, CancellationToken cancellationToken);
 
-        DockerImagePattern FetchLatest(DockerImagePattern pattern);
+        DockerImagePattern? FetchLatest(DockerImagePattern pattern);
     }
 }

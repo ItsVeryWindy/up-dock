@@ -19,7 +19,7 @@ namespace DockerUpgrader.Nodes
             return new SearchTreeNodeResult(_pattern.Create(versions), endIndex);
         }
 
-        public int CompareTo(ISearchTreeNode other)
+        public int CompareTo(ISearchTreeNode? other)
         {
             return 1;
         }

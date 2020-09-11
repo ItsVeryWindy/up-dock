@@ -26,7 +26,7 @@ namespace DockerUpgrader.Tests
 
             var planner = sp.GetRequiredService<IReplacementPlanner>();
 
-            var stream = typeof(ReplacementPlannerTests).Assembly.GetManifestResourceStream($"DockerUpgrader.Tests.Files.{fileName}");
+            var stream = typeof(ReplacementPlannerTests).Assembly.GetManifestResourceStream($"DockerUpgrader.Tests.Files.{fileName}")!;
 
             var fileInfo = new StreamFileInfo(stream);
 

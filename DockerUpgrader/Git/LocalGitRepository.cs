@@ -117,8 +117,6 @@ namespace DockerUpgrader.Git
                 Body = body.ToString()
             };
 
-            return;
-
             var pullRequest = await  _client.PullRequest.Create(_remoteRepository.Owner, _remoteRepository.Name, newPullRequest);
 
             var labelUpdate = new IssueUpdate();

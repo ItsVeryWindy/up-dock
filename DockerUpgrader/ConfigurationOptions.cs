@@ -16,16 +16,16 @@ namespace DockerUpgrader
         public ICollection<string> Include => _include;
         public ICollection<string> Exclude => _exclude;
         public ICollection<DockerImageTemplatePattern> Patterns => _patterns;
-        public string Search { get; set; }
-        public string Token { get; set; }
+        public string? Search { get; set; }
+        public string? Token { get; set; }
         public IDictionary<string, AuthenticationOptions> Authentication => _authentication;
 
         IReadOnlyCollection<string> IConfigurationOptions.Include => _include;
         IReadOnlyCollection<string> IConfigurationOptions.Exclude => _exclude;
         IReadOnlyCollection<DockerImageTemplatePattern> IConfigurationOptions.Patterns => _patterns;
         IReadOnlyDictionary<string, AuthenticationOptions> IConfigurationOptions.Authentication => _authentication;
-        string IConfigurationOptions.Search => Search;
-        string IConfigurationOptions.Token => Token;
+        string? IConfigurationOptions.Search => Search;
+        string? IConfigurationOptions.Token => Token;
 
         public void Populate(Stream stream)
         {

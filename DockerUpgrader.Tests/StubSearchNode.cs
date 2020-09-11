@@ -19,7 +19,7 @@ namespace DockerUpgrader.Tests
             new NuGetVersion(1, 2, 3)
         });
 
-        public int CompareTo(ISearchTreeNode other)
+        public int CompareTo(ISearchTreeNode? other)
         {
             return 1;
         }

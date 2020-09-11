@@ -7,7 +7,7 @@ namespace DockerUpgrader.Imaging.Parts
     {
         public static readonly EmptyDockerImagePatternPart Instance = new EmptyDockerImagePatternPart();
 
-        public IDockerImagePatternPart Next { get; } = null;
+        public IDockerImagePatternPart? Next { get; } = null;
 
         private EmptyDockerImagePatternPart()
         {

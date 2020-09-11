@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using DockerUpgrader.Files;
 
 namespace DockerUpgrader.Tests
@@ -18,8 +19,7 @@ namespace DockerUpgrader.Tests
         }
 
         public IDirectoryInfo? Parent { get; }
-        public string Name { get; }
-        public string Path { get; }
+        public string Path => throw new NotImplementedException();
         public bool Exists { get; }
         public Stream CreateWriteStream()
         {

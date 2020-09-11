@@ -120,7 +120,7 @@ namespace DockerUpgrader
 
             var file = _fileProvider.GetFile(localConfigPath);
 
-            if (file.Exists)
+            if (file?.Exists == true)
             {
                 using var stream = file.CreateReadStream();
 

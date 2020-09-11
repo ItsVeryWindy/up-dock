@@ -21,7 +21,7 @@ namespace DockerUpgrader.Imaging
             Template = template;
         }
 
-        public DockerImagePattern? Create(IReadOnlyList<NuGetVersion> versions)
+        public DockerImagePattern Create(IReadOnlyList<NuGetVersion> versions)
         {
             var image = Template.CreateImage(versions);
 
