@@ -25,7 +25,7 @@ namespace DockerUpgradeTool
             {
                 var list = replacementGroup.ToList();
 
-                var tempFile = await CreateTemporaryFileAsync(replacementGroup.Key, list, cancellationToken);
+                var tempFile = await CreateTemporaryFileAsync(replacementGroup.Key, list);
 
                 replacementGroup.Key.Delete();
 
@@ -33,7 +33,7 @@ namespace DockerUpgradeTool
             }
         }
 
-        private async Task<IFileInfo> CreateTemporaryFileAsync(IFileInfo file, IReadOnlyCollection<TextReplacement> replacements, CancellationToken cancellationToken)
+        private async Task<IFileInfo> CreateTemporaryFileAsync(IFileInfo file, IReadOnlyCollection<TextReplacement> replacements)
         {
             var tempFile = _provider.CreateTemporaryFile();
 

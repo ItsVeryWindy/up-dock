@@ -19,9 +19,6 @@ namespace DockerUpgradeTool.Imaging
 
         public override string ToString() => Pattern.Part.Execute(Image.Versions);
 
-        public DockerImagePattern Create(DockerImage image)
-        {
-            return new DockerImagePattern(Pattern, image);
-        }
+        public DockerImagePattern Create(DockerImage image) => new DockerImagePattern(Pattern, image);
     }
 }

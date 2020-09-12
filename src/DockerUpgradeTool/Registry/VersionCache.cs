@@ -130,9 +130,10 @@ namespace DockerUpgradeTool
                     .Where(kv => kv.Key != "realm")
                     .Select(kv => $"{HttpUtility.UrlEncode(kv.Key)}={HttpUtility.UrlEncode(kv.Value)}"));
 
-            var builder = new UriBuilder(realm);
-
-            builder.Query = queryString;
+            var builder = new UriBuilder(realm)
+            {
+                Query = queryString
+            };
 
             var request = new HttpRequestMessage(HttpMethod.Get, builder.Uri);
 

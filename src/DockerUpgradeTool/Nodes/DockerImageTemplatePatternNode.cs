@@ -14,14 +14,8 @@ namespace DockerUpgradeTool.Nodes
             _pattern = pattern;
         }
 
-        public SearchTreeNodeResult Search(ReadOnlySpan<char> span, int endIndex, ImmutableList<NuGetVersion> versions)
-        {
-            return new SearchTreeNodeResult(_pattern.Create(versions), endIndex);
-        }
+        public SearchTreeNodeResult Search(ReadOnlySpan<char> span, int endIndex, ImmutableList<NuGetVersion> versions) => new SearchTreeNodeResult(_pattern.Create(versions), endIndex);
 
-        public int CompareTo(ISearchTreeNode? other)
-        {
-            return 1;
-        }
+        public int CompareTo(ISearchTreeNode? other) => 1;
     }
 }

@@ -116,7 +116,7 @@ namespace DockerUpgradeTool.Imaging
 
                 if(i != strStart)
                 {
-                    parts.Add(tag.Substring(strStart, i - strStart));
+                    parts.Add(tag[strStart..i]);
                 }
 
                 parts.Add(range);
@@ -276,10 +276,7 @@ namespace DockerUpgradeTool.Imaging
 
         public DockerImageTemplatePattern CreatePattern(string pattern) => CreatePattern(pattern, null);
 
-        public DockerImageTemplatePattern CreatePattern(string pattern, string? group)
-        {
-            return DockerImageTemplatePattern.Parse(pattern, group ?? pattern, this);
-        }
+        public DockerImageTemplatePattern CreatePattern(string pattern, string? group) => DockerImageTemplatePattern.Parse(pattern, group ?? pattern, this);
 
         public override int GetHashCode() => HashCode.Combine(Repository, Image, Tag);
 

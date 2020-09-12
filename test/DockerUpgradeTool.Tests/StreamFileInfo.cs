@@ -13,18 +13,12 @@ namespace DockerUpgradeTool.Tests
             _stream = stream;
         }
 
-        public void Delete()
-        {
-            throw new System.NotImplementedException();
-        }
+        public void Delete() => throw new NotImplementedException();
 
         public IDirectoryInfo? Parent { get; }
         public string Path => throw new NotImplementedException();
         public bool Exists { get; }
-        public Stream CreateWriteStream()
-        {
-            throw new System.NotImplementedException();
-        }
+        public Stream CreateWriteStream() => throw new NotImplementedException();
 
         public Stream CreateReadStream()
         {
@@ -39,14 +33,8 @@ namespace DockerUpgradeTool.Tests
             return ms;
         }
 
-        public void Move(IFileInfo file)
-        {
-            throw new System.NotImplementedException();
-        }
+        public void Move(IFileInfo file) => throw new NotImplementedException();
 
-        public string MakeRelativePath(IDirectoryInfo directory)
-        {
-            throw new System.NotImplementedException();
-        }
+        public string MakeRelativePath(IDirectoryInfo directory) => throw new NotImplementedException();
     }
 }

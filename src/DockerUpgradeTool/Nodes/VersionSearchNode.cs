@@ -91,9 +91,6 @@ namespace DockerUpgradeTool.Nodes
             return new SearchTreeNodeResult();
         }
 
-        public int CompareTo(ISearchTreeNode? other)
-        {
-            return -1;
-        }
+        public int CompareTo(ISearchTreeNode? other) => -1;
     }
 }

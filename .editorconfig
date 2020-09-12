@@ -66,14 +66,14 @@ csharp_preserve_single_line_blocks = true
 #Style - Code block preferences
 
 #prefer curly braces even for one line of code
-csharp_prefer_braces = true:suggestion
+csharp_prefer_braces = false:suggestion
 
 #Style - expression bodied member options
 
 #prefer block bodies for constructors
 csharp_style_expression_bodied_constructors = false:suggestion
 #prefer block bodies for methods
-csharp_style_expression_bodied_methods = false:suggestion
+csharp_style_expression_bodied_methods = when_on_single_line:suggestion
 #prefer expression-bodied members for properties
 csharp_style_expression_bodied_properties = true:suggestion
 
@@ -117,7 +117,7 @@ dotnet_style_require_accessibility_modifiers = for_non_interface_members:suggest
 #Style - Modifier preferences
 
 #when this rule is set to a list of modifiers, prefer the specified ordering.
-csharp_preferred_modifier_order = public,private,internal,readonly,static,async,override:suggestion
+csharp_preferred_modifier_order = public,private,internal,protected,static,override,readonly,async:suggestion
 
 #Style - Pattern matching
 
@@ -132,3 +132,23 @@ dotnet_style_qualification_for_field = false:suggestion
 dotnet_style_qualification_for_method = false:suggestion
 #prefer properties not to be prefaced with this. or Me. in Visual Basic
 dotnet_style_qualification_for_property = false:suggestion
+
+#Style - naming options
+
+dotnet_naming_style.first_word_upper_case_style.capitalization = first_word_upper
+
+#capitalize public symbols
+dotnet_naming_rule.public_members_must_be_capitalized.symbols = public_symbols
+dotnet_naming_rule.public_members_must_be_capitalized.style = first_word_upper_case_style
+dotnet_naming_rule.public_members_must_be_capitalized.severity = suggestion
+
+dotnet_naming_symbols.public_symbols.applicable_kinds = property,method,field,event,delegate
+dotnet_naming_symbols.public_symbols.applicable_accessibilities = public
+dotnet_naming_symbols.public_symbols.required_modifiers = readonly
+
+#capitalize static variables
+dotnet_naming_rule.static_members_must_be_capitalized.symbols = static_symbols
+dotnet_naming_rule.static_members_must_be_capitalized.style = first_word_upper_case_style
+dotnet_naming_rule.public_members_must_be_capitalized.severity = suggestion
+
+dotnet_naming_symbols.static_symbols.required_modifiers = static

@@ -6,10 +6,7 @@ namespace DockerUpgradeTool.Files
 {
     public class PhysicalFileProvider : IFileProvider
     {
-        public IDirectoryInfo GetDirectory(string directory)
-        {
-            return new PhysicalDirectoryInfo(new DirectoryInfo(directory));
-        }
+        public IDirectoryInfo GetDirectory(string directory) => new PhysicalDirectoryInfo(new DirectoryInfo(directory));
 
         public IFileInfo? GetFile(string path)
         {

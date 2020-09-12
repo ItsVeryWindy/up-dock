@@ -16,9 +16,6 @@ namespace DockerUpgradeTool.Git
             _logger = logger;
         }
 
-        public IRemoteGitRepository CreateRepository(Repository repository)
-        {
-            return new RemoteGitRepository(repository, _client, _options, _logger);
-        }
+        public IRemoteGitRepository CreateRepository(Repository repository) => new RemoteGitRepository(repository, _client, _options, _logger);
     }
 }

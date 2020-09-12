@@ -50,7 +50,7 @@ namespace DockerUpgradeTool.Imaging
 
                 if(i != strStart)
                 {
-                    parts.Add(span.Slice(strStart, i - strStart).ToString());
+                    parts.Add(span[strStart..i].ToString());
                 }
 
                 parts.Add(Version);
@@ -88,10 +88,7 @@ namespace DockerUpgradeTool.Imaging
             return new DockerImageTemplatePattern(group, currentPart, template);
         }
 
-        private static bool IsVersion(ReadOnlySpan<char> span)
-        {
-            return !span.IsEmpty && span.StartsWith("{v}");
-        }
+        private static bool IsVersion(ReadOnlySpan<char> span) => !span.IsEmpty && span.StartsWith("{v}");
 
         public override string ToString() => Part.ToString();
 

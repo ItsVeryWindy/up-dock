@@ -92,10 +92,7 @@ namespace DockerUpgradeTool
             }
         }
 
-        public static DockerImageTemplatePattern ParsePattern(string pattern)
-        {
-            return DockerImageTemplate.ParseTemplate(pattern).CreatePattern(true, true, null);
-        }
+        public static DockerImageTemplatePattern ParsePattern(string pattern) => DockerImageTemplate.ParseTemplate(pattern).CreatePattern(true, true, null);
 
         public IConfigurationOptions Merge(IConfigurationOptions options)
         {

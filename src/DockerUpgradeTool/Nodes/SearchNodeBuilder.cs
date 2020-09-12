@@ -18,10 +18,7 @@ namespace DockerUpgradeTool.Nodes
             return this;
         }
 
-        public ISearchTreeNode Build()
-        {
-            return _root.Build(ImmutableList<TreeNode>.Empty);
-        }
+        public ISearchTreeNode Build() => _root.Build(ImmutableList<TreeNode>.Empty);
 
         private enum TreeNodeType
         {
@@ -170,10 +167,7 @@ namespace DockerUpgradeTool.Nodes
                 return new TextSearchNode(str, BuildChildren());
             }
 
-            private IEnumerable<ISearchTreeNode> BuildChildren()
-            {
-                return Children.Select(x => x.Build(ImmutableList<TreeNode>.Empty)).OrderBy(x => x);
-            }
+            private IEnumerable<ISearchTreeNode> BuildChildren() => Children.Select(x => x.Build(ImmutableList<TreeNode>.Empty)).OrderBy(x => x);
         }
     }
 }

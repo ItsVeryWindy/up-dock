@@ -19,14 +19,8 @@ namespace DockerUpgradeTool.Tests
             new NuGetVersion(1, 2, 3)
         });
 
-        public int CompareTo(ISearchTreeNode? other)
-        {
-            return 1;
-        }
+        public int CompareTo(ISearchTreeNode? other) => 1;
 
-        public SearchTreeNodeResult Search(ReadOnlySpan<char> span, int endIndex, ImmutableList<NuGetVersion> versions)
-        {
-            return new SearchTreeNodeResult(Image, endIndex);
-        }
+        public SearchTreeNodeResult Search(ReadOnlySpan<char> span, int endIndex, ImmutableList<NuGetVersion> versions) => new SearchTreeNodeResult(Image, endIndex);
     }
 }

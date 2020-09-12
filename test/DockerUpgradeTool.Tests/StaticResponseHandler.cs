@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace DockerUpgradeTool.Tests
 {
-    class StaticResponseHandler : DelegatingHandler
+    internal class StaticResponseHandler : DelegatingHandler
     {
         protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {

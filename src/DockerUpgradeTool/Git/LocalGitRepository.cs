@@ -36,10 +36,7 @@ namespace DockerUpgradeTool.Git
             Directory = directory;
         }
 
-        public bool Ignored(IFileInfo file)
-        {
-            return _localRepository.Ignore.IsPathIgnored(file.MakeRelativePath(Directory));
-        }
+        public bool Ignored(IFileInfo file) => _localRepository.Ignore.IsPathIgnored(file.MakeRelativePath(Directory));
 
         public async Task CreatePullRequestAsync(IRemoteGitRepository forkedRepository, IReadOnlyCollection<TextReplacement> replacements, CancellationToken cancellationToken)
         {
