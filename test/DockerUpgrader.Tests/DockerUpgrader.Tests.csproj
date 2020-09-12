@@ -30,6 +30,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\DockerUpgrader\DockerUpgrader.csproj" />
+    <ProjectReference Include="..\..\src\DockerUpgrader\DockerUpgrader.csproj" />
   </ItemGroup>
 </Project>

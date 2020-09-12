@@ -1,11 +1,14 @@
-﻿
-Microsoft Visual Studio Solution File, Format Version 12.00
+﻿Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29728.190
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DockerUpgrader", "DockerUpgrader\DockerUpgrader.csproj", "{4C666B58-5870-47E4-A7C9-1A0A77F160BF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DockerUpgrader", "src\DockerUpgrader\DockerUpgrader.csproj", "{4C666B58-5870-47E4-A7C9-1A0A77F160BF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DockerUpgrader.Tests", "DockerUpgrader.Tests\DockerUpgrader.Tests.csproj", "{DB8F004B-CDA9-4389-989B-9768DC3F76B6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DockerUpgrader.Tests", "test\DockerUpgrader.Tests\DockerUpgrader.Tests.csproj", "{DB8F004B-CDA9-4389-989B-9768DC3F76B6}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{EAAA472A-E325-460F-984D-BA622AEDEBF2}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{C0AE8F80-6840-4E46-9C3F-2976B9ED1EB7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -24,6 +27,10 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{4C666B58-5870-47E4-A7C9-1A0A77F160BF} = {EAAA472A-E325-460F-984D-BA622AEDEBF2}
+		{DB8F004B-CDA9-4389-989B-9768DC3F76B6} = {C0AE8F80-6840-4E46-9C3F-2976B9ED1EB7}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {B0A48175-D1C7-473D-B97E-986BED96ED23}
