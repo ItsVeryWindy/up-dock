@@ -2,9 +2,9 @@
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29728.190
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DockerUpgrader", "src\DockerUpgrader\DockerUpgrader.csproj", "{4C666B58-5870-47E4-A7C9-1A0A77F160BF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DockerUpgradeTool", "src\DockerUpgradeTool\DockerUpgradeTool.csproj", "{4C666B58-5870-47E4-A7C9-1A0A77F160BF}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DockerUpgrader.Tests", "test\DockerUpgrader.Tests\DockerUpgrader.Tests.csproj", "{DB8F004B-CDA9-4389-989B-9768DC3F76B6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DockerUpgradeTool.Tests", "test\DockerUpgradeTool.Tests\DockerUpgradeTool.Tests.csproj", "{DB8F004B-CDA9-4389-989B-9768DC3F76B6}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{EAAA472A-E325-460F-984D-BA622AEDEBF2}"
 EndProject

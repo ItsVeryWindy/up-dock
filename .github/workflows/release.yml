@@ -40,7 +40,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
-        asset_path: ./src/DockerUpgrader/bin/Release/netcoreapp3.1/win-x64/publish/DockerUpgrader.exe
+        asset_path: ./src/DockerUpgradeTool/bin/Release/netcoreapp3.1/win-x64/publish/DockerUpgradeTool.exe
         asset_name: docker-upgrade-tool-win-x64.exe
         asset_content_type: application/vnd.microsoft.portable-executable
     - name: Upload Mac Release Asset
@@ -50,7 +50,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
-        asset_path: ./src/DockerUpgrader/bin/Release/netcoreapp3.1/osx-x64/publish/DockerUpgrader
+        asset_path: ./src/DockerUpgradeTool/bin/Release/netcoreapp3.1/osx-x64/publish/DockerUpgradeTool
         asset_name: docker-upgrade-tool-osx-x64
         asset_content_type: application/octet-stream
     - name: Upload Linux Release Asset
@@ -60,6 +60,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
-        asset_path: ./src/DockerUpgrader/bin/Release/netcoreapp3.1/linux-x64/publish/DockerUpgrader
+        asset_path: ./src/DockerUpgradeTool/bin/Release/netcoreapp3.1/linux-x64/publish/DockerUpgradeTool
         asset_name: docker-upgrade-tool-linux-x64
         asset_content_type: application/octet-stream
