@@ -1,6 +1,8 @@
 # docker-upgrade-tool
 Automatically update docker images in github repositories.
 
+![Build Status](https://github.com/ItsVeryWindy/docker-upgrade-tool/workflows/Build/badge.svg) ![Release Status](https://github.com/ItsVeryWindy/docker-upgrade-tool/workflows/Release/badge.svg)
+
 ## Command Line Options
 ```
   --email/-e      The email address to use in the commit
