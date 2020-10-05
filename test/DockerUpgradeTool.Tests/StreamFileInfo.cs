@@ -38,6 +38,6 @@ namespace DockerUpgradeTool.Tests
 
         public void Move(IFileInfo file) => throw new NotImplementedException();
 
-        public string MakeRelativePath(IDirectoryInfo directory) => throw new NotImplementedException();
+        public string MakeRelativePath(IDirectoryInfo directory) => "/relative/path";
     }
 }
