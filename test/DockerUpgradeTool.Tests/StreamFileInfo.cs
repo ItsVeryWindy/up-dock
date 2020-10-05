@@ -16,6 +16,9 @@ namespace DockerUpgradeTool.Tests
         public void Delete() => throw new NotImplementedException();
 
         public IDirectoryInfo? Parent { get; }
+
+        public IDirectoryInfo? Root { get; }
+
         public string Path => throw new NotImplementedException();
         public bool Exists { get; }
         public Stream CreateWriteStream() => throw new NotImplementedException();

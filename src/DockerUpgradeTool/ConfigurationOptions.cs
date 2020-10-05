@@ -18,6 +18,7 @@ namespace DockerUpgradeTool
         public ICollection<DockerImageTemplatePattern> Patterns => _patterns;
         public string? Search { get; set; }
         public string? Token { get; set; }
+        public bool DryRun { get; set; }
         public IDictionary<string, AuthenticationOptions> Authentication => _authentication;
 
         IReadOnlyCollection<string> IConfigurationOptions.Include => _include;
@@ -26,6 +27,7 @@ namespace DockerUpgradeTool
         IReadOnlyDictionary<string, AuthenticationOptions> IConfigurationOptions.Authentication => _authentication;
         string? IConfigurationOptions.Search => Search;
         string? IConfigurationOptions.Token => Token;
+        bool IConfigurationOptions.DryRun => DryRun;
 
         public void Populate(Stream stream)
         {

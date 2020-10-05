@@ -13,14 +13,14 @@ namespace DockerUpgradeTool.Files
             if (path == null)
                 return null;
 
-            return new PhysicalFileInfo(new FileInfo(path));
+            return new PhysicalFileInfo(null, new FileInfo(path));
         }
 
         public IFileInfo CreateTemporaryFile()
         {
             var tempFileName = Path.GetTempFileName();
 
-            return new PhysicalFileInfo(new FileInfo(tempFileName));
+            return new PhysicalFileInfo(null, new FileInfo(tempFileName));
         }
     }
 
@@ -33,7 +33,7 @@ namespace DockerUpgradeTool.Files
             _directory = directory;
         }
 
-        public IEnumerable<IFileInfo> Files => _directory.GetFiles("*", SearchOption.AllDirectories).Select(x => new PhysicalFileInfo(x));
+        public IEnumerable<IFileInfo> Files => _directory.GetFiles("*", SearchOption.AllDirectories).Select(x => new PhysicalFileInfo(this, x));
 
         public string Path => _directory.FullName;
 

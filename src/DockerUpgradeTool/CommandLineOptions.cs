@@ -1,25 +1,45 @@
-﻿using CommandLine;
+﻿using PowerArgs;
 
 namespace DockerUpgradeTool
 {
     public class CommandLineOptions
     {
-        [Option('e', "email", Required = true, HelpText = "Email to use in the commit")]
+        [ArgShortcut("-e"), ArgShortcut("--email"), ArgShortcut(ArgShortcutPolicy.ShortcutsOnly)]
+        [ArgDescription("Email to use in the commit")]
+        [ArgRequired]
         public string? Email { get; set; }
 
-        [Option('t', "token", Required = true, HelpText = "GitHub token to access the repository")]
+        [ArgShortcut("-t"), ArgShortcut("--token"), ArgShortcut(ArgShortcutPolicy.ShortcutsOnly)]
+        [ArgDescription("GitHub token to access the repository")]
         public string? Token { get; set; }
 
-        [Option('s', "search", Required = true, HelpText = "Search query to get repositories")]
+        [ArgShortcut("-s"), ArgShortcut("--search"), ArgShortcut(ArgShortcutPolicy.ShortcutsOnly)]
+        [ArgDescription("Search query to get repositories")]
+        [ArgRequired]
         public string? Search { get; set; }
 
-        [Option('c', "config", Required = false, HelpText = "Default configuration to apply")]
+        [ArgShortcut("-c"), ArgShortcut("--config"), ArgShortcut(ArgShortcutPolicy.ShortcutsOnly)]
+        [ArgDescription("Default configuration to apply")]
         public string? Config { get; set; }
 
-        [Option('t', "template", Required = false, HelpText = "Default configuration to apply")]
-        public string[]? Templates { get; set; }
+        [ArgShortcut("-i"), ArgShortcut("--template"), ArgShortcut(ArgShortcutPolicy.ShortcutsOnly)]
+        [ArgDescription("A template to apply")]
+        public string[] Templates { get; set; } = new string[0];
 
-        [Option('a', "auth", Required = false, HelpText = "Authentication for a repository")]
-        public string[]? Authentication { get; set; }
+        [ArgShortcut("-a"), ArgShortcut("--auth"), ArgShortcut(ArgShortcutPolicy.ShortcutsOnly)]
+        [ArgDescription("Authentication for a repository")]
+        public string[] Authentication { get; set; } = new string[0];
+
+        [ArgShortcut("-d"), ArgShortcut("--dry-run"), ArgShortcut(ArgShortcutPolicy.ShortcutsOnly)]
+        [ArgDescription("Run without creating pull requests")]
+        public bool DryRun { get; set; }
+
+        [ArgShortcut("-h"), ArgShortcut("--help"), ArgShortcut(ArgShortcutPolicy.ShortcutsOnly)]
+        [ArgDescription("Display help information")]
+        public bool Help { get; set; }
+
+        [ArgShortcut("-v"), ArgShortcut("--version"), ArgShortcut(ArgShortcutPolicy.ShortcutsOnly)]
+        [ArgDescription("Run without creating pull requests")]
+        public bool Version { get; set; }
     }
 }

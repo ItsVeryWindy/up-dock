@@ -7,15 +7,17 @@ namespace DockerUpgradeTool.Git
     {
         private readonly IGitHubClient _client;
         private readonly CommandLineOptions _options;
-        private readonly ILogger<RemoteGitRepository> _logger;
+        private readonly ILogger<RemoteGitRepository> _remoteLogger;
+        private readonly ILogger<LocalGitRepository> _localLogger;
 
-        public GitRepositoryFactory(IGitHubClient client, CommandLineOptions options, ILogger<RemoteGitRepository> logger)
+        public GitRepositoryFactory(IGitHubClient client, CommandLineOptions options, ILogger<RemoteGitRepository> remoteLogger, ILogger<LocalGitRepository> localLogger)
         {
             _client = client;
             _options = options;
-            _logger = logger;
+            _remoteLogger = remoteLogger;
+            _localLogger = localLogger;
         }
 
-        public IRemoteGitRepository CreateRepository(Repository repository) => new RemoteGitRepository(repository, _client, _options, _logger);
+        public IRemoteGitRepository CreateRepository(Repository repository) => new RemoteGitRepository(repository, _client, _options, _remoteLogger, _localLogger);
     }
 }

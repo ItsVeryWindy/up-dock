@@ -8,7 +8,9 @@ using System.Threading.Tasks;
 using DockerUpgradeTool.Files;
 using DockerUpgradeTool.Nodes;
 using LibGit2Sharp;
+using Microsoft.Extensions.Logging;
 using Octokit;
+using Branch = LibGit2Sharp.Branch;
 using Signature = LibGit2Sharp.Signature;
 
 namespace DockerUpgradeTool.Git
@@ -19,6 +21,7 @@ namespace DockerUpgradeTool.Git
         private readonly CommandLineOptions _options;
         private readonly IGitHubClient _client;
         private readonly IRemoteGitRepository _remoteRepository;
+        private readonly ILogger<LocalGitRepository> _logger;
 
         public string WorkingDirectory => _localRepository.Info.WorkingDirectory;
 
@@ -26,13 +29,13 @@ namespace DockerUpgradeTool.Git
 
         public bool IsDirty => _localRepository.RetrieveStatus(new StatusOptions()).IsDirty;
 
-        public LocalGitRepository(LibGit2Sharp.Repository localRepository, IDirectoryInfo directory, CommandLineOptions options, IGitHubClient client, IRemoteGitRepository remoteRepository)
+        public LocalGitRepository(LibGit2Sharp.Repository localRepository, IDirectoryInfo directory, CommandLineOptions options, IGitHubClient client, IRemoteGitRepository remoteRepository, ILogger<LocalGitRepository> logger)
         {
             _localRepository = localRepository;
             _options = options;
             _client = client;
             _remoteRepository = remoteRepository;
-
+            _logger = logger;
             Directory = directory;
         }
 
@@ -44,27 +47,47 @@ namespace DockerUpgradeTool.Git
 
             var hash = CreateHash(replacements);
 
-            var branch = _localRepository.CreateBranch($"docker-update-{hash}");
+            var branch = CreateBranch($"docker-update-{hash}", remote);
 
-            _localRepository.Branches.Update(branch,
-                b => b.Remote = remote.Name,
-                b => b.UpstreamBranch = branch.CanonicalName);
+            var newPullRequest = CreatePullRequest(forkedRepository, replacements, branch);
 
-            Commands.Checkout(_localRepository, branch);
+            CreateCommit(newPullRequest.Title, branch, remote);
 
+            _logger.LogInformation("Creating pull request {Title} for repository {Repository}", newPullRequest.Title, _remoteRepository.CloneUrl);
+
+            var pullRequest = await  _client.PullRequest.Create(_remoteRepository.Owner, _remoteRepository.Name, newPullRequest);
+
+            var labelUpdate = new IssueUpdate();
+
+            labelUpdate.Labels.Add("docker-upgrade-tool");
+
+            _logger.LogInformation("Updating pull request {Url} with label", pullRequest.Url);
+
+            await _client.Issue.Update(_remoteRepository.Owner, _remoteRepository.Name, pullRequest.Number, labelUpdate);
+        }
+
+        private void CreateCommit(string title, Branch branch, Remote remote)
+        {
             var author = new Signature("docker-upgrade-tool", _options.Email, DateTime.Now);
 
             Commands.Stage(_localRepository, "*");
 
-            _localRepository.Commit("Automatic update of docker images", author, author);
-            
+            _logger.LogInformation("Creating commit {Title}", title);
+
+            _localRepository.Commit(title, author, author);
+
             var pushRefSpec = string.Format("+{0}:{0}", branch.CanonicalName);
+
+            _logger.LogInformation("Pushing to remote {RefSpec}", pushRefSpec);
 
             _localRepository.Network.Push(remote, pushRefSpec, new PushOptions
             {
                 CredentialsProvider = CreateCredentials
             });
+        }
 
+        private NewPullRequest CreatePullRequest(IRemoteGitRepository forkedRepository, IReadOnlyCollection<TextReplacement> replacements, Branch branch)
+        {
             string title;
 
             var body = new StringBuilder();
@@ -106,21 +129,32 @@ namespace DockerUpgradeTool.Git
                 .AppendLine()
                 .AppendLine("This is an automated update. Merge only if it passes tests");
 
-            var newPullRequest = new NewPullRequest(
+            return new NewPullRequest(
                 title,
                 $"{forkedRepository.Owner}:{branch.FriendlyName}",
                 _remoteRepository.Branch)
             {
                 Body = body.ToString()
             };
+        }
 
-            var pullRequest = await  _client.PullRequest.Create(_remoteRepository.Owner, _remoteRepository.Name, newPullRequest);
+        private Branch CreateBranch(string name, Remote remote)
+        {
+            _logger.LogInformation("Creating branch {Name}", name);
 
-            var labelUpdate = new IssueUpdate();
+            var branch = _localRepository.CreateBranch(name);
 
-            labelUpdate.Labels.Add("docker-upgrade-tool");
+            _logger.LogInformation("Tracking branch {Name} with {CanonicalName}", name, branch.CanonicalName);
 
-            await _client.Issue.Update(_remoteRepository.Owner, _remoteRepository.Name, pullRequest.Number, labelUpdate);
+            _localRepository.Branches.Update(branch,
+                b => b.Remote = remote.Name,
+                b => b.UpstreamBranch = branch.CanonicalName);
+
+            _logger.LogInformation("Checking out branch {Name}", name);
+
+            Commands.Checkout(_localRepository, branch);
+
+            return branch;
         }
 
         private void PopulateSingleUpdate(IGrouping<(DockerImage FromImage, DockerImage ToImage), TextReplacement> replacement, StringBuilder body)

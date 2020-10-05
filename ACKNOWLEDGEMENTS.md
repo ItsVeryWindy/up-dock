@@ -1,4 +1,4 @@
-[CommandLineParser](https://github.com/commandlineparser/commandline) - MIT License
+[PowerArgs](https://github.com/adamabdelhamed/PowerArgs) - MIT License
 
 [LibGit2Sharp](https://github.com/libgit2/libgit2sharp) - MIT License
 

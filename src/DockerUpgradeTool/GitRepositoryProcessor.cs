@@ -52,6 +52,8 @@ namespace DockerUpgradeTool
         {
             _cancellationProvider.CancellationToken.ThrowIfCancellationRequested();
 
+            _logger.LogInformation("Started processing repository {Repository}", repository.FullName);
+
             var gitRepository = _factory.CreateRepository(repository);
 
             var localRepository = gitRepository.CheckoutRepository();
@@ -80,6 +82,11 @@ namespace DockerUpgradeTool
                 await ProcessFile(filter, localRepository, file, node, replacements);
             }
 
+            if(replacements.Count == 0)
+            {
+                _logger.LogInformation("No changes to be made in repository {Repository}", repository.FullName);
+            }
+
             foreach (var replacement in replacements.GroupBy(x => x.Group))
             {
                 var groupedReplacements = replacement.ToList();
@@ -93,10 +100,15 @@ namespace DockerUpgradeTool
 
                 _logger.LogInformation("Changes detected in repository {Repository}", repository.FullName);
 
+                if (_options.DryRun)
+                    continue;
+
                 var forkedRepository = await gitRepository.ForkRepositoryAsync();
 
                 await localRepository.CreatePullRequestAsync(forkedRepository, groupedReplacements, _cancellationProvider.CancellationToken);
             }
+
+            _logger.LogInformation("Finished processing repository {Repository}", repository.FullName);
         }
 
         private async Task ProcessFile(IFileFilter filter, ILocalGitRepository repository, IFileInfo file, ISearchTreeNode node, List<TextReplacement> replacements)

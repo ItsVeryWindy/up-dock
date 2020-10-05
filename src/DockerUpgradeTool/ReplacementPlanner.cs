@@ -48,7 +48,7 @@ namespace DockerUpgradeTool
 
                     var latestVersion = latestPattern?.ToString();
 
-                    _logger.LogInformation("Identified '{CurrentVersion}' on line {LineNumber} of file {File}, from pattern {DockerImagePattern} with template {DockerImageTemplate}", currentVersion, lineNumber, file, image.Pattern, image.Image.Template);
+                    _logger.LogInformation("Identified '{CurrentVersion}' on line {LineNumber} of file {File}, from pattern {DockerImagePattern} with template {DockerImageTemplate}", currentVersion, lineNumber + 1, file.MakeRelativePath(file.Root!), image.Pattern, image.Image.Template);
 
                     if (latestVersion != null && currentVersion != latestVersion.ToString())
                     {

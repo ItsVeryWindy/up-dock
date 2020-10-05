@@ -18,6 +18,7 @@ namespace DockerUpgradeTool.Tests
         public void Delete() => _files.Remove(Path);
 
         public IDirectoryInfo? Parent { get; }
+        public IDirectoryInfo? Root { get; }
         public string Path { get; }
         public bool Exists { get; }
         public Stream CreateWriteStream() => _files[Path] = new MemoryStream();

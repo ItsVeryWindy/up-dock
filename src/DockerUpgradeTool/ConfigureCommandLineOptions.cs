@@ -19,6 +19,7 @@ namespace DockerUpgradeTool
         {
             options.Search ??= _options.Search;
             options.Token ??= _options.Token;
+            options.DryRun = _options.DryRun;
 
             if (_options.Templates != null)
             {

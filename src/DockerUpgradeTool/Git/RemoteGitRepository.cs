@@ -14,18 +14,20 @@ namespace DockerUpgradeTool.Git
         private readonly IGitHubClient _client;
         private readonly CommandLineOptions _options;
         private readonly ILogger<RemoteGitRepository> _logger;
+        private readonly ILogger<LocalGitRepository> _localLogger;
 
         public string CloneUrl => _repository.CloneUrl;
         public string Owner => _repository.Owner.Login;
         public string Name => _repository.Name;
         public string Branch => _repository.DefaultBranch;
 
-        public RemoteGitRepository(Repository repository, IGitHubClient client, CommandLineOptions options, ILogger<RemoteGitRepository> logger)
+        public RemoteGitRepository(Repository repository, IGitHubClient client, CommandLineOptions options, ILogger<RemoteGitRepository> logger, ILogger<LocalGitRepository> localLogger)
         {
             _repository = repository;
             _client = client;
             _options = options;
             _logger = logger;
+            _localLogger = localLogger;
         }
 
         public async Task<IRemoteGitRepository> ForkRepositoryAsync()
@@ -36,7 +38,7 @@ namespace DockerUpgradeTool.Git
 
             _logger.LogInformation("Created fork {Repository}", repository.FullName);
 
-            return new RemoteGitRepository(repository, _client, _options, _logger);
+            return new RemoteGitRepository(repository, _client, _options, _logger, _localLogger);
         }
 
         public ILocalGitRepository CheckoutRepository()
@@ -58,7 +60,7 @@ namespace DockerUpgradeTool.Git
 
             var localRepository = new LibGit2Sharp.Repository(path);
 
-            return new LocalGitRepository(localRepository, new PhysicalDirectoryInfo(new DirectoryInfo(dir)),   _options, _client, this);
+            return new LocalGitRepository(localRepository, new PhysicalDirectoryInfo(new DirectoryInfo(dir)), _options, _client, this, _localLogger);
         }
 
         private void CleanupRepository(string dir)

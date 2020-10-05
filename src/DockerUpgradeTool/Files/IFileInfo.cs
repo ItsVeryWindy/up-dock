@@ -6,6 +6,7 @@ namespace DockerUpgradeTool.Files
     {
         void Delete();
         IDirectoryInfo? Parent { get; }
+        IDirectoryInfo? Root { get; }
         string Path { get; }
         bool Exists { get; }
         Stream CreateWriteStream();

@@ -11,6 +11,7 @@ namespace DockerUpgradeTool
         string? Search { get; }
         string? Token { get; }
         IReadOnlyDictionary<string, AuthenticationOptions> Authentication { get; }
+        bool DryRun { get; }
 
         IConfigurationOptions Merge(IConfigurationOptions options);
     }

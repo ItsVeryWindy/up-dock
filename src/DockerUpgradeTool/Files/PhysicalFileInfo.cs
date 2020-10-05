@@ -4,6 +4,7 @@ namespace DockerUpgradeTool.Files
 {
     public class PhysicalFileInfo : IFileInfo
     {
+        private readonly IDirectoryInfo? _root;
         private readonly FileInfo _file;
 
         public IDirectoryInfo? Parent => new PhysicalDirectoryInfo(_file.Directory);
@@ -11,8 +12,11 @@ namespace DockerUpgradeTool.Files
         public string Path => _file.FullName;
         public bool Exists => _file.Exists;
 
-        public PhysicalFileInfo(FileInfo file)
+        public IDirectoryInfo? Root => _root;
+
+        public PhysicalFileInfo(IDirectoryInfo? root, FileInfo file)
         {
+            _root = root;
             _file = file;
         }
 
