@@ -6,13 +6,10 @@ namespace DockerUpgradeTool.Files
     {
         void Delete();
         IDirectoryInfo? Parent { get; }
-        IDirectoryInfo? Root { get; }
-        string Path { get; }
+        string AbsolutePath { get; }
         bool Exists { get; }
         Stream CreateWriteStream();
         Stream CreateReadStream();
         void Move(IFileInfo file);
-
-        string MakeRelativePath(IDirectoryInfo directory);
     }
 }

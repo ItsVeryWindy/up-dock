@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.IO;
-using System.Linq;
+﻿using System.IO;
 
 namespace DockerUpgradeTool.Files
 {
@@ -13,32 +11,14 @@ namespace DockerUpgradeTool.Files
             if (path == null)
                 return null;
 
-            return new PhysicalFileInfo(null, new FileInfo(path));
+            return new PhysicalFileInfo(new FileInfo(path));
         }
 
         public IFileInfo CreateTemporaryFile()
         {
             var tempFileName = Path.GetTempFileName();
 
-            return new PhysicalFileInfo(null, new FileInfo(tempFileName));
+            return new PhysicalFileInfo(new FileInfo(tempFileName));
         }
-    }
-
-    public class PhysicalDirectoryInfo : IDirectoryInfo
-    {
-        private readonly DirectoryInfo _directory;
-
-        public PhysicalDirectoryInfo(DirectoryInfo directory)
-        {
-            _directory = directory;
-        }
-
-        public IEnumerable<IFileInfo> Files => _directory.GetFiles("*", SearchOption.AllDirectories).Select(x => new PhysicalFileInfo(this, x));
-
-        public string Path => _directory.FullName;
-
-        public string Name => _directory.Name;
-
-        public IDirectoryInfo? Parent => _directory.Parent == null ? null : new PhysicalDirectoryInfo(_directory.Parent);
     }
 }

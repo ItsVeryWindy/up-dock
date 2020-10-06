@@ -16,11 +16,11 @@ namespace DockerUpgradeTool.Files
             _exclude = options.Exclude.Select(Glob.Parse).ToList();
         }
 
-        public bool Filter(ILocalGitRepository repository, IFileInfo file)
+        public bool Filter(IRepositoryFileInfo file)
         {
-            var relativePath = file.MakeRelativePath(repository.Directory);
+            var relativePath = file.RelativePath;
 
-            if (repository.Ignored(file))
+            if (file.Ignored)
                 return false;
 
             if(_include.Count > 0 && !_include.Any(x => x.IsMatch(relativePath)))
@@ -29,14 +29,14 @@ namespace DockerUpgradeTool.Files
             if (_exclude.Any(x => x.IsMatch(relativePath)))
                 return false;
 
-            return !InGitDirectory(repository.Directory, file);
+            return !InGitDirectory(file.Root, file.File);
         }
 
         private static bool InGitDirectory(IDirectoryInfo directory, IFileInfo file)
         {
             var parent = file.Parent;
 
-            while(parent != null && parent.Path != directory.Path)
+            while(parent != null && parent.AbsolutePath != directory.AbsolutePath)
             {
                 if (parent.Name == ".git")
                     return true;

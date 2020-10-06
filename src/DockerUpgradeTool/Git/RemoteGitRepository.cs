@@ -13,6 +13,7 @@ namespace DockerUpgradeTool.Git
         private readonly Repository _repository;
         private readonly IGitHubClient _client;
         private readonly CommandLineOptions _options;
+        private readonly IFileProvider _provider;
         private readonly ILogger<RemoteGitRepository> _logger;
         private readonly ILogger<LocalGitRepository> _localLogger;
 
@@ -21,11 +22,12 @@ namespace DockerUpgradeTool.Git
         public string Name => _repository.Name;
         public string Branch => _repository.DefaultBranch;
 
-        public RemoteGitRepository(Repository repository, IGitHubClient client, CommandLineOptions options, ILogger<RemoteGitRepository> logger, ILogger<LocalGitRepository> localLogger)
+        public RemoteGitRepository(Repository repository, IGitHubClient client, CommandLineOptions options, IFileProvider provider, ILogger<RemoteGitRepository> logger, ILogger<LocalGitRepository> localLogger)
         {
             _repository = repository;
             _client = client;
             _options = options;
+            _provider = provider;
             _logger = logger;
             _localLogger = localLogger;
         }
@@ -38,7 +40,7 @@ namespace DockerUpgradeTool.Git
 
             _logger.LogInformation("Created fork {Repository}", repository.FullName);
 
-            return new RemoteGitRepository(repository, _client, _options, _logger, _localLogger);
+            return new RemoteGitRepository(repository, _client, _options, _provider, _logger, _localLogger);
         }
 
         public ILocalGitRepository CheckoutRepository()
@@ -60,7 +62,7 @@ namespace DockerUpgradeTool.Git
 
             var localRepository = new LibGit2Sharp.Repository(path);
 
-            return new LocalGitRepository(localRepository, new PhysicalDirectoryInfo(new DirectoryInfo(dir)), _options, _client, this, _localLogger);
+            return new LocalGitRepository(localRepository, _options, _client, this, _provider, _localLogger);
         }
 
         private void CleanupRepository(string dir)

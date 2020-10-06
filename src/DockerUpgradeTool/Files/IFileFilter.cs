@@ -1,10 +1,9 @@
-﻿using DockerUpgradeTool.Files;
-using DockerUpgradeTool.Git;
+﻿using DockerUpgradeTool.Git;
 
 namespace DockerUpgradeTool
 {
     public interface IFileFilter
     {
-        bool Filter(ILocalGitRepository repository, IFileInfo file);
+        bool Filter(IRepositoryFileInfo file);
     }
 }

@@ -2,31 +2,77 @@
 using System.Collections.Generic;
 using System.IO;
 using DockerUpgradeTool.Files;
+using DockerUpgradeTool.Git;
 
 namespace DockerUpgradeTool.Tests
 {
-    internal class StubFileInfo : IFileInfo
+    internal class StubFileInfo : IRepositoryFileInfo, IFileInfo
     {
         private readonly Dictionary<string, Stream> _files;
 
         public StubFileInfo(Dictionary<string, Stream> files, string path)
         {
             _files = files;
-            Path = path;
+            AbsolutePath = path;
         }
 
-        public void Delete() => _files.Remove(Path);
+        public StubFileInfo(Stream stream, string path)
+        {
+            _files = new Dictionary<string, Stream>
+            {
+                [path] = stream
+            };
+
+            AbsolutePath = path;
+        }
+
+        public void Delete() => _files.Remove(AbsolutePath);
 
         public IDirectoryInfo? Parent { get; }
-        public IDirectoryInfo? Root { get; }
-        public string Path { get; }
+        public string AbsolutePath { get; }
+        public string RelativePath => AbsolutePath;
+
         public bool Exists { get; }
-        public Stream CreateWriteStream() => _files[Path] = new MemoryStream();
 
-        public Stream CreateReadStream() => _files[Path];
+        public IFileInfo File => this;
 
-        public void Move(IFileInfo file) => throw new NotImplementedException();
+        public bool Ignored => throw new NotImplementedException();
 
-        public string MakeRelativePath(IDirectoryInfo directory) => throw new NotImplementedException();
+        public IDirectoryInfo Root => throw new NotImplementedException();
+
+        public Stream CreateWriteStream() => _files[AbsolutePath] = new StubMemoryStream();
+
+        public Stream CreateReadStream()
+        {
+            var stream = _files[AbsolutePath];
+
+            stream.Position = 0;
+
+            var newStream = new StubMemoryStream();
+
+            stream.CopyTo(newStream);
+
+            newStream.Position = 0;
+
+            return newStream;
+        }
+
+        public void Move(IFileInfo file)
+        {
+            var stream = _files[AbsolutePath];
+
+            _files[file.AbsolutePath] = stream;
+
+            _files.Remove(AbsolutePath);
+        }
+        
+        private class StubMemoryStream : MemoryStream
+        {
+            protected override void Dispose(bool disposing)
+            {
+                Flush();
+                Seek(0, SeekOrigin.Begin);
+            }
+        }
     }
 }

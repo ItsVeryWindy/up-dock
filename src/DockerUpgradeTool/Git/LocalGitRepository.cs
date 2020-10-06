@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
@@ -21,25 +22,26 @@ namespace DockerUpgradeTool.Git
         private readonly CommandLineOptions _options;
         private readonly IGitHubClient _client;
         private readonly IRemoteGitRepository _remoteRepository;
+        private readonly IFileProvider _provider;
         private readonly ILogger<LocalGitRepository> _logger;
 
-        public string WorkingDirectory => _localRepository.Info.WorkingDirectory;
+        public IEnumerable<IRepositoryFileInfo> Files => Directory.Files.Select(x => new LocalGitRepositoryFileInfo(this, x));
 
-        public IDirectoryInfo Directory { get; }
+        public IDirectoryInfo Directory => _provider.GetDirectory(_localRepository.Info.WorkingDirectory);
 
         public bool IsDirty => _localRepository.RetrieveStatus(new StatusOptions()).IsDirty;
 
-        public LocalGitRepository(LibGit2Sharp.Repository localRepository, IDirectoryInfo directory, CommandLineOptions options, IGitHubClient client, IRemoteGitRepository remoteRepository, ILogger<LocalGitRepository> logger)
+        public LocalGitRepository(LibGit2Sharp.Repository localRepository, CommandLineOptions options, IGitHubClient client, IRemoteGitRepository remoteRepository, IFileProvider provider, ILogger<LocalGitRepository> logger)
         {
             _localRepository = localRepository;
             _options = options;
             _client = client;
             _remoteRepository = remoteRepository;
+            _provider = provider;
             _logger = logger;
-            Directory = directory;
         }
 
-        public bool Ignored(IFileInfo file) => _localRepository.Ignore.IsPathIgnored(file.MakeRelativePath(Directory));
+        private bool Ignored(IRepositoryFileInfo file) => _localRepository.Ignore.IsPathIgnored(file.RelativePath);
 
         public async Task CreatePullRequestAsync(IRemoteGitRepository forkedRepository, IReadOnlyCollection<TextReplacement> replacements, CancellationToken cancellationToken)
         {
@@ -112,7 +114,7 @@ namespace DockerUpgradeTool.Git
                 title = $"Automatic update of {distinctReplacements.Count} docker images";
 
                 body
-                    .AppendLine($"{distinctReplacements.Count} docker images were updated in {distinctReplacements.SelectMany(x => x).Select(x => x.File.Path).Distinct().Count()} files:")
+                    .AppendLine($"{distinctReplacements.Count} docker images were updated in {distinctReplacements.SelectMany(x => x).Select(x => x.File.File.AbsolutePath).Distinct().Count()} files:")
                     .AppendLine(string.Join(", ", distinctReplacements.Select(x => $"`{x.Key.Item1.Template.ToRepositoryImageString()}`")))
                     .AppendLine("<details>")
                     .AppendLine("<summary>Details of updated images</summary>");
@@ -170,7 +172,7 @@ namespace DockerUpgradeTool.Git
 
             foreach (var file in replacement)
             {
-                body.AppendLine($"Updated `{file.File.MakeRelativePath(Directory)}` to `{image}` `{fromVersion}` to `{toVersion}`");
+                body.AppendLine($"Updated `{file.File.RelativePath}` to `{image}` `{fromVersion}` to `{toVersion}`");
             }
         }
 
@@ -210,6 +212,25 @@ namespace DockerUpgradeTool.Git
             {
                 Username = "username", Password = _options.Token
             };
+        }
+
+        private class LocalGitRepositoryFileInfo : IRepositoryFileInfo
+        {
+            private readonly LocalGitRepository _localGitRepository;
+
+            public LocalGitRepositoryFileInfo(LocalGitRepository localGitRepository, IFileInfo file)
+            {
+                _localGitRepository = localGitRepository;
+                File = file;
+            }
+
+            public IFileInfo File { get; }
+
+            public bool Ignored => _localGitRepository.Ignored(this);
+
+            public string RelativePath => Path.GetRelativePath(_localGitRepository._localRepository.Info.WorkingDirectory, File.AbsolutePath);
+
+            public IDirectoryInfo Root => _localGitRepository.Directory;
         }
     }
 }

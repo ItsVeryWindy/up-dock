@@ -18,20 +18,18 @@ namespace DockerUpgradeTool
         private readonly IReplacementPlanner _planner;
         private readonly IReplacementPlanExecutor _executor;
         private readonly IConfigurationOptions _options;
-        private readonly IFileProvider _fileProvider;
         private readonly IFileFilterFactory _fileFilterFactory;
         private readonly ICancellationProvider _cancellationProvider;
         private readonly IVersionCache _cache;
         private readonly ILogger<GitRepositoryProcessor> _logger;
 
-        public GitRepositoryProcessor(IGitHubClient client, IGitRepositoryFactory factory, IReplacementPlanner planner, IReplacementPlanExecutor executor, IConfigurationOptions options, IFileProvider fileProvider, IFileFilterFactory fileFilterFactory, ICancellationProvider cancellationProvider, IVersionCache cache, ILogger<GitRepositoryProcessor> logger)
+        public GitRepositoryProcessor(IGitHubClient client, IGitRepositoryFactory factory, IReplacementPlanner planner, IReplacementPlanExecutor executor, IConfigurationOptions options, IFileFilterFactory fileFilterFactory, ICancellationProvider cancellationProvider, IVersionCache cache, ILogger<GitRepositoryProcessor> logger)
         {
             _client = client;
             _factory = factory;
             _planner = planner;
             _executor = executor;
             _options = options;
-            _fileProvider = fileProvider;
             _fileFilterFactory = fileFilterFactory;
             _cancellationProvider = cancellationProvider;
             _cache = cache;
@@ -58,7 +56,7 @@ namespace DockerUpgradeTool
 
             var localRepository = gitRepository.CheckoutRepository();
 
-            var directory = _fileProvider.GetDirectory(localRepository.WorkingDirectory);
+            var directory = localRepository.Directory;
 
             var localOptions = GetConfiguration(directory);
 
@@ -77,9 +75,9 @@ namespace DockerUpgradeTool
 
             var node = builder.Build();
 
-            foreach (var file in directory.Files)
+            foreach (var file in localRepository.Files)
             {
-                await ProcessFile(filter, localRepository, file, node, replacements);
+                await ProcessFile(filter, file, node, replacements);
             }
 
             if(replacements.Count == 0)
@@ -111,11 +109,11 @@ namespace DockerUpgradeTool
             _logger.LogInformation("Finished processing repository {Repository}", repository.FullName);
         }
 
-        private async Task ProcessFile(IFileFilter filter, ILocalGitRepository repository, IFileInfo file, ISearchTreeNode node, List<TextReplacement> replacements)
+        private async Task ProcessFile(IFileFilter filter, IRepositoryFileInfo file, ISearchTreeNode node, List<TextReplacement> replacements)
         {
             _cancellationProvider.CancellationToken.ThrowIfCancellationRequested();
 
-            if(!filter.Filter(repository, file))
+            if(!filter.Filter(file))
                 return;
 
             var plan = await _planner.GetReplacementPlanAsync(file, node, _cancellationProvider.CancellationToken);
@@ -128,11 +126,9 @@ namespace DockerUpgradeTool
 
         private IConfigurationOptions GetConfiguration(IDirectoryInfo directory)
         {
-            var localConfigPath = Path.Join(directory.Path, "docker_images.json");
+            var file = directory.GetFile("docker_images.json");
 
-            var file = _fileProvider.GetFile(localConfigPath);
-
-            if (file?.Exists == true)
+            if (file.Exists == true)
             {
                 using var stream = file.CreateReadStream();
 

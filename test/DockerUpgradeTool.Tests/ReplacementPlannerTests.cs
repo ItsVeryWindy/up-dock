@@ -28,7 +28,7 @@ namespace DockerUpgradeTool.Tests
 
             var stream = typeof(ReplacementPlannerTests).Assembly.GetManifestResourceStream($"DockerUpgradeTool.Tests.Files.{fileName}")!;
 
-            var fileInfo = new StreamFileInfo(stream);
+            var fileInfo = new StubFileInfo(stream, "/file/path");
 
             var results = await planner.GetReplacementPlanAsync(fileInfo, node, CancellationToken.None);
 

@@ -13,8 +13,10 @@ namespace DockerUpgradeTool.Tests
 
         public IDirectoryInfo GetDirectory(string path) => new StubDirectoryInfo(path);
 
-        public IFileInfo CreateTemporaryFile() => throw new NotImplementedException();
+        public IFileInfo CreateTemporaryFile() => new StubFileInfo(_files, Guid.NewGuid().ToString());
 
-        public IFileInfo GetFile(string path) => new StubFileInfo(_files, path);
+        public StubFileInfo GetFile(string path) => new StubFileInfo(_files, path);
+
+        IFileInfo IFileProvider.GetFile(string path) => GetFile(path);
     }
 }

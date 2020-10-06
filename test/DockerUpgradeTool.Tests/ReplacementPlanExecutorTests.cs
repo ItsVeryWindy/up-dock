@@ -15,16 +15,14 @@ namespace DockerUpgradeTool.Tests
         {
             var stream = typeof(ReplacementPlanExecutorTests).Assembly.GetManifestResourceStream("DockerUpgradeTool.Tests.Files.Dockerfile")!;
 
-            var provider = new PhysicalFileProvider();
+            var provider = new StubFileProvider();
 
-            var tempFile = provider.CreateTemporaryFile();
+            var tempFile = provider.GetFile("Dockerfile");
 
-            await using (var s = tempFile.CreateWriteStream())
-            {
-                await stream.CopyToAsync(s);
-            }
+            await stream.CopyToAsync(tempFile.CreateWriteStream());
 
             var sp = Program.CreateServices(new CommandLineOptions(), CancellationToken.None)
+                .AddSingleton<IFileProvider>(provider)
                 .BuildServiceProvider();
 
             var executor = sp.GetRequiredService<IReplacementPlanExecutor>();
@@ -36,7 +34,7 @@ namespace DockerUpgradeTool.Tests
 
             await executor.ExecutePlanAsync(replacements, CancellationToken.None);
 
-            var replacedFile = await File.ReadAllTextAsync(tempFile.Path);
+            var replacedFile = await new StreamReader(tempFile.CreateReadStream()).ReadToEndAsync();
 
             var expectedStream = typeof(ReplacementPlanExecutorTests).Assembly.GetManifestResourceStream("DockerUpgradeTool.Tests.Files.Dockerfile_expected")!;
 

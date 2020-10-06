@@ -4,6 +4,7 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using DockerUpgradeTool.Files;
+using DockerUpgradeTool.Git;
 using DockerUpgradeTool.Nodes;
 using DockerUpgradeTool.Registry;
 using Microsoft.Extensions.Logging;
@@ -21,9 +22,9 @@ namespace DockerUpgradeTool
             _logger = logger;
         }
 
-        public async Task<IReadOnlyCollection<TextReplacement>> GetReplacementPlanAsync(IFileInfo file, ISearchTreeNode node, CancellationToken cancellationToken)
+        public async Task<IReadOnlyCollection<TextReplacement>> GetReplacementPlanAsync(IRepositoryFileInfo file, ISearchTreeNode node, CancellationToken cancellationToken)
         {
-            using var sr = new StreamReader(file.CreateReadStream());
+            using var sr = new StreamReader(file.File.CreateReadStream());
 
             var replacements = new List<TextReplacement>();
 
@@ -48,7 +49,7 @@ namespace DockerUpgradeTool
 
                     var latestVersion = latestPattern?.ToString();
 
-                    _logger.LogInformation("Identified '{CurrentVersion}' on line {LineNumber} of file {File}, from pattern {DockerImagePattern} with template {DockerImageTemplate}", currentVersion, lineNumber + 1, file.MakeRelativePath(file.Root!), image.Pattern, image.Image.Template);
+                    _logger.LogInformation("Identified '{CurrentVersion}' on line {LineNumber} of file {File}, from pattern {DockerImagePattern} with template {DockerImageTemplate}", currentVersion, lineNumber + 1, file.RelativePath, image.Pattern, image.Image.Template);
 
                     if (latestVersion != null && currentVersion != latestVersion.ToString())
                     {

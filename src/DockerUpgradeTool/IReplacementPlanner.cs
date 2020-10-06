@@ -1,13 +1,13 @@
 ﻿using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using DockerUpgradeTool.Files;
+using DockerUpgradeTool.Git;
 using DockerUpgradeTool.Nodes;
 
 namespace DockerUpgradeTool
 {
     public interface IReplacementPlanner
     {
-        Task<IReadOnlyCollection<TextReplacement>> GetReplacementPlanAsync(IFileInfo file, ISearchTreeNode node, CancellationToken cancellationToken);
+        Task<IReadOnlyCollection<TextReplacement>> GetReplacementPlanAsync(IRepositoryFileInfo file, ISearchTreeNode node, CancellationToken cancellationToken);
     }
 }

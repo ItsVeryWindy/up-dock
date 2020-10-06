@@ -7,12 +7,9 @@ namespace DockerUpgradeTool.Git
 {
     public interface ILocalGitRepository
     {
-        string WorkingDirectory { get; }
-
-        bool IsDirty { get; }
         IDirectoryInfo Directory { get; }
-
-        bool Ignored(IFileInfo file);
+        bool IsDirty { get; }
+        IEnumerable<IRepositoryFileInfo> Files { get; }
 
         Task CreatePullRequestAsync(IRemoteGitRepository forkedRepository, IReadOnlyCollection<TextReplacement> replacements, CancellationToken cancellationToken);
         

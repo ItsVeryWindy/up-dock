@@ -7,7 +7,7 @@ namespace DockerUpgradeTool.Tests
     internal class StubDirectoryInfo : IDirectoryInfo
     {
         public IEnumerable<IFileInfo> Files { get; }
-        public string Path { get; }
+        public string AbsolutePath { get; }
         public string Name { get; }
         public IDirectoryInfo? Parent { get; }
 
@@ -15,5 +15,7 @@ namespace DockerUpgradeTool.Tests
         {
             throw new NotImplementedException();
         }
+
+        public IFileInfo GetFile(string v) => throw new NotImplementedException();
     }
 }

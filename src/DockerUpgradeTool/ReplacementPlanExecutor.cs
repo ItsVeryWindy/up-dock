@@ -21,7 +21,7 @@ namespace DockerUpgradeTool
             if (replacements.Count == 0)
                 return;
 
-            foreach (var replacementGroup in replacements.GroupBy(x => x.File))
+            foreach (var replacementGroup in replacements.GroupBy(x => x.File.File))
             {
                 var list = replacementGroup.ToList();
 
