@@ -85,7 +85,7 @@ namespace DockerUpgradeTool
 
                     var group = element.TryGetProperty("group", out var groupElement) ? groupElement.GetString() : null;
 
-                    var template = DockerImageTemplate.ParseTemplate(image, new Uri($"https://{repository}"));
+                    var template = DockerImageTemplate.Parse(image, new Uri($"https://{repository}"));
 
                     return pattern == null ? template.CreatePattern(false, true, group) : template.CreatePattern(pattern, group);
                 }
@@ -94,7 +94,7 @@ namespace DockerUpgradeTool
             }
         }
 
-        public static DockerImageTemplatePattern ParsePattern(string pattern) => DockerImageTemplate.ParseTemplate(pattern).CreatePattern(true, true, null);
+        public static DockerImageTemplatePattern ParsePattern(string pattern) => DockerImageTemplate.Parse(pattern).CreatePattern(true, true, null);
 
         public IConfigurationOptions Merge(IConfigurationOptions options)
         {

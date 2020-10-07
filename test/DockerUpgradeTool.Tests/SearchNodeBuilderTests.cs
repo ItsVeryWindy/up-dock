@@ -11,7 +11,7 @@ namespace DockerUpgradeTool.Tests
         {
             var builder = new SearchNodeBuilder();
 
-            var template = DockerImageTemplate.ParseTemplate("abcd1234:{v}");
+            var template = DockerImageTemplate.Parse("abcd1234:{v}");
 
             builder.Add(template.CreatePattern(true, true));
 
@@ -32,9 +32,9 @@ namespace DockerUpgradeTool.Tests
         {
             var builder = new SearchNodeBuilder();
 
-            var template = DockerImageTemplate.ParseTemplate("abcd12345:{v}");
+            var template = DockerImageTemplate.Parse("abcd12345:{v}");
 
-            builder.Add(DockerImageTemplate.ParseTemplate("abcd1234:{v}").CreatePattern(true, true));
+            builder.Add(DockerImageTemplate.Parse("abcd1234:{v}").CreatePattern(true, true));
             builder.Add(template.CreatePattern(true, true));
 
             var node = builder.Build();
@@ -55,7 +55,7 @@ namespace DockerUpgradeTool.Tests
         {
             var builder = new SearchNodeBuilder();
 
-            var template = DockerImageTemplate.ParseTemplate("abcd1234:{v}");
+            var template = DockerImageTemplate.Parse("abcd1234:{v}");
                 
             var pattern = template.CreatePattern(true, true);
 

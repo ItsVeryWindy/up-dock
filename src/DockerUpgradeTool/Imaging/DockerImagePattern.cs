@@ -1,5 +1,4 @@
-﻿using DockerUpgradeTool.Imaging.Parts;
-using DockerUpgradeTool.Nodes;
+﻿using DockerUpgradeTool.Nodes;
 
 namespace DockerUpgradeTool.Imaging
 {

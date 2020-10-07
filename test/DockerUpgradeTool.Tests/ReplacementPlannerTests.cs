@@ -44,10 +44,10 @@ namespace DockerUpgradeTool.Tests
             get
             {
                 yield return new TestCaseData(
-                    DockerImageTemplate.ParseTemplate("mcr.microsoft.com/dotnet/core/sdk:{v}-alpine{v}").CreatePattern(true, true),
+                    DockerImageTemplate.Parse("mcr.microsoft.com/dotnet/core/sdk:{v}-alpine{v}").CreatePattern(true, true),
                     "Dockerfile", "mcr.microsoft.com/dotnet/core/sdk:3.1.101-alpine3.10", 0, 5, "mcr.microsoft.com/dotnet/core/sdk:3.1.102-alpine3.11");
                 yield return new TestCaseData(
-                    DockerImageTemplate.ParseTemplate("mcr.microsoft.com/dotnet/core/sdk:{v}-alpine{v}").CreatePattern("sdk:{v}-alpine{v}"),
+                    DockerImageTemplate.Parse("mcr.microsoft.com/dotnet/core/sdk:{v}-alpine{v}").CreatePattern("sdk:{v}-alpine{v}"),
                     "another_file.txt", "sdk:3.1.101-alpine3.10", 8, 20, "sdk:3.1.102-alpine3.11");
             }
         }

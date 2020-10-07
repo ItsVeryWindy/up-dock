@@ -77,14 +77,14 @@ namespace DockerUpgradeTool.Imaging
 
         public static readonly Uri DefaultRepository = new Uri("https://registry-1.docker.io");
 
-        public static DockerImageTemplate ParseTemplate(string str)
+        public static DockerImageTemplate Parse(string str)
         {
             var (repository, image, tag) = SplitString(str);
 
             return CreateTemplate(repository ?? DefaultRepository, image, tag);
         }
 
-        public static DockerImageTemplate ParseTemplate(string str, Uri repository)
+        public static DockerImageTemplate Parse(string str, Uri repository)
         {
             var (_, image, tag) = SplitString(str);
 
@@ -104,6 +104,9 @@ namespace DockerUpgradeTool.Imaging
 
             var strStart = 0;
 
+            if (tag.StartsWith('.') || tag.StartsWith('-'))
+                throw new FormatException("The image tag cannot start with a period or a dash.");
+
             for (var i = 0; i < tag.Length;)
             {
                 var (range, length) = ParseFloatRange(tag.AsSpan(i));
@@ -116,7 +119,7 @@ namespace DockerUpgradeTool.Imaging
 
                 if(i != strStart)
                 {
-                    parts.Add(tag[strStart..i]);
+                    parts.Add(ParseTagPart(tag[strStart..i]));
                 }
 
                 parts.Add(range);
@@ -126,15 +129,23 @@ namespace DockerUpgradeTool.Imaging
 
             if (strStart != tag.Length)
             {
-                parts.Add(tag.Substring(strStart));
+                parts.Add(ParseTagPart(tag.Substring(strStart)));
             }
 
             return parts;
         }
 
+        private static string ParseTagPart(string tagPart)
+        {
+            if (tagPart.All(x => x >= 'a' && x <= 'z' || x >= 'A' && x <= 'Z' || x >= '0' && x <= '9' || x == '.' || x == '_' || x == '-'))
+                return tagPart;
+
+            throw new FormatException("The image tag should only contain lowercase and uppercase letters, digits, periods, underscores, or dashes.");
+        }
+
         private const string VersionStart = "{v";
         private const char VersionEnd = '}';
-        private const string AnyVersion = "*";
+        private static readonly FloatRange AnyVersion = FloatRange.Parse("*");
 
         private static (FloatRange?, int length) ParseFloatRange(ReadOnlySpan<char> span)
         {
@@ -148,47 +159,72 @@ namespace DockerUpgradeTool.Imaging
 
             var closeBracketIndex = remainingVersion.IndexOf(VersionEnd);
 
+            if(closeBracketIndex < 0)
+                throw new FormatException("The image tag is missing closing bracket.");
+
             if (closeBracketIndex == 0)
-            {
-                return (FloatRange.Parse(AnyVersion), VersionStart.Length + 1);
-            }
+                return (AnyVersion, VersionStart.Length + 1);
 
             var length = closeBracketIndex + VersionStart.Length + 1;
 
-            return FloatRange.TryParse(remainingVersion.Slice(0, closeBracketIndex).ToString(), out var range) ? (range, length) : (null, 0);
+            var range = FloatRange.Parse(remainingVersion.Slice(0, closeBracketIndex).ToString());
+
+            if (range == null)
+                throw new FormatException("The image tag contains an invalid version range.");
+
+            return (range, length);
         }
 
         private static (Uri? repository, string image, string tag) SplitString(string str)
         {
-            var (image, tag) = ParseImage(str);
+            var (repository, image) = ParseRepository(str);
 
-            var imageSplit = image.Split('/', 2);
+            string tag;
 
-            if (imageSplit.Length == 1)
+            (image, tag) = ParseImage(image);
+
+            return (repository, image, tag);
+        }
+        private static (Uri? repository, string image) ParseRepository(string str)
+        {
+            var imageSplit = str.Split('/', 2);
+
+            if (imageSplit.Length == 1 || !imageSplit[0].Contains("."))
             {
-                return (null, image, tag);
+                return (null, str);
             }
 
-            if (imageSplit[0].Contains(".") &&
-                Uri.TryCreate($"https://{imageSplit[0]}", UriKind.Absolute, out var repository))
-            {
-                return (repository, imageSplit[1], tag);
-            }
+            if (!Uri.TryCreate($"https://{imageSplit[0]}", UriKind.Absolute, out var repository))
+                    throw new FormatException("The registry name is invalid");
+            
+            if (repository.Host.Contains('_') == true)
+                throw new FormatException("The registry name should not contain underscores.");
 
-            return (null, image, tag);
+            return (repository, imageSplit[1]);
         }
 
         private static (string image, string tag) ParseImage(string str)
         {
             var split = str.Split(":");
 
+            var image = split[0];
+
+            if (image.StartsWith('.') || image.StartsWith('_') || image.StartsWith('-'))
+                throw new FormatException("The image name should not begin with a period, an underscore or a dash.");
+
+            if (image.EndsWith('.') || image.EndsWith('_') || image.EndsWith('-'))
+                throw new FormatException("The image name should not end with a period, an underscore or a dash.");
+
+            if (!image.All(x => x >= 'a' && x <= 'z' || x >= '0' && x <= '9' || x == '.' || x == '_' || x == '-' || x == '/'))
+                throw new FormatException("The image name should only contain lowercase letters, digits, periods, underscores, or dashes.");
+
             if (split.Length == 1)
-                return (str, "{v}");
+                return (image, "{v}");
 
             if(split.Length != 2)
-                throw new ArgumentException("String contains multiple colons", nameof(str));
+                throw new FormatException("The image name should only have one colon.");
 
-            return (split[0], split[1]);
+            return (image, split[1]);
         }
 
         private const string DefaultLibraryName = "library/";
