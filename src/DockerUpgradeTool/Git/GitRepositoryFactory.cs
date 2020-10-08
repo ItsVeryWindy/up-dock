@@ -1,4 +1,5 @@
-﻿using DockerUpgradeTool.Files;
+﻿using DockerUpgradeTool.CommandLine;
+using DockerUpgradeTool.Files;
 using Microsoft.Extensions.Logging;
 using Octokit;
 

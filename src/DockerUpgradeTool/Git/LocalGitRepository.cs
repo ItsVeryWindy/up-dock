@@ -6,6 +6,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using DockerUpgradeTool.CommandLine;
 using DockerUpgradeTool.Files;
 using DockerUpgradeTool.Nodes;
 using LibGit2Sharp;

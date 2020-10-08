@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
-using DockerUpgradeTool.Files;
 using DockerUpgradeTool.Git;
 using DockerUpgradeTool.Nodes;
 using DockerUpgradeTool.Registry;

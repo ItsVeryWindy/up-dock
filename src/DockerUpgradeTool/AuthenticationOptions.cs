@@ -1,4 +1,6 @@
-﻿namespace DockerUpgradeTool
+﻿using System;
+
+namespace DockerUpgradeTool
 {
     public class AuthenticationOptions
     {
@@ -9,6 +11,23 @@
         {
             Username = username;
             Password = password;
+        }
+
+        public static (string repo, AuthenticationOptions options) Parse(string authentication)
+        {
+            var repoSplit = authentication.Split("=", 2);
+
+            if (repoSplit.Length < 2)
+                throw new FormatException("Missing equals in authentication");
+
+            var (repo, str) = (repoSplit[0], repoSplit[1]);
+
+            var strSplit = str.Split(',', 2);
+
+            if (repoSplit.Length < 2)
+                throw new FormatException("Missing authentication separator");
+
+            return (repo, new AuthenticationOptions(strSplit[0], strSplit[1]));
         }
     }
 }

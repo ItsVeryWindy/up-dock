@@ -3,6 +3,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using DockerUpgradeTool.CommandLine;
 using DockerUpgradeTool.Files;
 using DockerUpgradeTool.Git;
 using DockerUpgradeTool.Registry;

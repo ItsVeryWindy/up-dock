@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using System.Threading.Tasks;
+using DockerUpgradeTool.CommandLine;
 using DockerUpgradeTool.Files;
 using LibGit2Sharp;
 using Microsoft.Extensions.Logging;

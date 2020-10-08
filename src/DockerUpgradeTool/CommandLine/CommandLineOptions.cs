@@ -1,6 +1,7 @@
-﻿using PowerArgs;
+﻿using DockerUpgradeTool.Imaging;
+using PowerArgs;
 
-namespace DockerUpgradeTool
+namespace DockerUpgradeTool.CommandLine
 {
     public class CommandLineOptions
     {
@@ -24,10 +25,11 @@ namespace DockerUpgradeTool
 
         [ArgShortcut("-i"), ArgShortcut("--template"), ArgShortcut(ArgShortcutPolicy.ShortcutsOnly)]
         [ArgDescription("A template to apply")]
-        public string[] Templates { get; set; } = new string[0];
+        public DockerImageTemplatePattern[] Templates { get; set; } = new DockerImageTemplatePattern[0];
 
         [ArgShortcut("-a"), ArgShortcut("--auth"), ArgShortcut(ArgShortcutPolicy.ShortcutsOnly)]
         [ArgDescription("Authentication for a repository")]
+        [AuthenticationArgValidator]
         public string[] Authentication { get; set; } = new string[0];
 
         [ArgShortcut("-d"), ArgShortcut("--dry-run"), ArgShortcut(ArgShortcutPolicy.ShortcutsOnly)]

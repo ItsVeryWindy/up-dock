@@ -105,7 +105,7 @@ namespace DockerUpgradeTool.Imaging
             var strStart = 0;
 
             if (tag.StartsWith('.') || tag.StartsWith('-'))
-                throw new FormatException("The image tag cannot start with a period or a dash.");
+                throw new FormatException("The image tag for a template cannot start with a period or a dash.");
 
             for (var i = 0; i < tag.Length;)
             {
@@ -140,7 +140,7 @@ namespace DockerUpgradeTool.Imaging
             if (tagPart.All(x => x >= 'a' && x <= 'z' || x >= 'A' && x <= 'Z' || x >= '0' && x <= '9' || x == '.' || x == '_' || x == '-'))
                 return tagPart;
 
-            throw new FormatException("The image tag should only contain lowercase and uppercase letters, digits, periods, underscores, or dashes.");
+            throw new FormatException("The image tag for a template should only contain lowercase and uppercase letters, digits, periods, underscores, or dashes.");
         }
 
         private const string VersionStart = "{v";
@@ -160,7 +160,7 @@ namespace DockerUpgradeTool.Imaging
             var closeBracketIndex = remainingVersion.IndexOf(VersionEnd);
 
             if(closeBracketIndex < 0)
-                throw new FormatException("The image tag is missing closing bracket.");
+                throw new FormatException("The image tag for a template should have matching curly brackets.");
 
             if (closeBracketIndex == 0)
                 return (AnyVersion, VersionStart.Length + 1);
@@ -170,7 +170,7 @@ namespace DockerUpgradeTool.Imaging
             var range = FloatRange.Parse(remainingVersion.Slice(0, closeBracketIndex).ToString());
 
             if (range == null)
-                throw new FormatException("The image tag contains an invalid version range.");
+                throw new FormatException("The image tag for the template contains an invalid version range.");
 
             return (range, length);
         }
@@ -195,10 +195,10 @@ namespace DockerUpgradeTool.Imaging
             }
 
             if (!Uri.TryCreate($"https://{imageSplit[0]}", UriKind.Absolute, out var repository))
-                    throw new FormatException("The registry name is invalid");
+                    throw new FormatException("The registry name for the template is invalid.");
             
             if (repository.Host.Contains('_') == true)
-                throw new FormatException("The registry name should not contain underscores.");
+                throw new FormatException("The registry name for a template should not contain underscores.");
 
             return (repository, imageSplit[1]);
         }
@@ -210,19 +210,19 @@ namespace DockerUpgradeTool.Imaging
             var image = split[0];
 
             if (image.StartsWith('.') || image.StartsWith('_') || image.StartsWith('-'))
-                throw new FormatException("The image name should not begin with a period, an underscore or a dash.");
+                throw new FormatException("The image name for a template should not begin with a period, an underscore or a dash.");
 
             if (image.EndsWith('.') || image.EndsWith('_') || image.EndsWith('-'))
-                throw new FormatException("The image name should not end with a period, an underscore or a dash.");
+                throw new FormatException("The image name for a template should not end with a period, an underscore or a dash.");
 
             if (!image.All(x => x >= 'a' && x <= 'z' || x >= '0' && x <= '9' || x == '.' || x == '_' || x == '-' || x == '/'))
-                throw new FormatException("The image name should only contain lowercase letters, digits, periods, underscores, or dashes.");
+                throw new FormatException("The image name for a template should only contain lowercase letters, digits, periods, underscores, or dashes.");
 
             if (split.Length == 1)
                 return (image, "{v}");
 
             if(split.Length != 2)
-                throw new FormatException("The image name should only have one colon.");
+                throw new FormatException("The image name for a template should only have one colon.");
 
             return (image, split[1]);
         }
