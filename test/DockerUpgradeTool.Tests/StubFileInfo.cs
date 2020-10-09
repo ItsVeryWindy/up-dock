@@ -32,7 +32,7 @@ namespace DockerUpgradeTool.Tests
         public string AbsolutePath { get; }
         public string RelativePath => AbsolutePath;
 
-        public bool Exists { get; }
+        public bool Exists => _files.ContainsKey(AbsolutePath);
 
         public IFileInfo File => this;
 
@@ -42,9 +42,10 @@ namespace DockerUpgradeTool.Tests
 
         public Stream CreateWriteStream() => _files[AbsolutePath] = new StubMemoryStream();
 
-        public Stream CreateReadStream()
+        public Stream? CreateReadStream()
         {
-            var stream = _files[AbsolutePath];
+            if (!_files.TryGetValue(AbsolutePath, out var stream))
+                return null;
 
             stream.Position = 0;
 

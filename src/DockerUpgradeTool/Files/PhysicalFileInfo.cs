@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 
 namespace DockerUpgradeTool.Files
 {
@@ -20,7 +21,25 @@ namespace DockerUpgradeTool.Files
 
         public Stream CreateWriteStream() => new FileStream(AbsolutePath, FileMode.Truncate, FileAccess.Write);
 
-        public Stream CreateReadStream() => new FileStream(AbsolutePath, FileMode.Open, FileAccess.Read);
+        public Stream? CreateReadStream()
+        {
+            try
+            {
+                return new FileStream(AbsolutePath, FileMode.Open, FileAccess.Read);
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return null;
+            }
+            catch (FileNotFoundException)
+            {
+                return null;
+            }
+            catch (IOException)
+            {
+                return null;
+            }
+        }
 
         public void Move(IFileInfo file) => File.Move(AbsolutePath, file.AbsolutePath);
     }

@@ -1,9 +1,10 @@
-﻿using System.Threading.Tasks;
+﻿using System.Threading;
+using System.Threading.Tasks;
 
 namespace DockerUpgradeTool
 {
     public interface IGitRepositoryProcessor
     {
-        Task ProcessAsync();
+        Task ProcessAsync(CancellationToken cancellationToken);
     }
 }

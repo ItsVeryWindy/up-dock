@@ -9,7 +9,7 @@ namespace DockerUpgradeTool.Files
         string AbsolutePath { get; }
         bool Exists { get; }
         Stream CreateWriteStream();
-        Stream CreateReadStream();
+        Stream? CreateReadStream();
         void Move(IFileInfo file);
     }
 }

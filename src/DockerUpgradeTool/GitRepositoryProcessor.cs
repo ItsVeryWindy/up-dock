@@ -1,6 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using DockerUpgradeTool.Files;
 using DockerUpgradeTool.Git;
@@ -19,11 +21,10 @@ namespace DockerUpgradeTool
         private readonly IReplacementPlanExecutor _executor;
         private readonly IConfigurationOptions _options;
         private readonly IFileFilterFactory _fileFilterFactory;
-        private readonly ICancellationProvider _cancellationProvider;
         private readonly IVersionCache _cache;
         private readonly ILogger<GitRepositoryProcessor> _logger;
 
-        public GitRepositoryProcessor(IGitHubClient client, IGitRepositoryFactory factory, IReplacementPlanner planner, IReplacementPlanExecutor executor, IConfigurationOptions options, IFileFilterFactory fileFilterFactory, ICancellationProvider cancellationProvider, IVersionCache cache, ILogger<GitRepositoryProcessor> logger)
+        public GitRepositoryProcessor(IGitHubClient client, IGitRepositoryFactory factory, IReplacementPlanner planner, IReplacementPlanExecutor executor, IConfigurationOptions options, IFileFilterFactory fileFilterFactory, IVersionCache cache, ILogger<GitRepositoryProcessor> logger)
         {
             _client = client;
             _factory = factory;
@@ -31,24 +32,23 @@ namespace DockerUpgradeTool
             _executor = executor;
             _options = options;
             _fileFilterFactory = fileFilterFactory;
-            _cancellationProvider = cancellationProvider;
             _cache = cache;
             _logger = logger;
         }
 
-        public async Task ProcessAsync()
+        public async Task ProcessAsync(CancellationToken cancellationToken)
         {
             var repositories = await _client.Search.SearchRepo(new SearchRepositoriesRequest(_options.Search));
 
             foreach (var repository in repositories.Items)
             {
-                await ProcessRepositoryAsync(repository);
+                await ProcessRepositoryAsync(repository, cancellationToken);
             }
         }
 
-        private async Task ProcessRepositoryAsync(Repository repository)
+        private async Task ProcessRepositoryAsync(Repository repository, CancellationToken cancellationToken)
         {
-            _cancellationProvider.CancellationToken.ThrowIfCancellationRequested();
+            cancellationToken.ThrowIfCancellationRequested();
 
             _logger.LogInformation("Started processing repository {Repository}", repository.FullName);
 
@@ -60,7 +60,7 @@ namespace DockerUpgradeTool
 
             var localOptions = GetConfiguration(directory);
 
-            await _cache.UpdateCacheAsync(localOptions.Patterns, _cancellationProvider.CancellationToken);
+            await _cache.UpdateCacheAsync(localOptions.Patterns, cancellationToken);
 
             var filter = _fileFilterFactory.Create(localOptions);
 
@@ -77,7 +77,7 @@ namespace DockerUpgradeTool
 
             foreach (var file in localRepository.Files)
             {
-                await ProcessFile(filter, file, node, replacements);
+                await ProcessFileAsync(filter, file, node, replacements, cancellationToken);
             }
 
             if(replacements.Count == 0)
@@ -91,7 +91,7 @@ namespace DockerUpgradeTool
 
                 localRepository.Reset();
 
-                await _executor.ExecutePlanAsync(groupedReplacements, _cancellationProvider.CancellationToken);
+                await _executor.ExecutePlanAsync(groupedReplacements, cancellationToken);
 
                 if (!localRepository.IsDirty)
                     continue;
@@ -103,20 +103,20 @@ namespace DockerUpgradeTool
 
                 var forkedRepository = await gitRepository.ForkRepositoryAsync();
 
-                await localRepository.CreatePullRequestAsync(forkedRepository, groupedReplacements, _cancellationProvider.CancellationToken);
+                await localRepository.CreatePullRequestAsync(forkedRepository, groupedReplacements, cancellationToken);
             }
 
             _logger.LogInformation("Finished processing repository {Repository}", repository.FullName);
         }
 
-        private async Task ProcessFile(IFileFilter filter, IRepositoryFileInfo file, ISearchTreeNode node, List<TextReplacement> replacements)
+        private async Task ProcessFileAsync(IFileFilter filter, IRepositoryFileInfo file, ISearchTreeNode node, List<TextReplacement> replacements, CancellationToken cancellationToken)
         {
-            _cancellationProvider.CancellationToken.ThrowIfCancellationRequested();
+            cancellationToken.ThrowIfCancellationRequested();
 
             if(!filter.Filter(file))
                 return;
 
-            var plan = await _planner.GetReplacementPlanAsync(file, node, _cancellationProvider.CancellationToken);
+            var plan = await _planner.GetReplacementPlanAsync(file, node, cancellationToken);
 
             if (plan.Count > 0)
             {
@@ -131,6 +131,9 @@ namespace DockerUpgradeTool
             if (file.Exists == true)
             {
                 using var stream = file.CreateReadStream();
+
+                if(stream == null)
+                    throw new InvalidOperationException("Could not read the configuration file in the repository");
 
                 var localOptions = new ConfigurationOptions();
                 

@@ -1,47 +1,54 @@
-﻿using DockerUpgradeTool.Imaging;
-using PowerArgs;
+﻿using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
+using DockerUpgradeTool.Imaging;
 
 namespace DockerUpgradeTool.CommandLine
 {
+    [Description("Automatically update docker images in github repositories.")]
     public class CommandLineOptions
     {
-        [ArgShortcut("-e"), ArgShortcut("--email"), ArgShortcut(ArgShortcutPolicy.ShortcutsOnly)]
-        [ArgDescription("Email to use in the commit")]
-        [ArgRequired]
+        [Shortcut("-e", "--email")]
+        [Description("Email to use in the commit")]
+        [Required]
+        [EmailAddress]
         public string? Email { get; set; }
 
-        [ArgShortcut("-t"), ArgShortcut("--token"), ArgShortcut(ArgShortcutPolicy.ShortcutsOnly)]
-        [ArgDescription("GitHub token to access the repository")]
+        [Shortcut("-t", "--token")]
+        [Description("GitHub token to access the repository")]
         public string? Token { get; set; }
 
-        [ArgShortcut("-s"), ArgShortcut("--search"), ArgShortcut(ArgShortcutPolicy.ShortcutsOnly)]
-        [ArgDescription("Search query to get repositories")]
-        [ArgRequired]
+        [Shortcut("-s", "--search")]
+        [Description("Search query to get repositories")]
+        [Required]
+        [ValidSearchFormat]
         public string? Search { get; set; }
 
-        [ArgShortcut("-c"), ArgShortcut("--config"), ArgShortcut(ArgShortcutPolicy.ShortcutsOnly)]
-        [ArgDescription("Default configuration to apply")]
+        [Shortcut("-c", "--config")]
+        [Description("Default configuration to apply")]
+        [ValidFilePath]
+        [ValidJsonFile]
         public string? Config { get; set; }
 
-        [ArgShortcut("-i"), ArgShortcut("--template"), ArgShortcut(ArgShortcutPolicy.ShortcutsOnly)]
-        [ArgDescription("A template to apply")]
+        [Shortcut("-i", "--template")]
+        [Description("A template to apply")]
+        [TypeConverter(typeof(DockerImageTemplatePatternConverter))]
         public DockerImageTemplatePattern[] Templates { get; set; } = new DockerImageTemplatePattern[0];
 
-        [ArgShortcut("-a"), ArgShortcut("--auth"), ArgShortcut(ArgShortcutPolicy.ShortcutsOnly)]
-        [ArgDescription("Authentication for a repository")]
-        [AuthenticationArgValidator]
+        [Shortcut("-a", "--auth")]
+        [Description("Authentication for a repository")]
+        [ValidAuthenticationFormat]
         public string[] Authentication { get; set; } = new string[0];
 
-        [ArgShortcut("-d"), ArgShortcut("--dry-run"), ArgShortcut(ArgShortcutPolicy.ShortcutsOnly)]
-        [ArgDescription("Run without creating pull requests")]
+        [Shortcut("-d", "--dry-run")]
+        [Description("Run without creating pull requests")]
         public bool DryRun { get; set; }
 
-        [ArgShortcut("-h"), ArgShortcut("--help"), ArgShortcut(ArgShortcutPolicy.ShortcutsOnly)]
-        [ArgDescription("Display help information")]
+        [Shortcut("-h", "--help")]
+        [Description("Display help information")]
         public bool Help { get; set; }
 
-        [ArgShortcut("-v"), ArgShortcut("--version"), ArgShortcut(ArgShortcutPolicy.ShortcutsOnly)]
-        [ArgDescription("Run without creating pull requests")]
+        [Shortcut("-v", "--version")]
+        [Description("Display what the version is")]
         public bool Version { get; set; }
     }
 }

@@ -17,8 +17,10 @@ namespace DockerUpgradeTool.Tests
         [TestCaseSource(nameof(TestCases))]
         public async Task ShouldReturnLinesToBeReplaced(DockerImageTemplatePattern pattern, string fileName, string expectedFrom, int expectedLineNumber, int expectedStart, string expectedTo)
         {
-            var sp = Program.CreateServices(new CommandLineOptions(), CancellationToken.None)
+            var sp = TestUtilities
+                .CreateServices()
                 .AddSingleton<HttpMessageHandler>(new StaticResponseHandler())
+                .AddSingleton<CommandLineOptions>()
                 .BuildServiceProvider();
 
             await sp.GetRequiredService<IVersionCache>().UpdateCacheAsync(Enumerable.Repeat(pattern, 1), CancellationToken.None);
@@ -27,7 +29,7 @@ namespace DockerUpgradeTool.Tests
 
             var planner = sp.GetRequiredService<IReplacementPlanner>();
 
-            var stream = typeof(ReplacementPlannerTests).Assembly.GetManifestResourceStream($"DockerUpgradeTool.Tests.Files.{fileName}")!;
+            var stream = TestUtilities.GetResource($"Files.{fileName}")!;
 
             var fileInfo = new StubFileInfo(stream, "/file/path");
 

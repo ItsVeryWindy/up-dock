@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
 using DockerUpgradeTool.Files;
 
 namespace DockerUpgradeTool.Tests
@@ -8,6 +9,8 @@ namespace DockerUpgradeTool.Tests
     internal class StubFileProvider : IFileProvider
     {
         private readonly Dictionary<string, Stream> _files = new Dictionary<string, Stream>();
+
+        public void AddFile(string path, string contents) => AddFile(path, new MemoryStream(Encoding.UTF8.GetBytes(contents)));
 
         public void AddFile(string path, Stream stream) => _files[path] = stream;
 

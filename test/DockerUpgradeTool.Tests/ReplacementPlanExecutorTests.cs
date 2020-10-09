@@ -14,7 +14,7 @@ namespace DockerUpgradeTool.Tests
         [Test]
         public async Task ShouldPerformReplaceOnSingleFile()
         {
-            var stream = typeof(ReplacementPlanExecutorTests).Assembly.GetManifestResourceStream("DockerUpgradeTool.Tests.Files.Dockerfile")!;
+            var stream = TestUtilities.GetResource("Files.Dockerfile")!;
 
             var provider = new StubFileProvider();
 
@@ -22,7 +22,8 @@ namespace DockerUpgradeTool.Tests
 
             await stream.CopyToAsync(tempFile.CreateWriteStream());
 
-            var sp = Program.CreateServices(new CommandLineOptions(), CancellationToken.None)
+            var sp = TestUtilities
+                .CreateServices()
                 .AddSingleton<IFileProvider>(provider)
                 .BuildServiceProvider();
 
@@ -35,15 +36,11 @@ namespace DockerUpgradeTool.Tests
 
             await executor.ExecutePlanAsync(replacements, CancellationToken.None);
 
-            var replacedFile = await new StreamReader(tempFile.CreateReadStream()).ReadToEndAsync();
+            var replacedFile = await tempFile.CreateReadStream().GetStringAsync();
 
-            var expectedStream = typeof(ReplacementPlanExecutorTests).Assembly.GetManifestResourceStream("DockerUpgradeTool.Tests.Files.Dockerfile_expected")!;
+            var expectedFile = await TestUtilities.GetResource("Files.Dockerfile_expected").GetStringAsync();
 
-            var reader = new StreamReader(expectedStream);
-
-            var text = await reader.ReadToEndAsync();
-
-            Assert.That(replacedFile, Is.EqualTo(text));
+            Assert.That(replacedFile, Is.EqualTo(expectedFile));
         }
     }
 }

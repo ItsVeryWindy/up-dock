@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -38,6 +39,10 @@ namespace DockerUpgradeTool
             var tempFile = _provider.CreateTemporaryFile();
 
             await using var inputFileStream = file.CreateReadStream();
+
+            if(inputFileStream == null)
+                throw new InvalidOperationException($"Could not read the file {file.AbsolutePath}");
+
             await using var outputFileStream = tempFile.CreateWriteStream();
 
             await using var sw = new StreamWriter(outputFileStream);
