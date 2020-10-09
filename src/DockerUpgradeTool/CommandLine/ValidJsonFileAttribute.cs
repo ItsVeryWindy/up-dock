@@ -1,5 +1,4 @@
-﻿using System;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.Text.Json;
 using DockerUpgradeTool.Files;
 using Microsoft.Extensions.DependencyInjection;
@@ -26,7 +25,7 @@ namespace DockerUpgradeTool.CommandLine
             {
                 JsonDocument.Parse(stream);
             }
-            catch(Exception ex)
+            catch(JsonException)
             {
                 return new ValidationResult($"The file specified in the {validationContext.DisplayName} field is not valid json.");
             }

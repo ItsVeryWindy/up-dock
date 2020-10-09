@@ -23,7 +23,12 @@ namespace DockerUpgradeTool
 
         public async Task<IReadOnlyCollection<TextReplacement>> GetReplacementPlanAsync(IRepositoryFileInfo file, ISearchTreeNode node, CancellationToken cancellationToken)
         {
-            using var sr = new StreamReader(file.File.CreateReadStream());
+            await using var inputFileStream = file.File.CreateReadStream();
+
+            if (inputFileStream == null)
+                throw new InvalidOperationException($"Could not read the file {file.RelativePath}");
+
+            using var sr = new StreamReader(inputFileStream);
 
             var replacements = new List<TextReplacement>();
 

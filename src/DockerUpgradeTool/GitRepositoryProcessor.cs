@@ -38,20 +38,40 @@ namespace DockerUpgradeTool
 
         public async Task ProcessAsync(CancellationToken cancellationToken)
         {
-            var repositories = await _client.Search.SearchRepo(new SearchRepositoriesRequest(_options.Search));
-
-            foreach (var repository in repositories.Items)
+            try
             {
-                await ProcessRepositoryAsync(repository, cancellationToken);
+                var repositories = await _client.Search.SearchRepo(new SearchRepositoriesRequest(_options.Search));
+
+                foreach (var repository in repositories.Items)
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+
+                    _logger.LogInformation("Started processing repository {Repository}", repository.FullName);
+
+                    try
+                    {
+                        await ProcessRepositoryAsync(repository, cancellationToken);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "Unhandled exception");
+                    }
+
+                    _logger.LogInformation("Finished processing repository {Repository}", repository.FullName);
+                }
             }
-        }
+            catch(ApiValidationException ex)
+            {
+                _logger.LogError(ex, "Unable to authenticate with GitHub, please make sure the token being used is valid for the search you are doing.");
+            }
+            catch(Exception ex)
+            {
+                _logger.LogError(ex, "Unhandled exception");
+            }
+}
 
         private async Task ProcessRepositoryAsync(Repository repository, CancellationToken cancellationToken)
         {
-            cancellationToken.ThrowIfCancellationRequested();
-
-            _logger.LogInformation("Started processing repository {Repository}", repository.FullName);
-
             var gitRepository = _factory.CreateRepository(repository);
 
             var localRepository = gitRepository.CheckoutRepository();
@@ -80,7 +100,7 @@ namespace DockerUpgradeTool
                 await ProcessFileAsync(filter, file, node, replacements, cancellationToken);
             }
 
-            if(replacements.Count == 0)
+            if (replacements.Count == 0)
             {
                 _logger.LogInformation("No changes to be made in repository {Repository}", repository.FullName);
             }
@@ -105,8 +125,6 @@ namespace DockerUpgradeTool
 
                 await localRepository.CreatePullRequestAsync(forkedRepository, groupedReplacements, cancellationToken);
             }
-
-            _logger.LogInformation("Finished processing repository {Repository}", repository.FullName);
         }
 
         private async Task ProcessFileAsync(IFileFilter filter, IRepositoryFileInfo file, ISearchTreeNode node, List<TextReplacement> replacements, CancellationToken cancellationToken)

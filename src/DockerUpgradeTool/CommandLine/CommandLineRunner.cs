@@ -15,7 +15,7 @@ namespace DockerUpgradeTool.CommandLine
 {
     public static class CommandLineRunner
     {
-        public static Task RunAsync<TCommandLineOptions, TRunner>(Action<IServiceCollection> configureServices, Action<ILoggingBuilder> configureLogging, string[] args)
+        public static async Task RunAsync<TCommandLineOptions, TRunner>(Action<IServiceCollection> configureServices, Action<ILoggingBuilder> configureLogging, string[] args)
             where TCommandLineOptions : class, new()
             where TRunner : ICommandLineRunner<TCommandLineOptions>
         {
@@ -64,7 +64,14 @@ namespace DockerUpgradeTool.CommandLine
 
             var runner = ActivatorUtilities.CreateInstance<TRunner>(serviceProvider);
 
-            return runner.RunAsync(options, cts.Token);
+            try
+            {
+                await runner.RunAsync(options, cts.Token);
+            }
+            finally
+            {
+                await serviceProvider.DisposeAsync();
+            }
         }
     }
 }
