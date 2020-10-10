@@ -30,14 +30,14 @@ namespace DockerUpgradeTool.Tests.CommandLine
                 "Automatically update docker images in github repositories.",
                 null,
                 "Options:",
-                "--email/-e*      Email to use in the commit",
-                "--token/-t       GitHub token to access the repository",
-                "--search/-s*     Search query to get repositories",
-                "--config/-c      Default configuration to apply",
-                "--template/-i    A template to apply",
                 "--auth/-a        Authentication for a repository",
+                "--config/-c      Default configuration to apply",
                 "--dry-run/-d     Run without creating pull requests",
+                "--email/-e*      Email to use in the commit",
                 "--help/-h        Display help information",
+                "--search/-s*     Search query to get repositories",
+                "--template/-i    A template to apply",
+                "--token/-t       GitHub token to access the repository",                
                 "--version/-v     Display what the version is"
             }));
         }
