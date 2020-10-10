@@ -29,6 +29,7 @@ namespace DockerUpgradeTool.CommandLine
 
             var shortcuts = typeof(T)
                 .GetProperties()
+                .OrderBy(x => x.Name)
                 .Select(x => new {
                     shortcuts = Formatter.FormatShortcut(x) + (x.GetCustomAttribute<RequiredAttribute>() == null ? "" : "*"),
                     description = x.GetCustomAttribute<DescriptionAttribute>()?.Description
