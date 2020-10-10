@@ -77,6 +77,9 @@ jobs:
       uses: docker/build-push-action@v2
       with:
         push: true
-        tags: user/app:latest
+        tags: itsverywindy/docker-upgrade-tool:${{ github.event.inputs.version }}
+        context: .
+        file: ./Dockerfile
+        platforms: linux/amd64
     - name: Image digest
       run: echo ${{ steps.docker_build.outputs.digest }}
