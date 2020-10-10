@@ -37,5 +37,21 @@ namespace DockerUpgradeTool.Tests
         [TestCase("nginx:-tag", "The image tag for a template cannot start with a period or a dash.")]
         [TestCase("nginx:.tag", "The image tag for a template cannot start with a period or a dash.")]
         public void ShouldHandleInvalidString(string str, string expectedError) => Assert.That(() => DockerImageTemplate.Parse(str), Throws.TypeOf<FormatException>().With.Message.EqualTo(expectedError));
+
+        [Test]
+        public void ShouldCreateDefaultGroupForPatternWhenGroupNotSpecified()
+        {
+            var pattern = DockerImageTemplate.Parse("nginx").CreatePattern("{v}");
+
+            Assert.That(pattern.Group, Is.EqualTo("registry-1.docker.io/library/nginx:{v}"));
+        }
+
+        [Test]
+        public void ShouldCreateDefaultGroupWhenGroupNotSpecified()
+        {
+            var pattern = DockerImageTemplate.Parse("nginx").CreatePattern(false, true);
+
+            Assert.That(pattern.Group, Is.EqualTo("registry-1.docker.io/library/nginx:{v}"));
+        }
     }
 }

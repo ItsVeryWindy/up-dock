@@ -307,12 +307,27 @@ namespace DockerUpgradeTool.Imaging
 
             var pattern = sb.ToString();
 
-            return DockerImageTemplatePattern.Parse(pattern, group ?? pattern, this);
+            return DockerImageTemplatePattern.Parse(pattern, group ?? CreateDefaultGroup(), this);
         }
 
         public DockerImageTemplatePattern CreatePattern(string pattern) => CreatePattern(pattern, null);
 
-        public DockerImageTemplatePattern CreatePattern(string pattern, string? group) => DockerImageTemplatePattern.Parse(pattern, group ?? pattern, this);
+        public DockerImageTemplatePattern CreatePattern(string pattern, string? group) => DockerImageTemplatePattern.Parse(pattern, group ?? CreateDefaultGroup(), this);
+
+        private string CreateDefaultGroup()
+        {
+            var sb = new StringBuilder()
+                .Append(Repository.Host)
+                .Append("/")
+                .Append(ImageString()).Append(":");
+
+            foreach (var part in _parts)
+            {
+                sb.Append(part is FloatRange ? "{v}" : part);
+            }
+
+            return sb.ToString();
+        }
 
         public override int GetHashCode() => HashCode.Combine(Repository, Image, Tag);
 
