@@ -46,7 +46,7 @@ namespace DockerUpgradeTool
                 {
                     cancellationToken.ThrowIfCancellationRequested();
 
-                    _logger.LogInformation("Started processing repository {Repository}", repository.FullName);
+                    _logger.LogStartedProcessingRepository(repository);
 
                     try
                     {
@@ -57,7 +57,7 @@ namespace DockerUpgradeTool
                         _logger.LogError(ex, "Unhandled exception");
                     }
 
-                    _logger.LogInformation("Finished processing repository {Repository}", repository.FullName);
+                    _logger.LogFinishedProcessingRepository(repository);
                 }
             }
             catch(ApiValidationException ex)
@@ -102,7 +102,7 @@ namespace DockerUpgradeTool
 
             if (replacements.Count == 0)
             {
-                _logger.LogInformation("No changes to be made in repository {Repository}", repository.FullName);
+                _logger.LogNoChangesInRepository(repository);
             }
 
             foreach (var replacement in replacements.GroupBy(x => x.Group))
@@ -116,7 +116,7 @@ namespace DockerUpgradeTool
                 if (!localRepository.IsDirty)
                     continue;
 
-                _logger.LogInformation("Changes detected in repository {Repository}", repository.FullName);
+                _logger.LogChangesDetectedInRepository(repository);
 
                 if (_options.DryRun)
                     continue;

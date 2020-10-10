@@ -53,11 +53,11 @@ namespace DockerUpgradeTool
 
                     var latestVersion = latestPattern?.ToString();
 
-                    _logger.LogInformation("Identified '{CurrentVersion}' on line {LineNumber} of file {File}, from pattern {DockerImagePattern} with template {DockerImageTemplate}", currentVersion, lineNumber + 1, file.RelativePath, image.Pattern, image.Image.Template);
+                    _logger.LogIdentifiedFromPattern(currentVersion, lineNumber + 1, file, image);
 
-                    if (latestVersion != null && currentVersion != latestVersion.ToString())
+                    if (latestVersion != null && currentVersion != latestVersion)
                     {
-                        _logger.LogInformation("Version is outdated replacing '{CurrentVersion}' with {LatestVersion}", currentVersion, latestVersion);
+                        _logger.LogReplacingOutdatedVersion(currentVersion, latestVersion);
 
                         replacements.Add(new TextReplacement(image.Pattern.Group, file, currentVersion, image, latestVersion, latestPattern!, lineNumber, i));
                     }
