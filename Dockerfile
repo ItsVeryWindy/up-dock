@@ -1,6 +1,6 @@
 FROM alpine:3.8.5
 
-RUN apk add --no-cache libstdc++ libintl
+RUN apk add --no-cache libstdc++ libintl libssl-dev
 
 WORKDIR /docker-upgrade-tool
 
