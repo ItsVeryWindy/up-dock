@@ -1,4 +1,4 @@
-FROM alpine:3.8.0
+FROM alpine:3.8.5
 
 RUN apk add --no-cache libstdc++ libintl
 
