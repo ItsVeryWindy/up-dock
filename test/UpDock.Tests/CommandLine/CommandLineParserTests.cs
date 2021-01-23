@@ -6,6 +6,7 @@ using System.Globalization;
 using System.Linq;
 using UpDock.CommandLine;
 using NUnit.Framework;
+using System.IO;
 
 namespace UpDock.Tests.CommandLine
 {
@@ -14,7 +15,7 @@ namespace UpDock.Tests.CommandLine
         private const string Argument = "--argument";
 
         #pragma warning disable CS8618
-        private CommandLineParser _parser;
+        private ICommandLineParser _parser;
         #pragma warning restore CS8618
 
         [SetUp]
@@ -203,6 +204,51 @@ namespace UpDock.Tests.CommandLine
             Assert.That(argument.Value, Is.Null);
         }
 
+        [Test]
+        public void ShouldReadPropertyFromStandardInput()
+        {
+            const string value = "value";
+
+            var stream = new MemoryStream();
+            var writer = new StreamWriter(stream);
+
+            writer.Write(value);
+            writer.Flush();
+            stream.Position = 0;
+
+            var input = new StreamReader(stream);
+
+            var arguments = _parser.Parse<OptionsWithStandardInput>(new[] { Argument }, input);
+
+            Assert.That(arguments, Has.Count.EqualTo(1));
+
+            var argument = arguments.First();
+
+            Assert.That(argument.Argument, Is.EqualTo("--argument"));
+            Assert.That(argument.Index, Is.EqualTo(0));
+            Assert.That(argument.OriginalValue, Is.EqualTo(value));
+            Assert.That(argument.Value, Is.EqualTo(value));
+        }
+
+        [Test]
+        public void ShouldReadPropertyFromArgsWhenStandardInputIsEmpty()
+        {
+            const string value = "value";
+
+            var input = new StreamReader(new MemoryStream());
+
+            var arguments = _parser.Parse<OptionsWithStandardInput>(new[] { Argument, value }, input);
+
+            Assert.That(arguments, Has.Count.EqualTo(1));
+
+            var argument = arguments.First();
+
+            Assert.That(argument.Argument, Is.EqualTo("--argument"));
+            Assert.That(argument.Index, Is.EqualTo(0));
+            Assert.That(argument.OriginalValue, Is.EqualTo(value));
+            Assert.That(argument.Value, Is.EqualTo(value));
+        }
+
         public class Options<T>
         {
             [Shortcut("--argument")]
@@ -216,6 +262,13 @@ namespace UpDock.Tests.CommandLine
         {
             [Shortcut("--argument")]
             [Required]
+            public string? Property { get; set; }
+        }
+
+        public class OptionsWithStandardInput
+        {
+            [Shortcut("--argument")]
+            [StandardInput]
             public string? Property { get; set; }
         }
 

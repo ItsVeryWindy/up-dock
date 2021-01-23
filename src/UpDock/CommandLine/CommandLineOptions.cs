@@ -14,7 +14,8 @@ namespace UpDock.CommandLine
         public string? Email { get; set; }
 
         [Shortcut("-t", "--token")]
-        [Description("GitHub token to access the repository")]
+        [StandardInput]
+        [Description("GitHub token to access the repository (can come from standard in)")]
         public string? Token { get; set; }
 
         [Shortcut("-s", "--search")]

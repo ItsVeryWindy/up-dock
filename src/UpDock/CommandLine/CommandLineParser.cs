@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 
@@ -9,7 +10,7 @@ namespace UpDock.CommandLine
 {
     public class CommandLineParser : ICommandLineParser
     {
-        public IReadOnlyList<CommandLineArgument> Parse<T>(string[] args)
+        public IReadOnlyList<CommandLineArgument> Parse<T>(string[] args, TextReader input)
         {
             var shortcutMappings = typeof(T)
                 .GetProperties()
@@ -47,23 +48,28 @@ namespace UpDock.CommandLine
                 string? originalValue = null;
                 object? value = null;
 
-                if (args.Length == i + 1)
+                if (property.GetCustomAttribute<StandardInputAttribute>() != null && input.Peek() != -1)
+                {
+                    originalValue = input.ReadToEnd();
+                }
+
+                if (originalValue == null && args.Length == i + 1)
                 {
                     errors.Add("Value not specified");
                 }
                 else
                 {
-                    originalValue = args[i + 1];
+                    originalValue ??= args[++i];
 
                     try
                     {
                         value = GetConvertedValue(property, originalValue);
                     }
-                    catch(ArgumentException ex) when (ex.InnerException is FormatException)
+                    catch (ArgumentException ex) when (ex.InnerException is FormatException)
                     {
                         errors.Add(ex.InnerException.Message);
                     }
-                    catch(FormatException ex)
+                    catch (FormatException ex)
                     {
                         errors.Add(ex.Message);
                     }
@@ -74,8 +80,6 @@ namespace UpDock.CommandLine
                 argument.Errors.AddRange(errors);
 
                 arguments.Add(argument);
-
-                i++;
             }
 
             var requiredArguments = typeof(T)
