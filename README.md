@@ -1,7 +1,10 @@
-# docker-upgrade-tool
-Automatically update docker images in github repositories.
+# UpDock
+## What's UpDock?
+UpDock is a tool for automatically updating docker images within github repositories.
 
-![Build Status](https://github.com/ItsVeryWindy/docker-upgrade-tool/workflows/Build/badge.svg) ![Release Status](https://github.com/ItsVeryWindy/docker-upgrade-tool/workflows/Release/badge.svg)
+![Build Status](https://github.com/ItsVeryWindy/up-dock/workflows/Build/badge.svg) ![Release Status](https://github.com/ItsVeryWindy/up-dock/workflows/Release/badge.svg)
+
+![Updock Icon](assets/icon.png)
 
 ## Command Line Options
 ```
@@ -14,7 +17,7 @@ Automatically update docker images in github repositories.
 ```
 
 ## Configuration File
-Configuartion can either be specified by command line options or via a file for more complex image patterns, by default it will look for a file inside the repository called `docker_images.json` and combine those options with the ones provided.
+Configuartion can either be specified by command line options or via a file for more complex image patterns, by default it will look for a file inside the repository called `up-dock.json` and combine those options with the ones provided.
 
 ```
 {

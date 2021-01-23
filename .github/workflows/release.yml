@@ -51,8 +51,8 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
-        asset_path: ./src/DockerUpgradeTool/bin/Release/netcoreapp3.1/win-x64/publish/docker-upgrade-tool.exe
-        asset_name: docker-upgrade-tool-win-x64.exe
+        asset_path: ./src/UpDock/bin/Release/netcoreapp3.1/win-x64/publish/up-dock.exe
+        asset_name: up-dock-win-x64.exe
         asset_content_type: application/vnd.microsoft.portable-executable
     - name: Upload Mac Release Asset
       id: upload-mac-release-asset
@@ -61,8 +61,8 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
-        asset_path: ./src/DockerUpgradeTool/bin/Release/netcoreapp3.1/osx-x64/publish/docker-upgrade-tool
-        asset_name: docker-upgrade-tool-osx-x64
+        asset_path: ./src/UpDock/bin/Release/netcoreapp3.1/osx-x64/publish/up-dock
+        asset_name: up-dock-osx-x64
         asset_content_type: application/octet-stream
     - name: Upload Linux Release Asset
       id: upload-linux-release-asset 
@@ -71,15 +71,15 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
-        asset_path: ./src/DockerUpgradeTool/bin/Release/netcoreapp3.1/linux-x64/publish/docker-upgrade-tool
-        asset_name: docker-upgrade-tool-linux-x64
+        asset_path: ./src/UpDock/bin/Release/netcoreapp3.1/linux-x64/publish/up-dock
+        asset_name: up-dock-linux-x64
         asset_content_type: application/octet-stream
     - name: Build and push
       id: docker_build
       uses: docker/build-push-action@v2
       with:
         push: true
-        tags: itsverywindy/docker-upgrade-tool:${{ github.event.inputs.version }}
+        tags: itsverywindy/up-dock:${{ github.event.inputs.version }}
         context: .
         file: ./Dockerfile
         platforms: linux/amd64

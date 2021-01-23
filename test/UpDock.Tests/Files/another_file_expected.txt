@@ -1,0 +1,11 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
+
+namespace UpDock.Tests.Files
+{
+    class MyClass
+    {
+        var text = "sdk:3.1.101-alpine3.11";
+    }
+}

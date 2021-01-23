@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "UpDock": {
+      "commandName": "Project",
+      "commandLineArgs": "-e ItsVeryWindy@users.noreply.github.com -s repo:ItsVeryWindy/test-docker-update -d"
+    }
+  }
+}

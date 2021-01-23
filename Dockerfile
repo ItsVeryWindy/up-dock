@@ -2,8 +2,8 @@ FROM alpine:3.9.6
 
 RUN apk add --no-cache libstdc++ libintl libressl-dev
 
-WORKDIR /docker-upgrade-tool
+WORKDIR /up-dock
 
-COPY src/DockerUpgradeTool/bin/Release/netcoreapp3.1/linux-musl-x64/publish .
+COPY src/UpDock/bin/Release/netcoreapp3.1/linux-musl-x64/publish .
 
-ENTRYPOINT [ "./docker-upgrade-tool" ]
+ENTRYPOINT [ "./up-dock" ]
