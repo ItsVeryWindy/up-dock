@@ -8,12 +8,21 @@ UpDock is a tool for automatically updating docker images within github reposito
 
 ## Command Line Options
 ```
-  --email/-e      The email address to use in the commit
-  --token/-t      GitHub token to access the repository
-  --search/-s     Search query to get repositories
-  --config/-c     Default configuration file to apply
-  --template/-t*  A template string for the docker image to be updated
-  --auth/-a*      Authentications details for a docker repository (Should be in the form of [registry]=[username],[password])
+--auth/-a        Authentication credentials for a docker repository (should be in the form of [registry]=[username],[password])
+--config/-c      Default configuration to apply
+--dry-run/-d     Run without creating pull requests
+--email/-e*      Email to use in the commit
+--help/-h        Display help information
+--search/-s*     Search query to get repositories
+--template/-i    A template to apply
+--token/-t       GitHub token to access the repository (can come from standard in)
+--version/-v     Display what the version is
+```
+
+## Running inside a container
+An image has been published to the docker hub for use, as an example.
+```
+docker run --rm itsverywindy/up-dock:1.0.0 -e ItsVeryWindy@users.noreply.github.com -s repo:ItsVeryWindy/test-docker-update -i "mcr.microsoft.com/dotnet/core/sdk:{v}" -d
 ```
 
 ## Configuration File
