@@ -37,7 +37,7 @@ namespace UpDock.Tests.CommandLine
                 "--help/-h        Display help information",
                 "--search/-s*     Search query to get repositories",
                 "--template/-i    A template to apply",
-                "--token/-t       GitHub token to access the repository",                
+                "--token/-t       GitHub token to access the repository (can come from standard in)",                
                 "--version/-v     Display what the version is"
             }));
         }
