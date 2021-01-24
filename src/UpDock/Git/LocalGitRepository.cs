@@ -46,27 +46,87 @@ namespace UpDock.Git
 
         public async Task CreatePullRequestAsync(IRemoteGitRepository forkedRepository, IReadOnlyCollection<TextReplacement> replacements, CancellationToken cancellationToken)
         {
-            var remote = _localRepository.Network.Remotes.Add("downstream", forkedRepository.CloneUrl);
+            var head = _localRepository.Head;
 
-            var hash = CreateHash(replacements);
+            try
+            {
+                var remote = GetRemote(forkedRepository);
 
-            var branch = CreateBranch($"docker-update-{hash}", remote);
+                var groupHash = CreateHash(replacements.First().Group);
 
-            var newPullRequest = CreatePullRequest(forkedRepository, replacements, branch);
+                var hash = CreateHash(replacements);
 
-            CreateCommit(newPullRequest.Title, branch, remote);
+                var branch = CreateBranch($"up-dock-{groupHash}-{hash}", remote);
 
-            _logger.LogInformation("Creating pull request {Title} for repository {Repository}", newPullRequest.Title, _remoteRepository.CloneUrl);
+                CleanUpOldReferences(remote, groupHash, branch);
 
-            var pullRequest = await  _client.PullRequest.Create(_remoteRepository.Owner, _remoteRepository.Name, newPullRequest);
+                var newPullRequest = CreatePullRequest(forkedRepository, replacements, branch);
 
-            var labelUpdate = new IssueUpdate();
+                CreateCommit(newPullRequest.Title, branch, remote);
 
-            labelUpdate.Labels.Add("up-dock");
+                _logger.LogInformation("Creating pull request {Title} for repository {Repository}", newPullRequest.Title, _remoteRepository.CloneUrl);
 
-            _logger.LogInformation("Updating pull request {Url} with label", pullRequest.Url);
+                try
+                {
+                    var createdPullRequest = await _client.PullRequest.Create(_remoteRepository.Owner, _remoteRepository.Name, newPullRequest);
 
-            await _client.Issue.Update(_remoteRepository.Owner, _remoteRepository.Name, pullRequest.Number, labelUpdate);
+                    var labelUpdate = new IssueUpdate();
+
+                    labelUpdate.AddLabel("up-dock");
+
+                    _logger.LogInformation("Updating pull request {Url} with label", createdPullRequest.Url);
+
+                    await _client.Issue.Update(_remoteRepository.Owner, _remoteRepository.Name, createdPullRequest.Number, labelUpdate);
+                }
+                catch (ApiValidationException ex)
+                {
+                    if (ex.ApiError.Errors.Any(x => x.Message.Contains("already exists") && x.Message.Contains(branch.FriendlyName)))
+                    {
+                        _logger.LogInformation("Pull request already exists for branch {Branch} in repository {Repository}", branch.FriendlyName, _remoteRepository.CloneUrl);
+                        return;
+                    }
+                    throw;
+                }
+            }
+            finally
+            {
+                Commands.Checkout(_localRepository, head);
+            }
+        }
+
+        private Remote GetRemote(IRemoteGitRepository forkedRepository)
+        {
+            const string remoteName = "downstream";
+
+            var existingRemote = _localRepository.Network.Remotes.FirstOrDefault(x => x.Name == remoteName);
+
+            if (existingRemote != null)
+                return existingRemote;
+
+            var newRemote = _localRepository.Network.Remotes.Add(remoteName, forkedRepository.CloneUrl);
+
+            return newRemote;
+        }
+
+        private void CleanUpOldReferences(Remote remote, string groupHash, Branch branch)
+        {
+            var references = _localRepository.Network.ListReferences(remote);
+
+            foreach (var reference in references)
+            {
+                if (!reference.CanonicalName.StartsWith($"refs/heads/up-dock-{groupHash}"))
+                    continue;
+
+                if (reference.CanonicalName == branch.CanonicalName)
+                    continue;
+
+                _logger.LogInformation("Removing old reference {Reference} for repository {Repository}", reference.CanonicalName, _remoteRepository.CloneUrl);
+
+                _localRepository.Network.Push(remote, $"+:{reference.CanonicalName}", new PushOptions
+                {
+                    CredentialsProvider = CreateCredentials
+                });
+            }
         }
 
         private void CreateCommit(string title, Branch branch, Remote remote)
@@ -130,7 +190,7 @@ namespace UpDock.Git
 
             body
                 .AppendLine()
-                .AppendLine("This is an automated update. Merge only if it passes tests");
+                .AppendLine("This is an automated update. Merge only if it passes tests.");
 
             return new NewPullRequest(
                 title,
@@ -167,7 +227,7 @@ namespace UpDock.Git
             var toVersion = replacement.First().ToPattern.Image.Tag;
 
             body
-                .AppendLine($"Docker Upgrade Tool has generated an update of `{image}` from `{fromVersion}` to `{toVersion}`")
+                .AppendLine($"UpDock has generated an update of `{image}` from `{fromVersion}` to `{toVersion}`")
                 .AppendLine()
                 .AppendLine($"{replacement.Count()} file(s) updated");
 
@@ -193,12 +253,17 @@ namespace UpDock.Git
                 .Select(x => $"{x.From}{x.To}{x.LineNumber}{x.Start}")
                 .Aggregate((x, y) => x + y);
 
-            using var sha256Hash = SHA256.Create();
+            return CreateHash(createString);
+        }
 
-            var bytes = sha256Hash.ComputeHash(Encoding.UTF8.GetBytes(createString));  
-  
-            var builder = new StringBuilder(); 
-                
+        private static readonly SHA256 Sha256Hash = SHA256.Create();
+
+        private static string CreateHash(string str)
+        {
+            var bytes = Sha256Hash.ComputeHash(Encoding.UTF8.GetBytes(str));
+
+            var builder = new StringBuilder();
+
             foreach (var b in bytes)
             {
                 builder.Append(b.ToString("x2"));
