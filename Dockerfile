@@ -1,4 +1,4 @@
-FROM alpine:3.9.6
+FROM buildpack-deps:stretch
 
 RUN apk add --no-cache libstdc++ libintl libressl-dev
 
