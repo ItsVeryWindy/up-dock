@@ -7,7 +7,7 @@ namespace UpDock.Files
     {
         private readonly FileInfo _file;
 
-        public IDirectoryInfo? Parent => new PhysicalDirectoryInfo(_file.Directory);
+        public IDirectoryInfo? Parent => _file.Directory == null ? null : new PhysicalDirectoryInfo(_file.Directory);
         public string Name => _file.Name;
         public string AbsolutePath => _file.FullName;
         public bool Exists => _file.Exists;

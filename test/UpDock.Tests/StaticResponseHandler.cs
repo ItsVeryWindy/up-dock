@@ -14,7 +14,7 @@ namespace UpDock.Tests
             return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
             {
                 RequestMessage = request,
-                Content = new StreamContent(stream)
+                Content = new StreamContent(stream!)
             });
         }
     }

@@ -30,7 +30,7 @@ namespace UpDock.CommandLine
                 .AddSingleton<IDisplayErrorMessages, DisplayErrorMessages>()
                 .AddSingleton<IDisplayHelpInformation, DisplayHelpInformation>()
                 .AddSingleton<IProcessInfo>(new ProcessInfo(
-                    Path.GetFileName(Process.GetCurrentProcess().MainModule.FileName),
+                    Path.GetFileName(Process.GetCurrentProcess().MainModule!.FileName!),
                     typeof(CommandLineRunner).Assembly.GetName().Version!.ToString()
                 ));
 

@@ -56,12 +56,12 @@ namespace UpDock
             switch (element.ValueKind)
             {
                 case JsonValueKind.String:
-                    list.Add(element.GetString());
+                    list.Add(element.GetString()!);
                     break;
                 case JsonValueKind.Array:
                     foreach (var subElement in element.EnumerateArray())
                     {
-                        list.Add(subElement.GetString());
+                        list.Add(subElement.GetString()!);
                     }
                     break;
                 default:
@@ -74,16 +74,16 @@ namespace UpDock
             switch (element.ValueKind)
             {
                 case JsonValueKind.String:
-                    return ParsePattern(element.GetString());
+                    return ParsePattern(element.GetString()!);
                 case JsonValueKind.Object:
                 {
-                    var repository = element.GetProperty("repository").GetString();
+                    var repository = GetRequiredJsonProperty(element, "repository");
 
-                    var image = element.GetProperty("image").GetString();
+                    var image = GetRequiredJsonProperty(element, "image");
 
-                    var pattern = element.TryGetProperty("pattern", out var patternElement) ? patternElement.GetString() : null;
+                    var pattern = GetOptionalProperty(element, "pattern");
 
-                    var group = element.TryGetProperty("group", out var groupElement) ? groupElement.GetString() : null;
+                    var group = GetOptionalProperty(element, "group");
 
                     var template = DockerImageTemplate.Parse(image, new Uri($"https://{repository}"));
 
@@ -92,6 +92,30 @@ namespace UpDock
                 default:
                     throw new InvalidOperationException("Invalid configuration file");
             }
+        }
+
+        private static string GetRequiredJsonProperty(JsonElement element, string name)
+        {
+            if (!element.TryGetProperty(name, out var childElement))
+                throw new InvalidOperationException($"Invalid configuration file: expected {name} was not found");
+
+            return GetStringProperty(childElement, name);
+        }
+
+        private static string? GetOptionalProperty(JsonElement element, string name)
+        {
+            if (!element.TryGetProperty(name, out var childElement))
+                return null;
+
+            return GetStringProperty(childElement, name);
+        }
+
+        private static string GetStringProperty(JsonElement element, string name)
+        {
+            if (element.ValueKind != JsonValueKind.String)
+                throw new InvalidOperationException($"Invalid configuration file: expected {name} to be a string");
+
+            return element.GetString()!;
         }
 
         public static DockerImageTemplatePattern ParsePattern(string pattern) => DockerImageTemplate.Parse(pattern).CreatePattern(true, true, null);

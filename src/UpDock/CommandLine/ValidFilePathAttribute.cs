@@ -6,7 +6,7 @@ namespace UpDock.CommandLine
 {
     public class ValidFilePathAttribute : ValidationAttribute
     {
-        protected override ValidationResult IsValid(object value, ValidationContext validationContext)
+        protected override ValidationResult? IsValid(object? value, ValidationContext validationContext)
         {
             if (value == null)
                 return ValidationResult.Success;

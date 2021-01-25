@@ -98,9 +98,9 @@ namespace UpDock
                 return await RequestTags(repository, image, cancellationToken);
             }
 
-            var content = await response.Content.ReadAsStringAsync();
+            var content = await response.Content.ReadAsStringAsync(cancellationToken);
 
-            return JsonSerializer.Deserialize<TagList>(content);
+            return JsonSerializer.Deserialize<TagList>(content)!;
         }
 
         private AuthToken? GetExistingToken(Uri repository, string image)

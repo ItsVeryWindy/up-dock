@@ -5,8 +5,11 @@ namespace UpDock.CommandLine
 {
     public class ValidAuthenticationFormatAttribute : ValidationAttribute
     {
-        protected override ValidationResult IsValid(object value, ValidationContext validationContext)
+        protected override ValidationResult? IsValid(object? value, ValidationContext validationContext)
         {
+            if(value == null)
+                return ValidationResult.Success;
+
             try
             {
                 AuthenticationOptions.Parse((string)value);

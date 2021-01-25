@@ -59,7 +59,7 @@ namespace UpDock.CommandLine
                 if (result == ValidationResult.Success)
                     continue;
 
-                argument.Errors.Add(result.ErrorMessage);
+                argument.Errors.Add(result!.ErrorMessage!);
             }
         }
 
@@ -84,7 +84,7 @@ namespace UpDock.CommandLine
                     if (result == ValidationResult.Success)
                         continue;
 
-                    argument.Errors.Add(result.ErrorMessage);
+                    argument.Errors.Add(result!.ErrorMessage!);
                 }
             }
         }
