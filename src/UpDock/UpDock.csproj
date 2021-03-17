@@ -5,6 +5,7 @@
     <Nullable>enable</Nullable>
     <AssemblyName>up-dock</AssemblyName>
     <InvariantGlobalization>true</InvariantGlobalization>
+	<DebugType>embedded</DebugType>
   </PropertyGroup>
 
   <ItemGroup>
