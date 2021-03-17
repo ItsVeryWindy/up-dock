@@ -110,7 +110,7 @@ namespace UpDock.Git
 
         private void CleanUpOldReferences(Remote remote, string groupHash, Branch branch)
         {
-            var references = _localRepository.Network.ListReferences(remote);
+            var references = _localRepository.Network.ListReferences(remote, CreateCredentials);
 
             foreach (var reference in references)
             {
