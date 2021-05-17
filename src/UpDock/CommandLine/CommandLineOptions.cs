@@ -51,5 +51,9 @@ namespace UpDock.CommandLine
         [Shortcut("-v", "--version")]
         [Description("Display what the version is")]
         public bool Version { get; set; }
+
+        [Shortcut("-l", "--allow-downgrade")]
+        [Description("Allow downgrading if the version is higher than the one specified")]
+        public bool AllowDowngrade { get; set; }
     }
 }

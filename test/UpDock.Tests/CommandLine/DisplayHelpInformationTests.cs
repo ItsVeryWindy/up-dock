@@ -30,15 +30,16 @@ namespace UpDock.Tests.CommandLine
                 "Automatically update docker images in github repositories.",
                 null,
                 "Options:",
-                "--auth/-a        Authentication for a repository",
-                "--config/-c      Default configuration to apply",
-                "--dry-run/-d     Run without creating pull requests",
-                "--email/-e*      Email to use in the commit",
-                "--help/-h        Display help information",
-                "--search/-s*     Search query to get repositories",
-                "--template/-i    A template to apply",
-                "--token/-t       GitHub token to access the repository (can come from standard in)",                
-                "--version/-v     Display what the version is"
+                "--allow-downgrade/-l    Allow downgrading if the version is higher than the one specified",
+                "--auth/-a               Authentication for a repository",
+                "--config/-c             Default configuration to apply",
+                "--dry-run/-d            Run without creating pull requests",
+                "--email/-e*             Email to use in the commit",
+                "--help/-h               Display help information",
+                "--search/-s*            Search query to get repositories",
+                "--template/-i           A template to apply",
+                "--token/-t              GitHub token to access the repository (can come from standard in)",                
+                "--version/-v            Display what the version is"
             }));
         }
     }

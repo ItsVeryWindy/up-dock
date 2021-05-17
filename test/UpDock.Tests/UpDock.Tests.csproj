@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="Files\Dockerfile_higher" />
     <EmbeddedResource Include="Files\another_file.txt" />
     <EmbeddedResource Include="Files\another_file_expected.txt" />
     <EmbeddedResource Include="tags_response.json" />

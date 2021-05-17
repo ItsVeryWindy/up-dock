@@ -12,6 +12,7 @@ namespace UpDock
         string? Token { get; }
         IReadOnlyDictionary<string, AuthenticationOptions> Authentication { get; }
         bool DryRun { get; }
+        bool AllowDowngrade { get; }
 
         IConfigurationOptions Merge(IConfigurationOptions options);
     }

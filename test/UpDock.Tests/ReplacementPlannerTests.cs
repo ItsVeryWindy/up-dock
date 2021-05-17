@@ -14,8 +14,8 @@ namespace UpDock.Tests
 {
     public class ReplacementPlannerTests
     {
-        [TestCaseSource(nameof(TestCases))]
-        public async Task ShouldReturnLinesToBeReplaced(DockerImageTemplatePattern pattern, string fileName, string expectedFrom, int expectedLineNumber, int expectedStart, string expectedTo)
+        [TestCaseSource(nameof(PositiveTestCases))]
+        public async Task ShouldReturnLinesToBeReplaced(DockerImageTemplatePattern pattern, string fileName, string expectedFrom, int expectedLineNumber, int expectedStart, string expectedTo, bool allowDowngrade)
         {
             var sp = TestUtilities
                 .CreateServices()
@@ -33,7 +33,7 @@ namespace UpDock.Tests
 
             var fileInfo = new StubFileInfo(stream, "/file/path");
 
-            var results = await planner.GetReplacementPlanAsync(fileInfo, node, CancellationToken.None);
+            var results = await planner.GetReplacementPlanAsync(fileInfo, node, allowDowngrade, CancellationToken.None);
 
             Assert.That(results, Has.Count.EqualTo(1));
             Assert.That(results.First().From, Is.EqualTo(expectedFrom));
@@ -42,16 +42,51 @@ namespace UpDock.Tests
             Assert.That(results.First().To, Is.EqualTo(expectedTo));
         }
 
-        public static IEnumerable<TestCaseData> TestCases
+        [TestCaseSource(nameof(NegativeTestCases))]
+        public async Task ShouldNotReplaceLines(DockerImageTemplatePattern pattern, string fileName, bool allowDowngrade)
+        {
+            var sp = TestUtilities
+                .CreateServices()
+                .AddSingleton<HttpMessageHandler>(new StaticResponseHandler())
+                .AddSingleton<CommandLineOptions>()
+                .BuildServiceProvider();
+
+            await sp.GetRequiredService<IVersionCache>().UpdateCacheAsync(Enumerable.Repeat(pattern, 1), CancellationToken.None);
+
+            var node = new SearchNodeBuilder().Add(pattern).Build();
+
+            var planner = sp.GetRequiredService<IReplacementPlanner>();
+
+            var stream = TestUtilities.GetResource($"Files.{fileName}")!;
+
+            var fileInfo = new StubFileInfo(stream, "/file/path");
+
+            var results = await planner.GetReplacementPlanAsync(fileInfo, node, allowDowngrade, CancellationToken.None);
+
+            Assert.That(results, Has.Count.EqualTo(0));
+        }
+
+        public static IEnumerable<TestCaseData> PositiveTestCases
         {
             get
             {
                 yield return new TestCaseData(
                     DockerImageTemplate.Parse("mcr.microsoft.com/dotnet/core/sdk:{v}-alpine{v}").CreatePattern(true, true),
-                    "Dockerfile", "mcr.microsoft.com/dotnet/core/sdk:3.1.101-alpine3.10", 0, 5, "mcr.microsoft.com/dotnet/core/sdk:3.1.102-alpine3.11");
+                    "Dockerfile", "mcr.microsoft.com/dotnet/core/sdk:3.1.101-alpine3.10", 0, 5, "mcr.microsoft.com/dotnet/core/sdk:3.1.102-alpine3.11", true);
                 yield return new TestCaseData(
                     DockerImageTemplate.Parse("mcr.microsoft.com/dotnet/core/sdk:{v}-alpine{v}").CreatePattern("sdk:{v}-alpine{v}"),
-                    "another_file.txt", "sdk:3.1.101-alpine3.10", 8, 20, "sdk:3.1.102-alpine3.11");
+                    "another_file.txt", "sdk:3.1.101-alpine3.10", 8, 20, "sdk:3.1.102-alpine3.11", true);
+                yield return new TestCaseData(
+                    DockerImageTemplate.Parse("mcr.microsoft.com/dotnet/core/sdk:{v}-alpine{v}").CreatePattern(true, true),
+                    "Dockerfile_higher", "mcr.microsoft.com/dotnet/core/sdk:3.1.102-alpine3.12", 0, 5, "mcr.microsoft.com/dotnet/core/sdk:3.1.102-alpine3.11", true);
+            }
+        }
+
+        public static IEnumerable<TestCaseData> NegativeTestCases {
+            get {
+                yield return new TestCaseData(
+                    DockerImageTemplate.Parse("mcr.microsoft.com/dotnet/core/sdk:{v}-alpine{v}").CreatePattern(true, true),
+                    "Dockerfile_higher", false);
             }
         }
     }

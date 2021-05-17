@@ -133,7 +133,7 @@ namespace UpDock
             if(!filter.Filter(file))
                 return;
 
-            var plan = await _planner.GetReplacementPlanAsync(file, node, cancellationToken);
+            var plan = await _planner.GetReplacementPlanAsync(file, node, _options.AllowDowngrade, cancellationToken);
 
             if (plan.Count > 0)
             {

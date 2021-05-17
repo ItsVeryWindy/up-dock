@@ -21,7 +21,7 @@ namespace UpDock
             _logger = logger;
         }
 
-        public async Task<IReadOnlyCollection<TextReplacement>> GetReplacementPlanAsync(IRepositoryFileInfo file, ISearchTreeNode node, CancellationToken cancellationToken)
+        public async Task<IReadOnlyCollection<TextReplacement>> GetReplacementPlanAsync(IRepositoryFileInfo file, ISearchTreeNode node, bool allowDowngrade, CancellationToken cancellationToken)
         {
             await using var inputFileStream = file.File.CreateReadStream();
 
@@ -55,7 +55,7 @@ namespace UpDock
 
                     _logger.LogIdentifiedFromPattern(currentVersion, lineNumber + 1, file, image);
 
-                    if (latestVersion != null && currentVersion != latestVersion)
+                    if (latestVersion != null && ((allowDowngrade && currentVersion != latestVersion) || (!allowDowngrade && latestPattern!.Image.CompareTo(image.Image) > 0)))
                     {
                         _logger.LogReplacingOutdatedVersion(currentVersion, latestVersion);
 

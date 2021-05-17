@@ -19,6 +19,7 @@ namespace UpDock
         public string? Search { get; set; }
         public string? Token { get; set; }
         public bool DryRun { get; set; }
+        public bool AllowDowngrade { get; set; }
         public IDictionary<string, AuthenticationOptions> Authentication => _authentication;
 
         IReadOnlyCollection<string> IConfigurationOptions.Include => _include;
@@ -28,6 +29,7 @@ namespace UpDock
         string? IConfigurationOptions.Search => Search;
         string? IConfigurationOptions.Token => Token;
         bool IConfigurationOptions.DryRun => DryRun;
+        bool IConfigurationOptions.AllowDowngrade => AllowDowngrade;
 
         public void Populate(Stream stream)
         {

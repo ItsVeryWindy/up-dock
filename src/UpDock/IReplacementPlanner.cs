@@ -8,6 +8,6 @@ namespace UpDock
 {
     public interface IReplacementPlanner
     {
-        Task<IReadOnlyCollection<TextReplacement>> GetReplacementPlanAsync(IRepositoryFileInfo file, ISearchTreeNode node, CancellationToken cancellationToken);
+        Task<IReadOnlyCollection<TextReplacement>> GetReplacementPlanAsync(IRepositoryFileInfo file, ISearchTreeNode node, bool allowDowngrade, CancellationToken cancellationToken);
     }
 }
