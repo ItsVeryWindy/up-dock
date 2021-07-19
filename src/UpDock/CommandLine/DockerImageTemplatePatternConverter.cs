@@ -13,7 +13,7 @@ namespace UpDock.CommandLine
         {
             var str = (string)value;
 
-            return DockerImageTemplate.Parse(str).CreatePattern(true, true, null);
+            return DockerImageTemplate.Parse(str).CreatePattern(true, true, true, null);
         }
     }
 }

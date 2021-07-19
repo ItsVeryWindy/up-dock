@@ -233,13 +233,13 @@ namespace UpDock
 
             var builder = new SearchNodeBuilder();
 
-            builder.Add(pattern.Image.Template.CreatePattern(false, false));
+            builder.Add(pattern.Image.Template.CreatePattern(false, false, false));
 
             var node = builder.Build();
 
             var versions = FindMatchingDockerImages(node, tagList);
 
-            var matchingVersion = versions.LastOrDefault(pattern.Image.Template.Satisfies);
+            var matchingVersion = versions.LastOrDefault();
 
             return matchingVersion == null ? null : pattern.Create(matchingVersion);
         }

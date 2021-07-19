@@ -6,10 +6,10 @@ namespace UpDock.Tests
 {
     public class DockerImageTemplateTests
     {
-        [TestCase("nginx", "https://registry-1.docker.io/", "library/nginx", "nginx:{v}")]
-        [TestCase("library/nginx", "https://registry-1.docker.io/", "library/nginx", "library/nginx:{v}")]
-        [TestCase("repository.com/nginx", "https://repository.com/", "nginx", "repository.com/nginx:{v}")]
-        [TestCase("nginx:_{v}", "https://registry-1.docker.io/", "library/nginx", "nginx:_{v}")]
+        [TestCase("nginx", "https://registry-1.docker.io/", "library/nginx", "nginx:{v*}")]
+        [TestCase("library/nginx", "https://registry-1.docker.io/", "library/nginx", "library/nginx:{v*}")]
+        [TestCase("repository.com/nginx", "https://repository.com/", "nginx", "repository.com/nginx:{v*}")]
+        [TestCase("nginx:_{v}", "https://registry-1.docker.io/", "library/nginx", "nginx:_{v*}")]
         public void ShouldHandleValidString(string str, string expectedRepository, string expectedImage, string expectedPattern)
         {
             var template = DockerImageTemplate.Parse(str);
@@ -17,7 +17,7 @@ namespace UpDock.Tests
             Assert.That(template.Repository.ToString(), Is.EqualTo(expectedRepository));
             Assert.That(template.Image, Is.EqualTo(expectedImage));
 
-            var pattern = template.CreatePattern(true, true);
+            var pattern = template.CreatePattern(true, true, true);
 
             Assert.That(pattern.ToString(), Is.EqualTo(expectedPattern));
         }
@@ -49,7 +49,7 @@ namespace UpDock.Tests
         [Test]
         public void ShouldCreateDefaultGroupWhenGroupNotSpecified()
         {
-            var pattern = DockerImageTemplate.Parse("nginx").CreatePattern(false, true);
+            var pattern = DockerImageTemplate.Parse("nginx").CreatePattern(false, true, true);
 
             Assert.That(pattern.Group, Is.EqualTo("registry-1.docker.io/library/nginx:{v}"));
         }

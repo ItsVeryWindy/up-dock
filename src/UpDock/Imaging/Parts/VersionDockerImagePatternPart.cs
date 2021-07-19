@@ -9,9 +9,11 @@ namespace UpDock
     public class VersionDockerImagePatternPart : IDockerImagePatternPart
     {
         public IDockerImagePatternPart Next { get; }
+        public FloatRange Range { get; }
 
-        public VersionDockerImagePatternPart(IDockerImagePatternPart next)
+        public VersionDockerImagePatternPart(FloatRange range, IDockerImagePatternPart next)
         {
+            Range = range;
             Next = next;
         }
 
@@ -30,7 +32,7 @@ namespace UpDock
             return version + Next.Execute(versions.Skip(1));
         }
 
-        public override string ToString() => "{v}" + Next.ToString();
+        public override string ToString() => $"{{v{Range}}}{Next}";
 
         private static readonly object Version = new object();
 

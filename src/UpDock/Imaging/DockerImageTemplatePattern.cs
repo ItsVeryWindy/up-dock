@@ -28,8 +28,6 @@ namespace UpDock.Imaging
             return new DockerImagePattern(this, image);
         }
 
-        private static readonly object Version = new object();
-
         public static DockerImageTemplatePattern Parse(string pattern, string group, DockerImageTemplate template)
         {
             IList<object> parts = new List<object>();
@@ -42,7 +40,9 @@ namespace UpDock.Imaging
 
             for (var i = 0; i < span.Length;)
             {
-                if(!IsVersion(span.Slice(i)))
+                var (range, length) = ParseFloatRange(span.Slice(i));
+
+                if (range == null)
                 {
                     i++;
                     continue;
@@ -53,11 +53,11 @@ namespace UpDock.Imaging
                     parts.Add(span[strStart..i].ToString());
                 }
 
-                parts.Add(Version);
+                parts.Add(range);
 
                 versionCount++;
 
-                i += 3;
+                i += length;
                 strStart = i;
             }
 
@@ -75,9 +75,9 @@ namespace UpDock.Imaging
 
             foreach (var part in parts.Reverse())
             {
-                if (part == Version)
+                if (part is FloatRange range)
                 {
-                    currentPart = new VersionDockerImagePatternPart(currentPart);
+                    currentPart = new VersionDockerImagePatternPart(range, currentPart);
                 }
                 else
                 {
@@ -88,7 +88,37 @@ namespace UpDock.Imaging
             return new DockerImageTemplatePattern(group, currentPart, template);
         }
 
-        private static bool IsVersion(ReadOnlySpan<char> span) => !span.IsEmpty && span.StartsWith("{v}");
+        private const string VersionStart = "{v";
+        private const char VersionEnd = '}';
+        private static readonly FloatRange AnyVersion = FloatRange.Parse("*");
+
+        private static (FloatRange?, int length) ParseFloatRange(ReadOnlySpan<char> span)
+        {
+            if (span.IsEmpty)
+                return (null, 0);
+
+            if (!span.StartsWith(VersionStart))
+                return (null, 0);
+
+            var remainingVersion = span.Slice(2);
+
+            var closeBracketIndex = remainingVersion.IndexOf(VersionEnd);
+
+            if (closeBracketIndex < 0)
+                throw new FormatException("The image tag for a template should have matching curly brackets.");
+
+            if (closeBracketIndex == 0)
+                return (AnyVersion, VersionStart.Length + 1);
+
+            var length = closeBracketIndex + VersionStart.Length + 1;
+
+            var range = FloatRange.Parse(remainingVersion.Slice(0, closeBracketIndex).ToString());
+
+            if (range == null)
+                throw new FormatException("The image tag for the template contains an invalid version range.");
+
+            return (range, length);
+        }
 
         public override string ToString() => Part.ToString();
 

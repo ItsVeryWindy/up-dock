@@ -28,27 +28,6 @@ namespace UpDock.Imaging
             _parts = parts;
         }
 
-        public bool Satisfies(DockerImage image)
-        {
-            var ranges = _parts.OfType<FloatRange>().ToList();
-
-            var versions = image.Versions.ToList();
-
-            if (ranges.Count != versions.Count)
-                return false;
-
-            for (var i = 0; i < versions.Count; i++)
-            {
-                var range = ranges[i];
-                var version = versions[i];
-
-                if (!range.Satisfies(version))
-                    return false;
-            }
-
-            return true;
-        }
-
         public DockerImage CreateImage(IReadOnlyList<NuGetVersion> versions)
         {
             if(versions.Count != _parts.OfType<FloatRange>().Count())
@@ -276,26 +255,26 @@ namespace UpDock.Imaging
             return sb.ToString();
         }
 
-        public DockerImageTemplatePattern CreatePattern(bool includeRepository, bool includeImage) =>
-            CreatePattern(includeRepository, includeImage, null);
+        public DockerImageTemplatePattern CreatePattern(bool includeRepository, bool includeImage, bool matchAnyVersion) =>
+            CreatePattern(includeRepository, includeImage, matchAnyVersion, null);
 
-        public DockerImageTemplatePattern CreatePattern(bool includeRepository, bool includeImage, string? group)
+        public DockerImageTemplatePattern CreatePattern(bool includeRepository, bool includeImage, bool matchAnyVersion, string? group)
         {
             var sb = new StringBuilder();
 
             if(Repository != DefaultRepository && includeRepository)
             {
-                sb.Append(Repository.Host).Append("/");
+                sb.Append(Repository.Host).Append('/');
             }
 
             if (includeImage)
             {
-                sb.Append(_image).Append(":");
+                sb.Append(_image).Append(':');
             }
 
             foreach (var part in _parts)
             {
-                sb.Append(part is FloatRange ? "{v}" : part);
+                sb.Append(part is FloatRange range ? (matchAnyVersion ? "{v}" : $"{{v{range}}}") : part);
             }
 
             var pattern = sb.ToString();

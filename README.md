@@ -62,7 +62,18 @@ Multiple versions can be specified if the image contains more than one version n
 ### Pattern
 Sometimes the image you want to update is not fully specified in the place you wish to update it.
 For these instances you can specify a pattern that contains just the version numbers, eg. if you had a line in a text file, `NGINX_VERSION=1.0`, you could have the pattern `NGINX_VERSION={v}` with the image `nginx:{v}`.
+Just like image templates, patterns can also contain a floating number range to match on ie. `nginx:{v1.*}`
+
 To be a valid pattern is must have the same number as versions as in the image.
+
+### Version Match Ordering
+In some instances, you may have multiple images that match on the same line of text.
+The behaviour in that instance is to match on the last valid entry.
+This is more important when you're matching on a general as well as a more specific floating number range ie. `nginx:{v}` as well as `nginx:{v1.*}`
+
+The order of precendence is "Config specified in the repository" > "Config specified on the command line" > "Templates defined on the command line".
+
+There is one exception to this rule if you're redefining an existing entry, where as the existing precedence will still stand ie. if you define an entry for `nginx:{v}`, then another for `nginx:{v1.*}`, and then later on redefine `nginx:{v}` it will still be processed in the original order.
 
 ### Grouping
 By default, grouping of changes is done based off the image specified. You can specify a `group` property with a string as the value and all changes with that group will be merged into a single pull request.

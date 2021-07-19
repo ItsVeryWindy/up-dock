@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using NuGet.Versioning;
 using UpDock.Imaging;
 using UpDock.Imaging.Parts;
 
@@ -9,7 +10,7 @@ namespace UpDock.Nodes
 {
     public class SearchNodeBuilder
     {
-        private readonly TreeNode _root = new TreeNode(TreeNodeType.Root);
+        private readonly TreeNode _root = new(TreeNodeType.Root);
 
         public SearchNodeBuilder Add(DockerImageTemplatePattern pattern)
         {
@@ -24,7 +25,8 @@ namespace UpDock.Nodes
         {
             End,
             Character,
-            VersionRange,
+            Version,
+            FloatRange,
             Root
         }
 
@@ -33,6 +35,8 @@ namespace UpDock.Nodes
             public char? Character { get; }
 
             public DockerImageTemplatePattern? Pattern { get; }
+
+            public FloatRange? FloatRange { get; }
 
             public TreeNodeType Type { get; }
 
@@ -48,6 +52,12 @@ namespace UpDock.Nodes
             {
                 Pattern = pattern;
                 Type = TreeNodeType.End;
+            }
+
+            public TreeNode(FloatRange range)
+            {
+                FloatRange = range;
+                Type = TreeNodeType.FloatRange;
             }
 
             public TreeNode(TreeNodeType type)
@@ -69,18 +79,29 @@ namespace UpDock.Nodes
                     return;
                 }
 
-                if (part is VersionDockerImagePatternPart)
+                if (part is VersionDockerImagePatternPart versionPart)
                 {
-                    var versionRangeNode = Children.FirstOrDefault(x => x.Type == TreeNodeType.VersionRange);
+                    var versionNode = Children.FirstOrDefault(x => x.Type == TreeNodeType.Version);
 
-                    if (versionRangeNode == null)
+                    if (versionNode == null)
                     {
-                        versionRangeNode = new TreeNode(TreeNodeType.VersionRange);
+                        versionNode = new TreeNode(TreeNodeType.Version);
 
-                        Children.Add(versionRangeNode);
+                        Children.Add(versionNode);
                     }
 
-                    versionRangeNode.Add(pattern, part.Next);
+                    var floatRange = versionNode
+                        .Children
+                        .FirstOrDefault(x => x.FloatRange == versionPart.Range);
+
+                    if (floatRange == null)
+                    {
+                        floatRange = new TreeNode(versionPart.Range);
+
+                        versionNode.Children.Add(floatRange);
+                    }
+
+                    floatRange.Add(pattern, part.Next);
 
                     return;
                 }
@@ -136,7 +157,7 @@ namespace UpDock.Nodes
                         return CreateNode(nodesWithThis);
                     }
 
-                    if (Type != TreeNodeType.VersionRange)
+                    if (Type != TreeNodeType.Version && Type != TreeNodeType.FloatRange)
                     {
                         var node = Children.First().Build(nodesWithThis);
 
@@ -152,9 +173,14 @@ namespace UpDock.Nodes
 
             private ISearchTreeNode CreateNode(ImmutableList<TreeNode> nodes)
             {
-                if (Type == TreeNodeType.VersionRange)
+                if (Type == TreeNodeType.Version)
                 {
                     return new VersionSearchNode(BuildChildren());
+                }
+
+                if (Type == TreeNodeType.FloatRange)
+                {
+                    return new FloatRangeNode(FloatRange!, BuildChildren());
                 }
 
                 return CreateTextNode(nodes);

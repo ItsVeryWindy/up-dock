@@ -14,7 +14,7 @@ namespace UpDock.Tests
 
         public static readonly IEnumerable<ISearchTreeNode> SingleInstance = Enumerable.Repeat<ISearchTreeNode>(Instance, 1);
 
-        public static readonly DockerImagePattern Image = DockerImageTemplate.Parse("test:{v}").CreatePattern(true, true).Create(new List<NuGetVersion>
+        public static readonly DockerImagePattern Image = DockerImageTemplate.Parse("test:{v}").CreatePattern(true, true, true).Create(new List<NuGetVersion>
         {
             new NuGetVersion(1, 2, 3)
         });

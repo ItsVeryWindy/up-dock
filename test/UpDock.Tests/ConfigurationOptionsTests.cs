@@ -52,14 +52,14 @@ namespace UpDock.Tests
 
             var first = _options.Patterns.First();
 
-            Assert.That(first.ToString(), Is.EqualTo("example-image:{v}"));
+            Assert.That(first.ToString(), Is.EqualTo("example-image:{v*}"));
             Assert.That(first.Template.Image, Is.EqualTo("library/example-image"));
             Assert.That(first.Template.Repository, Is.EqualTo(DockerImageTemplate.DefaultRepository));
             Assert.That(first.Template.Tag, Is.EqualTo("{v*}"));
 
             var second = _options.Patterns.Skip(1).First();
 
-            Assert.That(second.ToString(), Is.EqualTo("example-repository.com/example-image:{v}"));
+            Assert.That(second.ToString(), Is.EqualTo("example-repository.com/example-image:{v*}"));
             Assert.That(second.Template.Image, Is.EqualTo("example-image"));
             Assert.That(second.Template.Repository.ToString(), Is.EqualTo("https://example-repository.com/"));
             Assert.That(second.Template.Tag, Is.EqualTo("{v*}"));
