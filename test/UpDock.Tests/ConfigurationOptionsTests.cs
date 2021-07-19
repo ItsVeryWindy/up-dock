@@ -32,14 +32,12 @@ namespace UpDock.Tests
                     "example-image",
                     new
                     {
-                        image = "example-image",
-                        repository = "example-repository"
+                        image = "example-repository.com/example-image",
                     },
                     new
                     {
                         pattern = "example-pattern",
-                        image = "example-image:example-tag",
-                        repository = "example-repository"
+                        image = "example-repository.com/example-image:example-tag",
                     }
                 }
             });
@@ -61,16 +59,16 @@ namespace UpDock.Tests
 
             var second = _options.Patterns.Skip(1).First();
 
-            Assert.That(second.ToString(), Is.EqualTo("example-image:{v}"));
+            Assert.That(second.ToString(), Is.EqualTo("example-repository.com/example-image:{v}"));
             Assert.That(second.Template.Image, Is.EqualTo("example-image"));
-            Assert.That(second.Template.Repository.ToString(), Is.EqualTo("https://example-repository/"));
+            Assert.That(second.Template.Repository.ToString(), Is.EqualTo("https://example-repository.com/"));
             Assert.That(second.Template.Tag, Is.EqualTo("{v*}"));
 
             var third = _options.Patterns.Skip(2).First();
 
             Assert.That(third.ToString(), Is.EqualTo("example-pattern"));
             Assert.That(third.Template.Image, Is.EqualTo("example-image"));
-            Assert.That(third.Template.Repository?.ToString(), Is.EqualTo("https://example-repository/"));
+            Assert.That(third.Template.Repository?.ToString(), Is.EqualTo("https://example-repository.com/"));
             Assert.That(third.Template.Tag, Is.EqualTo("example-tag"));
         }
 
@@ -82,45 +80,11 @@ namespace UpDock.Tests
                 {
                     new
                     {
-                        repository = "example-repository"
                     }
                 }
             });
 
             Assert.That(() => _options.Populate(ms), Throws.InvalidOperationException.And.Message.EqualTo("Invalid configuration file: expected image was not found"));
-        }
-
-        [Test]
-        public async Task ShouldHandleRepositoryMissing()
-        {
-            var ms = await CreateStream(new {
-                templates = new object[]
-                {
-                    new
-                    {
-                        image = "example-image"
-                    }
-                }
-            });
-
-            Assert.That(() => _options.Populate(ms), Throws.InvalidOperationException.And.Message.EqualTo("Invalid configuration file: expected repository was not found"));
-        }
-
-        [Test]
-        public async Task ShouldHandleRepositoryNotBeingAString()
-        {
-            var ms = await CreateStream(new {
-                templates = new object[]
-                {
-                    new
-                    {
-                        repository = Array.Empty<object>(),
-                        image = "example-image"
-                    }
-                }
-            });
-
-            Assert.That(() => _options.Populate(ms), Throws.InvalidOperationException.And.Message.EqualTo("Invalid configuration file: expected repository to be a string"));
         }
 
         [Test]
@@ -131,7 +95,6 @@ namespace UpDock.Tests
                 {
                     new
                     {
-                        repository = "example-repository",
                         image = Array.Empty<object>()
                     }
                 }
@@ -148,7 +111,6 @@ namespace UpDock.Tests
                 {
                     new
                     {
-                        repository = "example-repository",
                         image = "example-image",
                         group = Array.Empty<object>()
                     }
@@ -166,7 +128,6 @@ namespace UpDock.Tests
                 {
                     new
                     {
-                        repository = "example-repository",
                         image = "example-image",
                         pattern = Array.Empty<object>()
                     }

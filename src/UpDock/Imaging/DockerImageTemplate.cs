@@ -84,13 +84,6 @@ namespace UpDock.Imaging
             return CreateTemplate(repository ?? DefaultRepository, image, tag);
         }
 
-        public static DockerImageTemplate Parse(string str, Uri repository)
-        {
-            var (_, image, tag) = SplitString(str);
-
-            return CreateTemplate(repository, image, tag);
-        }
-
         private static DockerImageTemplate CreateTemplate(Uri repository, string image, string tag)
         {
             var parts = ParseTag(tag);

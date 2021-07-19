@@ -79,17 +79,15 @@ namespace UpDock
                     return ParsePattern(element.GetString()!);
                 case JsonValueKind.Object:
                 {
-                    var repository = GetRequiredJsonProperty(element, "repository");
-
                     var image = GetRequiredJsonProperty(element, "image");
 
                     var pattern = GetOptionalProperty(element, "pattern");
 
                     var group = GetOptionalProperty(element, "group");
 
-                    var template = DockerImageTemplate.Parse(image, new Uri($"https://{repository}"));
+                    var template = DockerImageTemplate.Parse(image);
 
-                    return pattern == null ? template.CreatePattern(false, true, group) : template.CreatePattern(pattern, group);
+                    return pattern == null ? template.CreatePattern(true, true, group) : template.CreatePattern(pattern, group);
                 }
                 default:
                     throw new InvalidOperationException("Invalid configuration file");

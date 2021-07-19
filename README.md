@@ -35,13 +35,11 @@ Configuartion can either be specified by command line options or via a file for 
     "templates": [
         "example-image",
         {
-            "image": "example-image",
-            "repository": "example-repository.com"
+            "image": "example-repository.com/example-image",
         },
         {
             "pattern": "example-pattern:{v}",
-            "image": "example-image:example-tag{v}",
-            "repository": "example-repository.com"
+            "image": "example-repository.com/example-image:example-tag{v}",
         }
     ]
 }
@@ -51,7 +49,7 @@ The templates property is an array of images to search for and update.
 
 There are three different ways of specifying a docker image.
 * The first is the short form, which is similar to what you would provide when doing a docker pull
-* A slightly longer form, which can be used when the string being matched on only contains the name and not the repository it's coming from
+* A slightly longer form, which can be used when you need to specify other paramters
 * An even longer form, for when the pattern to match on bares no resemblence to the name of the image
 
 ### Image template
