@@ -22,6 +22,6 @@ namespace UpDock.Git
             _localLogger = localLogger;
         }
 
-        public IRemoteGitRepository CreateRepository(Repository repository) => new RemoteGitRepository(repository, _client, _options, _provider, _remoteLogger, _localLogger);
+        public IRemoteGitRepository CreateRepository(IRepository repository) => new RemoteGitRepository(repository, _client, _options, _provider, _remoteLogger, _localLogger);
     }
 }

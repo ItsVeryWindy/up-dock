@@ -220,7 +220,7 @@ namespace UpDock.Git
             return branch;
         }
 
-        private void PopulateSingleUpdate(IGrouping<(DockerImage FromImage, DockerImage ToImage), TextReplacement> replacement, StringBuilder body)
+        private static void PopulateSingleUpdate(IGrouping<(DockerImage FromImage, DockerImage ToImage), TextReplacement> replacement, StringBuilder body)
         {
             var image = replacement.First().FromPattern.Image.Template.ToRepositoryImageString();
             var fromVersion = replacement.First().FromPattern.Image.Tag;

@@ -18,8 +18,8 @@ namespace UpDock.Tests
 
         public IFileInfo CreateTemporaryFile() => new StubFileInfo(_files, Guid.NewGuid().ToString());
 
-        public StubFileInfo GetFile(string path) => new StubFileInfo(_files, path);
+        public StubFileInfo GetFile(string path) => new(_files, path);
 
-        IFileInfo IFileProvider.GetFile(string path) => GetFile(path);
+        IFileInfo? IFileProvider.GetFile(string? path) => path is null ? null : GetFile(path);
     }
 }

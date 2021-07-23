@@ -1,9 +1,7 @@
-﻿using Octokit;
-
-namespace UpDock.Git
+﻿namespace UpDock.Git
 {
     public interface IGitRepositoryFactory
     {
-        IRemoteGitRepository CreateRepository(Repository repository);
+        IRemoteGitRepository CreateRepository(IRepository repository);
     }
 }

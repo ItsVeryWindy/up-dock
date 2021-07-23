@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
 using System.Text.Json;
 using UpDock.Imaging;
 
@@ -9,10 +11,10 @@ namespace UpDock
 {
     public class ConfigurationOptions : IConfigurationOptions
     {
-        private readonly HashSet<string> _include = new HashSet<string>();
-        private readonly HashSet<string> _exclude = new HashSet<string>();
-        private readonly HashSet<DockerImageTemplatePattern> _patterns = new HashSet<DockerImageTemplatePattern>();
-        private readonly Dictionary<string, AuthenticationOptions> _authentication = new Dictionary<string, AuthenticationOptions>();
+        private readonly HashSet<string> _include = new();
+        private readonly HashSet<string> _exclude = new();
+        private readonly HashSet<DockerImageTemplatePattern> _patterns = new();
+        private readonly Dictionary<string, AuthenticationOptions> _authentication = new();
         public ICollection<string> Include => _include;
         public ICollection<string> Exclude => _exclude;
         public ICollection<DockerImageTemplatePattern> Patterns => _patterns;
@@ -140,6 +142,41 @@ namespace UpDock
             }
 
             return newOptions;
+        }
+
+        private static readonly SHA256 Sha256Hash = SHA256.Create();
+
+        public string CreateHash()
+        {
+            var builder = new StringBuilder();
+
+            builder.Append(':');
+
+            foreach (var include in Include)
+            {
+                builder.AppendLine(include);
+            }
+
+            builder.Append(':');
+
+            foreach (var exclude in Exclude)
+            {
+                builder.AppendLine(exclude);
+            }
+
+            builder.Append(':').Append(DryRun).Append(':').Append(AllowDowngrade).Append(':');
+
+            foreach(var pattern in Patterns)
+            {
+                builder
+                    .Append(pattern.Group)
+                    .Append(':')
+                    .Append(pattern.ToString())
+                    .Append(':')
+                    .Append(pattern.Template.ToString());
+            }
+
+            return Sha256Hash.ComputeHash(builder.ToString());
         }
     }
 }

@@ -11,7 +11,7 @@ namespace UpDock.Git
 {
     public class RemoteGitRepository : IRemoteGitRepository
     {
-        private readonly Repository _repository;
+        private readonly IRepository _repository;
         private readonly IGitHubClient _client;
         private readonly CommandLineOptions _options;
         private readonly IFileProvider _provider;
@@ -19,11 +19,11 @@ namespace UpDock.Git
         private readonly ILogger<LocalGitRepository> _localLogger;
 
         public string CloneUrl => _repository.CloneUrl;
-        public string Owner => _repository.Owner.Login;
+        public string Owner => _repository.Owner;
         public string Name => _repository.Name;
         public string Branch => _repository.DefaultBranch;
 
-        public RemoteGitRepository(Repository repository, IGitHubClient client, CommandLineOptions options, IFileProvider provider, ILogger<RemoteGitRepository> logger, ILogger<LocalGitRepository> localLogger)
+        public RemoteGitRepository(IRepository repository, IGitHubClient client, CommandLineOptions options, IFileProvider provider, ILogger<RemoteGitRepository> logger, ILogger<LocalGitRepository> localLogger)
         {
             _repository = repository;
             _client = client;
@@ -37,11 +37,11 @@ namespace UpDock.Git
         {
             _logger.LogInformation("Forking {Repository}", _repository.FullName);
 
-            var repository = await _client.Repository.Forks.Create(_repository.Owner.Login, _repository.Name, new NewRepositoryFork());
+            var repository = await _client.Repository.Forks.Create(_repository.Owner, _repository.Name, new NewRepositoryFork());
 
             _logger.LogInformation("Created fork {Repository}", repository.FullName);
 
-            return new RemoteGitRepository(repository, _client, _options, _provider, _logger, _localLogger);
+            return new RemoteGitRepository(new GitHubRepository(repository), _client, _options, _provider, _logger, _localLogger);
         }
 
         public ILocalGitRepository CheckoutRepository()
@@ -51,11 +51,11 @@ namespace UpDock.Git
                 CredentialsProvider = CreateCredentials
             };
 
-            var dir = Path.Combine(Path.GetTempPath(), "git-repositories", _repository.Owner.Login, _repository.Name);
+            var dir = Path.Combine(Path.GetTempPath(), "git-repositories", _repository.Owner, _repository.Name);
 
             CleanupRepository(dir);
 
-            var sourceUrl = $"https://github.com/{_repository.Owner.Login}/{_repository.Name}.git";
+            var sourceUrl = $"https://github.com/{_repository.Owner}/{_repository.Name}.git";
 
             _logger.LogInformation("Cloning {CloneUrl} into {Directory}", sourceUrl, dir);
 

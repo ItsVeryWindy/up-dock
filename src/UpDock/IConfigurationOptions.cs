@@ -15,5 +15,6 @@ namespace UpDock
         bool AllowDowngrade { get; }
 
         IConfigurationOptions Merge(IConfigurationOptions options);
+        string CreateHash();
     }
 }

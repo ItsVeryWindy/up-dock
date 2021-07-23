@@ -9,29 +9,32 @@ using UpDock.Nodes;
 using UpDock.Registry;
 using Microsoft.Extensions.Logging;
 using Octokit;
+using UpDock.Caching;
 
 namespace UpDock
 {
     public class GitRepositoryProcessor : IGitRepositoryProcessor
     {
-        private readonly IGitHubClient _client;
+        private readonly IRepositorySearcher _searcher;
         private readonly IGitRepositoryFactory _factory;
         private readonly IReplacementPlanner _planner;
         private readonly IReplacementPlanExecutor _executor;
         private readonly IConfigurationOptions _options;
         private readonly IFileFilterFactory _fileFilterFactory;
         private readonly IVersionCache _cache;
+        private readonly IUpdateCache _updateCache;
         private readonly ILogger<GitRepositoryProcessor> _logger;
 
-        public GitRepositoryProcessor(IGitHubClient client, IGitRepositoryFactory factory, IReplacementPlanner planner, IReplacementPlanExecutor executor, IConfigurationOptions options, IFileFilterFactory fileFilterFactory, IVersionCache cache, ILogger<GitRepositoryProcessor> logger)
+        public GitRepositoryProcessor(IRepositorySearcher searcher, IGitRepositoryFactory factory, IReplacementPlanner planner, IReplacementPlanExecutor executor, IConfigurationOptions options, IFileFilterFactory fileFilterFactory, IVersionCache cache, IUpdateCache updateCache, ILogger<GitRepositoryProcessor> logger)
         {
-            _client = client;
+            _searcher = searcher;
             _factory = factory;
             _planner = planner;
             _executor = executor;
             _options = options;
             _fileFilterFactory = fileFilterFactory;
             _cache = cache;
+            _updateCache = updateCache;
             _logger = logger;
         }
 
@@ -39,9 +42,11 @@ namespace UpDock
         {
             try
             {
-                var repositories = await _client.Search.SearchRepo(new SearchRepositoriesRequest(_options.Search));
+                var repositories = await _searcher.SearchAsync(_options.Search!, cancellationToken);
 
-                foreach (var repository in repositories.Items)
+                await _updateCache.LoadAsync(cancellationToken);
+
+                foreach (var repository in repositories)
                 {
                     cancellationToken.ThrowIfCancellationRequested();
 
@@ -49,7 +54,14 @@ namespace UpDock
 
                     try
                     {
-                        await ProcessRepositoryAsync(repository, cancellationToken);
+                        if (_updateCache.HasChanged(repository, _options))
+                        {
+                            await ProcessRepositoryAsync(repository, cancellationToken);
+                        }
+                        else
+                        {
+                            _logger.LogSkippedProcessingRepository(repository);
+                        }
                     }
                     catch (Exception ex)
                     {
@@ -58,6 +70,8 @@ namespace UpDock
 
                     _logger.LogFinishedProcessingRepository(repository);
                 }
+
+                await _updateCache.SaveAsync(cancellationToken);
             }
             catch(ApiValidationException ex)
             {
@@ -69,7 +83,7 @@ namespace UpDock
             }
         }
 
-        private async Task ProcessRepositoryAsync(Repository repository, CancellationToken cancellationToken)
+        private async Task ProcessRepositoryAsync(IRepository repository, CancellationToken cancellationToken)
         {
             var gitRepository = _factory.CreateRepository(repository);
 
@@ -79,7 +93,7 @@ namespace UpDock
 
             var localOptions = GetConfiguration(directory);
 
-            await _cache.UpdateCacheAsync(localOptions.Patterns, cancellationToken);
+            await _cache.UpdateCacheAsync(localOptions.Patterns.Select(x => x.Template), cancellationToken);
 
             var filter = _fileFilterFactory.Create(localOptions);
 
@@ -124,6 +138,8 @@ namespace UpDock
 
                 await localRepository.CreatePullRequestAsync(forkedRepository, groupedReplacements, cancellationToken);
             }
+
+            _updateCache.Set(repository, _options, localOptions.Patterns.Select(x => x.Template).Select(x => _cache.FetchLatest(x)));
         }
 
         private async Task ProcessFileAsync(IFileFilter filter, IRepositoryFileInfo file, ISearchTreeNode node, List<TextReplacement> replacements, CancellationToken cancellationToken)

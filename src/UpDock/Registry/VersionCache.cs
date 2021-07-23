@@ -32,10 +32,9 @@ namespace UpDock
             _options = options;
         }
 
-        public async Task UpdateCacheAsync(IEnumerable<DockerImageTemplatePattern> patterns, CancellationToken cancellationToken)
+        public async Task UpdateCacheAsync(IEnumerable<DockerImageTemplate> templates, CancellationToken cancellationToken)
         {
-            var tagListTasks = patterns
-                .Select(x => x.Template)
+            var tagListTasks = templates
                 .Select(x => (x.Repository, x.Image))
                 .Distinct()
                 .Select(x => UpdateTagsAsync(x.Repository, x.Image, cancellationToken));
@@ -226,22 +225,20 @@ namespace UpDock
             return ReadKey(next, 1, next, dictionary);
         }
 
-        public DockerImagePattern? FetchLatest(DockerImagePattern pattern)
+        public DockerImage? FetchLatest(DockerImageTemplate template)
         {
-            if (!_tagLists.TryGetValue((pattern.Image.Repository, pattern.Image.Image), out var tagList))
+            if (!_tagLists.TryGetValue((template.Repository, template.Image), out var tagList))
                 return null;
 
             var builder = new SearchNodeBuilder();
 
-            builder.Add(pattern.Image.Template.CreatePattern(false, false, false));
+            builder.Add(template.CreatePattern(false, false, false));
 
             var node = builder.Build();
 
             var versions = FindMatchingDockerImages(node, tagList);
 
-            var matchingVersion = versions.LastOrDefault();
-
-            return matchingVersion == null ? null : pattern.Create(matchingVersion);
+            return versions.LastOrDefault();
         }
 
         private static IEnumerable<DockerImage> FindMatchingDockerImages(ISearchTreeNode node, TagList tagList)

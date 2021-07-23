@@ -32,6 +32,7 @@ namespace UpDock.Tests.CommandLine
                 "Options:",
                 "--allow-downgrade/-l    Allow downgrading if the version is higher than the one specified",
                 "--auth/-a               Authentication for a repository",
+                "--cache                 Cache the results from this run to re-use in another",
                 "--config/-c             Default configuration to apply",
                 "--dry-run/-d            Run without creating pull requests",
                 "--email/-e*             Email to use in the commit",

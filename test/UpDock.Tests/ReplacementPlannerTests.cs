@@ -23,7 +23,7 @@ namespace UpDock.Tests
                 .AddSingleton<CommandLineOptions>()
                 .BuildServiceProvider();
 
-            await sp.GetRequiredService<IVersionCache>().UpdateCacheAsync(Enumerable.Repeat(pattern, 1), CancellationToken.None);
+            await sp.GetRequiredService<IVersionCache>().UpdateCacheAsync(Enumerable.Repeat(pattern.Template, 1), CancellationToken.None);
 
             var node = new SearchNodeBuilder().Add(pattern).Build();
 
@@ -51,7 +51,7 @@ namespace UpDock.Tests
                 .AddSingleton<CommandLineOptions>()
                 .BuildServiceProvider();
 
-            await sp.GetRequiredService<IVersionCache>().UpdateCacheAsync(Enumerable.Repeat(pattern, 1), CancellationToken.None);
+            await sp.GetRequiredService<IVersionCache>().UpdateCacheAsync(Enumerable.Repeat(pattern.Template, 1), CancellationToken.None);
 
             var node = new SearchNodeBuilder().Add(pattern).Build();
 

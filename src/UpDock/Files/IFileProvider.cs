@@ -6,6 +6,6 @@
 
         IFileInfo CreateTemporaryFile();
 
-        IFileInfo? GetFile(string path);
+        IFileInfo? GetFile(string? path);
     }
 }

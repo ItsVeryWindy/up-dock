@@ -9,6 +9,7 @@ UpDock is a tool for automatically updating docker images within github reposito
 ## Command Line Options
 ```
 --auth/-a        Authentication credentials for a docker repository (should be in the form of [registry]=[username],[password])
+--cache          Cache the results from this run to re-use in another
 --config/-c      Default configuration to apply
 --dry-run/-d     Run without creating pull requests
 --email/-e*      Email to use in the commit

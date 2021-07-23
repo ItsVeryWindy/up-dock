@@ -305,7 +305,7 @@ namespace UpDock.Imaging
 
         public override bool Equals(object? obj)
         {
-            if (!(obj is DockerImageTemplate template))
+            if (obj is not DockerImageTemplate template)
                 return false;
 
             return Equals(Repository, template.Repository) && Equals(Image, template.Image) && Equals(Tag, template.Tag);

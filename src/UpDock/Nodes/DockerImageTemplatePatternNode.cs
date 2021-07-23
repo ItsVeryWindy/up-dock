@@ -14,7 +14,7 @@ namespace UpDock.Nodes
             _pattern = pattern;
         }
 
-        public SearchTreeNodeResult Search(ReadOnlySpan<char> span, int endIndex, ImmutableList<NuGetVersion> versions) => new SearchTreeNodeResult(_pattern.Create(versions), endIndex);
+        public SearchTreeNodeResult Search(ReadOnlySpan<char> span, int endIndex, ImmutableList<NuGetVersion> versions) => new(_pattern.Create(versions), endIndex);
 
         public int CompareTo(ISearchTreeNode? other) => 1;
     }

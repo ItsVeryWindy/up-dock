@@ -6,9 +6,9 @@ namespace UpDock.Files
     {
         public IDirectoryInfo GetDirectory(string directory) => new PhysicalDirectoryInfo(new DirectoryInfo(directory));
 
-        public IFileInfo? GetFile(string path)
+        public IFileInfo? GetFile(string? path)
         {
-            if (path == null)
+            if (path is null)
                 return null;
 
             return new PhysicalFileInfo(new FileInfo(path));

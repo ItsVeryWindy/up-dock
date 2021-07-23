@@ -55,5 +55,9 @@ namespace UpDock.CommandLine
         [Shortcut("-l", "--allow-downgrade")]
         [Description("Allow downgrading if the version is higher than the one specified")]
         public bool AllowDowngrade { get; set; }
+
+        [Shortcut("--cache")]
+        [Description("Cache the results from this run to re-use in another")]
+        public string? Cache { get; set; }
     }
 }

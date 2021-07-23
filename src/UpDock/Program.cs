@@ -9,6 +9,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Octokit;
 using Octokit.Internal;
+using UpDock.Caching;
 
 namespace UpDock
 {
@@ -24,6 +25,8 @@ namespace UpDock
                 .AddLogging(x => x.AddConsole())
                 .AddSingleton<HttpClient>()
                 .AddSingleton<IVersionCache, VersionCache>()
+                .AddSingleton<IUpdateCache, UpdateCache>()
+                .AddSingleton<IRepositorySearcher, GitHubRepositorySearcher>()
                 .AddSingleton<IFileProvider, PhysicalFileProvider>()
                 .AddSingleton<IGitHubClient>(sp => {
                     var token = sp.GetRequiredService<IConfigurationOptions>().Token;

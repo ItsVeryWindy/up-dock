@@ -107,7 +107,7 @@ namespace UpDock.Nodes
 
         public override bool Equals(object? obj)
         {
-            if (!(obj is DockerImage image))
+            if (obj is not DockerImage image)
                 return false;
 
             return Equals(Repository, image.Repository) && Equals(Image, image.Image) && Equals(Tag, image.Tag);

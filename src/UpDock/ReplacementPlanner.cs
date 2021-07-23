@@ -49,7 +49,9 @@ namespace UpDock
 
                     var currentVersion = line.Substring(i, endIndex);
 
-                    var latestPattern = _cache.FetchLatest(image);
+                    var latestImage = _cache.FetchLatest(image.Pattern.Template);
+
+                    var latestPattern = latestImage is null ? null : image.Create(latestImage);
 
                     var latestVersion = latestPattern?.ToString();
 
