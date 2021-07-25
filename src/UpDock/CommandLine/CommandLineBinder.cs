@@ -22,7 +22,7 @@ namespace UpDock.CommandLine
             }
         }
 
-        private void BindSingle<T>(IReadOnlyList<CommandLineArgument> arguments, T options, PropertyInfo property)
+        private static void BindSingle<T>(IReadOnlyList<CommandLineArgument> arguments, T options, PropertyInfo property)
         {
             var argument = arguments.FirstOrDefault(x => x.Property == property);
 
@@ -32,7 +32,7 @@ namespace UpDock.CommandLine
             property.SetValue(options, argument.Value);
         }
 
-        private void BindEnumerable<T>(IReadOnlyList<CommandLineArgument> arguments, T options, PropertyInfo property)
+        private static void BindEnumerable<T>(IReadOnlyList<CommandLineArgument> arguments, T options, PropertyInfo property)
         {
             var propertyArguments = arguments.Where(x => x.Property == property).ToList();
 

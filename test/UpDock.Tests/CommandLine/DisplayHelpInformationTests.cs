@@ -39,8 +39,12 @@ namespace UpDock.Tests.CommandLine
                 "--help/-h               Display help information",
                 "--search/-s*            Search query to get repositories",
                 "--template/-i           A template to apply",
-                "--token/-t              GitHub token to access the repository (can come from standard in)",                
-                "--version/-v            Display what the version is"
+                "--token/-t              GitHub token to access the repository",                
+                "--version/-v            Display what the version is",
+                null,
+                "Prefixing the argument with an @ (eg. -@a, --@argument) will signify that value",
+                "should come from a line in standard input. Multiple arguments may be specified",
+                "this way and will be processed in the order that they appear."
             }));
         }
     }

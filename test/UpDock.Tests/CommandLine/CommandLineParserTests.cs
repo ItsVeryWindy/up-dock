@@ -13,10 +13,9 @@ namespace UpDock.Tests.CommandLine
     public class CommandLineParserTests
     {
         private const string Argument = "--argument";
+        private const string ArgumentForStdIn = "--@argument";
 
-        #pragma warning disable CS8618
-        private ICommandLineParser _parser;
-        #pragma warning restore CS8618
+        private ICommandLineParser _parser = null!;
 
         [SetUp]
         public void SetUp() => _parser = new CommandLineParser();
@@ -192,13 +191,13 @@ namespace UpDock.Tests.CommandLine
         [Test]
         public void ShouldHandlePropertiesThatAreRequired()
         {
-            var arguments = _parser.Parse<OptionsWithRequiredProperty>(new string[0]);
+            var arguments = _parser.Parse<OptionsWithRequiredProperty>(Array.Empty<string>());
 
             Assert.That(arguments, Has.Count.EqualTo(1));
 
             var argument = arguments.First();
 
-            Assert.That(argument.Argument, Is.EqualTo("--argument"));
+            Assert.That(argument.Argument, Is.EqualTo(Argument));
             Assert.That(argument.Index, Is.EqualTo(0));
             Assert.That(argument.OriginalValue, Is.Null);
             Assert.That(argument.Value, Is.Null);
@@ -209,49 +208,82 @@ namespace UpDock.Tests.CommandLine
         {
             const string value = "value";
 
-            var stream = new MemoryStream();
-            var writer = new StreamWriter(stream);
+            var input = CreateStandardInput(value);
 
-            writer.Write(value);
-            writer.Flush();
-            stream.Position = 0;
-
-            var input = new StreamReader(stream);
-
-            var arguments = _parser.Parse<OptionsWithStandardInput>(new[] { Argument }, input);
+            var arguments = _parser.Parse<Options<string>>(new[] { ArgumentForStdIn }, input);
 
             Assert.That(arguments, Has.Count.EqualTo(1));
 
             var argument = arguments.First();
 
-            Assert.That(argument.Argument, Is.EqualTo("--argument"));
+            Assert.That(argument.Argument, Is.EqualTo(ArgumentForStdIn));
             Assert.That(argument.Index, Is.EqualTo(0));
             Assert.That(argument.OriginalValue, Is.EqualTo(value));
             Assert.That(argument.Value, Is.EqualTo(value));
         }
 
         [Test]
-        public void ShouldReadPropertyFromArgsWhenStandardInputIsEmpty()
+        public void ShouldParseMultiplePropertiesFromStandardInput()
         {
             const string value = "value";
 
+            var input = CreateStandardInput(value, value);
+
+            var arguments = _parser.Parse<Options<string[]>>(new[] { ArgumentForStdIn, ArgumentForStdIn }, input);
+
+            Assert.That(arguments, Has.Count.EqualTo(2));
+
+            var firstArgument = arguments.First();
+
+            Assert.That(firstArgument.Argument, Is.EqualTo(ArgumentForStdIn));
+            Assert.That(firstArgument.Index, Is.EqualTo(0));
+            Assert.That(firstArgument.OriginalValue, Is.EqualTo(value));
+            Assert.That(firstArgument.Value, Is.EqualTo(value));
+
+            var lastArgument = arguments.Last();
+
+            Assert.That(lastArgument.Argument, Is.EqualTo(ArgumentForStdIn));
+            Assert.That(lastArgument.Index, Is.EqualTo(1));
+            Assert.That(lastArgument.OriginalValue, Is.EqualTo(value));
+            Assert.That(lastArgument.Value, Is.EqualTo(value));
+        }
+
+        [Test]
+        public void ShouldHandleWhenStandardInputIsEmpty()
+        {
             var input = new StreamReader(new MemoryStream());
 
-            var arguments = _parser.Parse<OptionsWithStandardInput>(new[] { Argument, value }, input);
+            var arguments = _parser.Parse<Options<string>>(new[] { ArgumentForStdIn }, input);
 
             Assert.That(arguments, Has.Count.EqualTo(1));
 
             var argument = arguments.First();
 
-            Assert.That(argument.Argument, Is.EqualTo("--argument"));
+            Assert.That(argument.Argument, Is.EqualTo(ArgumentForStdIn));
             Assert.That(argument.Index, Is.EqualTo(0));
-            Assert.That(argument.OriginalValue, Is.EqualTo(value));
-            Assert.That(argument.Value, Is.EqualTo(value));
+            Assert.That(argument.OriginalValue, Is.Null);
+            Assert.That(argument.Value, Is.Null);
+        }
+
+        private StreamReader CreateStandardInput(params string[] values)
+        {
+            var stream = new MemoryStream();
+            var writer = new StreamWriter(stream);
+
+            foreach(var value in values)
+            {
+                writer.WriteLine(value);
+            }
+
+            writer.Flush();
+            stream.Position = 0;
+
+            return new StreamReader(stream);
         }
 
         public class Options<T>
         {
-            [Shortcut("--argument")]
+            [Shortcut("argument")]
 #pragma warning disable CS8618
             public T Property { get; set; }
 #pragma warning disable CS8618
@@ -260,21 +292,14 @@ namespace UpDock.Tests.CommandLine
 
         public class OptionsWithRequiredProperty
         {
-            [Shortcut("--argument")]
+            [Shortcut("argument")]
             [Required]
-            public string? Property { get; set; }
-        }
-
-        public class OptionsWithStandardInput
-        {
-            [Shortcut("--argument")]
-            [StandardInput]
             public string? Property { get; set; }
         }
 
         public class OptionsWithTypeConverter
         {
-            [Shortcut("--argument")]
+            [Shortcut("argument")]
             [TypeConverter(typeof(StringTypeConverter))]
             public string? Property { get; set; }
 

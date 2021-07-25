@@ -14,8 +14,8 @@ namespace UpDock.CommandLine
         {
             var shortcutMappings = typeof(T)
                 .GetProperties()
-                .SelectMany(x => x.GetCustomAttributes<ShortcutAttribute>().SelectMany(y => y.Shortcuts).Select(y => new { property = x, shortcut = y }))
-                .ToDictionary(x => x.shortcut, x => x.property);
+                .SelectMany(x => x.GetCustomAttributes<ShortcutAttribute>().SelectMany(y => GetShortcuts(y.Shortcuts)).Select(y => new { property = x, shortcut = y }))
+                .ToDictionary(x => x.shortcut.shortcut, x => new { x.property, x.shortcut.stdin });
 
             var arguments = new List<CommandLineArgument>();
 
@@ -23,7 +23,7 @@ namespace UpDock.CommandLine
             {
                 var arg = args[i];
 
-                if(!shortcutMappings.TryGetValue(arg, out var property))
+                if(!shortcutMappings.TryGetValue(arg, out var info))
                 {
                     arguments.Add(new CommandLineArgument(arg, null, null, null, arguments.Count(x => x.Argument == arg))
                     {
@@ -35,6 +35,9 @@ namespace UpDock.CommandLine
 
                     continue;
                 }
+
+                var property = info.property;
+                var stdin = info.stdin;
 
                 if (property.PropertyType == typeof(bool))
                 {
@@ -48,19 +51,27 @@ namespace UpDock.CommandLine
                 string? originalValue = null;
                 object? value = null;
 
-                if (property.GetCustomAttribute<StandardInputAttribute>() != null && input.Peek() != -1)
+                if (stdin)
                 {
-                    originalValue = input.ReadToEnd();
+                    if (input.Peek() != -1)
+                    {
+                        originalValue = input.ReadLine();
+                    }
+                }
+                else
+                {
+                    if (i + 1 < args.Length)
+                    {
+                        originalValue = args[++i];
+                    }
                 }
 
-                if (originalValue == null && args.Length == i + 1)
+                if (originalValue is null)
                 {
                     errors.Add("Value not specified");
                 }
                 else
                 {
-                    originalValue ??= args[++i];
-
                     try
                     {
                         value = GetConvertedValue(property, originalValue);
@@ -99,7 +110,7 @@ namespace UpDock.CommandLine
             return converter.ConvertFromString(value);
         }
 
-        private TypeConverter GetConverter(PropertyInfo property)
+        private static TypeConverter GetConverter(PropertyInfo property)
         {
             var converterName = property.GetCustomAttribute<TypeConverterAttribute>()?.ConverterTypeName;
 
@@ -111,7 +122,7 @@ namespace UpDock.CommandLine
             return (TypeConverter)Activator.CreateInstance(type!)!;
         }
 
-        private Type GetCorrectTypeToConvert(Type type)
+        private static Type GetCorrectTypeToConvert(Type type)
         {
             if (!typeof(IEnumerable<object>).IsAssignableFrom(type))
                 return type;
@@ -123,6 +134,15 @@ namespace UpDock.CommandLine
                 return type.GetGenericArguments()[0];
 
             return type;
+        }
+
+        private static IEnumerable<(string shortcut, bool stdin)> GetShortcuts(IReadOnlyCollection<Shortcut> shortcuts)
+        {
+            foreach(var shortcut in shortcuts)
+            {
+                yield return (shortcut.ToString(), false);
+                yield return (shortcut.ToString(true), true);
+            }
         }
     }
 }

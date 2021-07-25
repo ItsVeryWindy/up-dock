@@ -16,8 +16,12 @@ UpDock is a tool for automatically updating docker images within github reposito
 --help/-h        Display help information
 --search/-s*     Search query to get repositories
 --template/-i    A template to apply
---token/-t       GitHub token to access the repository (can come from standard in)
+--token/-t       GitHub token to access the repository
 --version/-v     Display what the version is
+
+Prefixing the argument with an @ (eg. -@a, --@argument) will signify that value
+should come from a line in standard input. Multiple arguments may be specified
+this way and will be processed in the order that they appear.
 ```
 
 ## Running inside a container
@@ -27,7 +31,7 @@ docker run --rm itsverywindy/up-dock:1.0.0 -e ItsVeryWindy@users.noreply.github.
 ```
 
 ## Configuration File
-Configuartion can either be specified by command line options or via a file for more complex image patterns, by default it will look for a file inside the repository called `up-dock.json` and combine those options with the ones provided.
+Configuration can either be specified by command line options or via a file for more complex image patterns, by default it will look for a file inside the repository called `up-dock.json` and combine those options with the ones provided.
 
 ```
 {

@@ -41,6 +41,12 @@ namespace UpDock.CommandLine
             {
                 _writer.WriteLine($"{shortcut.shortcuts.PadRight(maxLength)} {shortcut.description}");
             }
+
+            _writer
+                .WriteLine()
+                .WriteLine("Prefixing the argument with an @ (eg. -@a, --@argument) will signify that value")
+                .WriteLine("should come from a line in standard input. Multiple arguments may be specified")
+                .WriteLine("this way and will be processed in the order that they appear.");
         }
     }
 }
