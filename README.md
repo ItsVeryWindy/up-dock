@@ -84,21 +84,21 @@ The digest is an optional component and should only be used when planning to mat
 
 In this instance the tag is used to lookup which digest to update to.
 
-### Pattern
+### Patterns
 Sometimes the image you want to update is not fully specified in the place you wish to update it.
 
-For these instances you can specify a pattern that contains just the version numbers, eg. if you had a line in a text file, `NGINX_VERSION=1.0`, you could have the pattern `NGINX_VERSION={v}` with the image `nginx:{v}`.
+For these instances you can specify a pattern that contains just the version numbers or the digest, eg. if you had a line in a text file, `NGINX_VERSION=1.0`, you could have the pattern `NGINX_VERSION={v}` with the image `nginx:{v}`.
 
 Just like image templates, patterns can also contain a floating number range to match on ie. the pattern `NGINX_VERSION={v1.*}` would match a string where the existing text is `NGINX_VERSION=1.0` but not `NGINX_VERSION=2.0`.
 
-To be a valid pattern is must have the same number as versions as in the image.
+To be a valid pattern is must have the same number as versions as in the image template.
 
 #### Digests
 A digest can be used in a pattern if the image template also specifies a digest.
 
 In order to specify a digest in a pattern the string must contain `{digest}` ie. `NGINX_VERSION={digest}`.
 
-You can combine digests and versions in the same string, this is useful when trying to keep track of what version the digest is for. ie. `NGINX_VERSION={digest} #{v}` would match `nginx@sha256:abcd... #1.17`.
+You can combine digests and versions in the same string, this is useful when trying to keep track of what version the digest is for. ie. `NGINX_VERSION={digest} #{v}` would match `NGINX_VERSION=sha256:abcd... #1.17`.
 
 ### Version Match Ordering
 In some instances, you may have multiple images that match on the same line of text.
