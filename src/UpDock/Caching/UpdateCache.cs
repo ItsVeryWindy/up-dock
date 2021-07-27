@@ -152,7 +152,7 @@ namespace UpDock.Caching
             try
             {
                 return new SearchNodeBuilder()
-                    .Add(DockerImageTemplate.Parse(template).CreatePattern(true, true, false))
+                    .Add(DockerImageTemplate.Parse(template).CreatePattern(true, true, true, true, false))
                     .Build()
                     .Search(image)
                     .Pattern?

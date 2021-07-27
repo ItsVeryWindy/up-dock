@@ -88,17 +88,18 @@ namespace UpDock.Tests
             Assert.That(newContents, Is.EqualTo("{\"images\":{},\"repositories\":{}}"));
         }
 
-        [Test]
-        public async Task ShouldLoadIfCacheFileIsValid()
+        [TestCase("{\"images\": { \"abcd\": \"abcd:1234\" }, \"repositories\": {\"my-repository\": {\"hash\": \"hash\", \"entries\": [0]}}}", "{\"images\":{\"library/abcd:{v*}\":\"registry-1.docker.io/library/abcd:1234\"},\"repositories\":{\"my-repository\":{\"hash\":\"hash\",\"entries\":[0]}}}")]
+        [TestCase("{\"images\": { \"abcd@{digest}:{v}\": \"abcd@sha256:4f880368ed63767483b6f6c5bf7efde3af3faba816e71ff42db50326b0386bec:1234\" }, \"repositories\": {\"my-repository\": {\"hash\": \"hash\", \"entries\": [0]}}}", "{\"images\":{\"library/abcd@{digest}:{v*}\":\"registry-1.docker.io/library/abcd@sha256:4f880368ed63767483b6f6c5bf7efde3af3faba816e71ff42db50326b0386bec:1234\"},\"repositories\":{\"my-repository\":{\"hash\":\"hash\",\"entries\":[0]}}}")]
+        public async Task ShouldLoadIfCacheFileIsValid(string loaded, string saved)
         {
-            _provider.AddFile(_options.Cache!, "{\"images\": { \"abcd\": \"abcd:1234\" }, \"repositories\": {\"my-repository\": {\"hash\": \"hash\", \"entries\": [0]}}}");
+            _provider.AddFile(_options.Cache!, loaded);
 
             Assert.That(() => _updateCache.LoadAsync(CancellationToken.None), Throws.Nothing);
             Assert.That(() => _updateCache.SaveAsync(CancellationToken.None), Throws.Nothing);
 
             var newContents = await TestUtilities.GetStringAsync(_provider.GetFile(_options.Cache!).CreateReadStream());
 
-            Assert.That(newContents, Is.EqualTo("{\"images\":{\"library/abcd:{v*}\":\"registry-1.docker.io/library/abcd:1234\"},\"repositories\":{\"my-repository\":{\"hash\":\"hash\",\"entries\":[0]}}}"));
+            Assert.That(newContents, Is.EqualTo(saved));
         }
 
         [Test]
@@ -115,6 +116,43 @@ namespace UpDock.Tests
             var newContents = await TestUtilities.GetStringAsync(_provider.GetFile(_options.Cache!).CreateReadStream());
 
             Assert.That(newContents, Is.EqualTo("{\"images\":{\"library/abcd:{v*}\":\"registry-1.docker.io/library/abcd:1234\"},\"repositories\":{\"CloneUrl\":{\"hash\":\"9ada877545c28a3da684301f18e73588d0f516fafc9449bd706c2ec02e274806\",\"entries\":[0]}}}"));
+        }
+
+        [Test]
+        public async Task ShouldWriteDigestToCache()
+        {
+            var image = CreateImage("abcd@{digest}", "abcd@sha256:4f880368ed63767483b6f6c5bf7efde3af3faba816e71ff42db50326b0386bec");
+
+            var options = new ConfigurationOptions();
+
+            _updateCache.Set(new StubRepository(), options, Enumerable.Repeat(image, 1));
+
+            Assert.That(() => _updateCache.SaveAsync(CancellationToken.None), Throws.Nothing);
+
+            var newContents = await TestUtilities.GetStringAsync(_provider.GetFile(_options.Cache!).CreateReadStream());
+
+            Assert.That(newContents, Is.EqualTo("{\"images\":{\"library/abcd@{digest}:{v*}\":\"registry-1.docker.io/library/abcd@sha256:4f880368ed63767483b6f6c5bf7efde3af3faba816e71ff42db50326b0386bec\"},\"repositories\":{\"CloneUrl\":{\"hash\":\"9ada877545c28a3da684301f18e73588d0f516fafc9449bd706c2ec02e274806\",\"entries\":[0]}}}"));
+        }
+
+        [Test]
+        public async Task ShouldWriteDigestWithVersionToCache()
+        {
+            var image = new SearchNodeBuilder()
+                    .Add(DockerImageTemplate.Parse("abcd@{digest}").CreatePattern("abcd@{digest}:{v}"))
+                    .Build()
+                    .Search("abcd@sha256:4f880368ed63767483b6f6c5bf7efde3af3faba816e71ff42db50326b0386bec:1234")
+                    .Pattern?
+                    .Image!;
+
+            var options = new ConfigurationOptions();
+
+            _updateCache.Set(new StubRepository(), options, Enumerable.Repeat(image, 1));
+
+            Assert.That(() => _updateCache.SaveAsync(CancellationToken.None), Throws.Nothing);
+
+            var newContents = await TestUtilities.GetStringAsync(_provider.GetFile(_options.Cache!).CreateReadStream());
+
+            Assert.That(newContents, Is.EqualTo("{\"images\":{\"library/abcd@{digest}:{v*}\":\"registry-1.docker.io/library/abcd@sha256:4f880368ed63767483b6f6c5bf7efde3af3faba816e71ff42db50326b0386bec:1234\"},\"repositories\":{\"CloneUrl\":{\"hash\":\"9ada877545c28a3da684301f18e73588d0f516fafc9449bd706c2ec02e274806\",\"entries\":[0]}}}"));
         }
 
         [Test]
@@ -156,7 +194,7 @@ namespace UpDock.Tests
 
             var options = new ConfigurationOptions
             {
-                Patterns = { DockerImageTemplate.Parse("abcd").CreatePattern(true, true, true) }
+                Patterns = { DockerImageTemplate.Parse("abcd").CreatePattern(true, true, true, false, true) }
             };
 
             var repository = new StubRepository();
@@ -170,10 +208,15 @@ namespace UpDock.Tests
 
         private static DockerImage CreateImage(string version)
         {
+            return CreateImage("abcd", $"abcd:{version}");
+        }
+
+        private static DockerImage CreateImage(string template, string search)
+        {
             return new SearchNodeBuilder()
-                    .Add(DockerImageTemplate.Parse("abcd").CreatePattern(true, true, false))
+                    .Add(DockerImageTemplate.Parse(template).CreatePattern(true, true, true, false, false))
                     .Build()
-                    .Search($"abcd:{version}")
+                    .Search(search)
                     .Pattern?
                     .Image!;
         }

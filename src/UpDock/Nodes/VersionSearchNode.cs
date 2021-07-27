@@ -39,7 +39,7 @@ namespace UpDock.Nodes
             _children = new List<ISearchTreeNode>(children);
         }
 
-        public SearchTreeNodeResult Search(ReadOnlySpan<char> span, int endIndex, ImmutableList<NuGetVersion> versions)
+        public SearchTreeNodeResult Search(ReadOnlySpan<char> span, int endIndex, string? digest, ImmutableList<NuGetVersion> versions)
         {
             var versionEndIndex = GetEndOfVersion(span);
 
@@ -50,7 +50,7 @@ namespace UpDock.Nodes
                 if (!NuGetVersion.TryParse(subString, out var version))
                     continue;
 
-                var childResult = GetChildResult(span.Slice(subString.Length), endIndex + subString.Length, versions.Add(version));
+                var childResult = GetChildResult(span[subString.Length..], endIndex + subString.Length, digest, versions.Add(version));
 
                 if(childResult.Pattern == null)
                     continue;
@@ -76,11 +76,11 @@ namespace UpDock.Nodes
             return span.Length;
         }
 
-        private SearchTreeNodeResult GetChildResult(ReadOnlySpan<char> span, int endIndex, ImmutableList<NuGetVersion> versions)
+        private SearchTreeNodeResult GetChildResult(ReadOnlySpan<char> span, int endIndex, string? digest, ImmutableList<NuGetVersion> versions)
         {
             foreach (var child in _children)
             {
-                var childResult = child.Search(span, endIndex, versions);
+                var childResult = child.Search(span, endIndex, digest, versions);
 
                 if (childResult.Pattern != null)
                 {

@@ -17,20 +17,25 @@ namespace UpDock.Imaging
 
         public string Tag => TagString();
 
+        public bool HasDigest { get; }
+
         public IEnumerable<FloatRange> Versions => _parts.OfType<FloatRange>();
 
         private readonly List<object> _parts;
 
-        private DockerImageTemplate(Uri repository, string image, List<object> parts)
+        private DockerImageTemplate(Uri repository, string image, bool hasDigest, List<object> parts)
         {
             Repository = repository;
             _image = image;
+            HasDigest = hasDigest;
             _parts = parts;
         }
 
-        public DockerImage CreateImage(IReadOnlyList<NuGetVersion> versions)
+        public DockerImage CreateImage(string? digest, IReadOnlyList<NuGetVersion> versions)
         {
-            if(versions.Count != _parts.OfType<FloatRange>().Count())
+            var requiresVersions = !HasDigest || (HasDigest && digest is null) || versions.Count > 0;
+
+            if (requiresVersions && versions.Count != _parts.OfType<FloatRange>().Count())
                 throw new ArgumentException("Versions given do not match template", nameof(versions));
 
             var parts = new List<object>();
@@ -41,9 +46,12 @@ namespace UpDock.Imaging
             {
                 if (part is FloatRange)
                 {
-                    var version = versions[versionCounter++];
+                    if (requiresVersions)
+                    {
+                        var version = versions[versionCounter++];
 
-                    parts.Add(version);
+                        parts.Add(version);
+                    }
 
                     continue;
                 }
@@ -51,23 +59,23 @@ namespace UpDock.Imaging
                 parts.Add(part);
             }
 
-            return new DockerImage(Repository, Image, parts, this);
+            return new DockerImage(Repository, Image, digest, parts, this);
         }
 
         public static readonly Uri DefaultRepository = new Uri("https://registry-1.docker.io");
 
         public static DockerImageTemplate Parse(string str)
         {
-            var (repository, image, tag) = SplitString(str);
+            var (repository, image, hasDigest, tag) = SplitString(str);
 
-            return CreateTemplate(repository ?? DefaultRepository, image, tag);
+            return CreateTemplate(repository ?? DefaultRepository, image, hasDigest, tag);
         }
 
-        private static DockerImageTemplate CreateTemplate(Uri repository, string image, string tag)
+        private static DockerImageTemplate CreateTemplate(Uri repository, string image, bool hasDigest, string tag)
         {
             var parts = ParseTag(tag);
 
-            return new DockerImageTemplate(repository, image, parts);
+            return new DockerImageTemplate(repository, image, hasDigest, parts);
         }
 
         private static List<object> ParseTag(string tag)
@@ -147,15 +155,16 @@ namespace UpDock.Imaging
             return (range, length);
         }
 
-        private static (Uri? repository, string image, string tag) SplitString(string str)
+        private static (Uri? repository, string image, bool hasDigest, string tag) SplitString(string str)
         {
             var (repository, image) = ParseRepository(str);
 
+            bool hasDigest;
             string tag;
 
-            (image, tag) = ParseImage(image);
+            (image, hasDigest, tag) = ParseImage(image);
 
-            return (repository, image, tag);
+            return (repository, image, hasDigest, tag);
         }
         private static (Uri? repository, string image) ParseRepository(string str)
         {
@@ -175,11 +184,21 @@ namespace UpDock.Imaging
             return (repository, imageSplit[1]);
         }
 
-        private static (string image, string tag) ParseImage(string str)
+        private static (string image, bool hasDigest, string tag) ParseImage(string str)
         {
-            var split = str.Split(":");
+            var splitDigest = str.Split('@');
 
-            var image = split[0];
+            var hasDigest = splitDigest.Length > 1;
+
+            if (splitDigest.Length > 2)
+                throw new FormatException("The image name for a template should only have one @ symbol.");
+
+            var splitTag = splitDigest[hasDigest ? 1 : 0].Split(':');
+
+            var image = hasDigest ? splitDigest[0] : splitTag[0];
+
+            if (hasDigest && splitTag[0] != "{digest}")
+                throw new FormatException("If an @ symbol is specified in the template, it must be followed by '{digest}' to indicate that a digest is required.");
 
             if (image.StartsWith('.') || image.StartsWith('_') || image.StartsWith('-'))
                 throw new FormatException("The image name for a template should not begin with a period, an underscore or a dash.");
@@ -190,13 +209,13 @@ namespace UpDock.Imaging
             if (!image.All(x => x >= 'a' && x <= 'z' || x >= '0' && x <= '9' || x == '.' || x == '_' || x == '-' || x == '/'))
                 throw new FormatException("The image name for a template should only contain lowercase letters, digits, periods, underscores, or dashes.");
 
-            if (split.Length == 1)
-                return (image, "{v}");
+            if (splitTag.Length == 1)
+                return (image, hasDigest, "{v}");
 
-            if(split.Length != 2)
+            if(splitTag.Length != 2)
                 throw new FormatException("The image name for a template should only have one colon.");
 
-            return (image, split[1]);
+            return (image, hasDigest, splitTag[1]);
         }
 
         private const string DefaultLibraryName = "library/";
@@ -233,10 +252,17 @@ namespace UpDock.Imaging
 
             if(Repository != DefaultRepository)
             {
-                sb.Append(Repository.Host).Append("/");
+                sb.Append(Repository.Host).Append('/');
             }
 
-            sb.Append(Image).Append(":").Append(Tag);
+            sb.Append(Image);
+                
+            if (HasDigest)
+            {
+                sb.Append("@{digest}");
+            }
+
+            sb.Append(':').Append(Tag);
 
             return sb.ToString();
         }
@@ -247,7 +273,7 @@ namespace UpDock.Imaging
 
             if(Repository != DefaultRepository)
             {
-                sb.Append(Repository.Host).Append("/");
+                sb.Append(Repository.Host).Append('/');
             }
 
             sb.Append(Image);
@@ -255,10 +281,10 @@ namespace UpDock.Imaging
             return sb.ToString();
         }
 
-        public DockerImageTemplatePattern CreatePattern(bool includeRepository, bool includeImage, bool matchAnyVersion) =>
-            CreatePattern(includeRepository, includeImage, matchAnyVersion, null);
+        public DockerImageTemplatePattern CreatePattern(bool includeRepository, bool includeImage, bool includeDigest, bool includeTag, bool matchAnyVersion) =>
+            CreatePattern(includeRepository, includeImage, includeDigest, includeTag, matchAnyVersion, null);
 
-        public DockerImageTemplatePattern CreatePattern(bool includeRepository, bool includeImage, bool matchAnyVersion, string? group)
+        public DockerImageTemplatePattern CreatePattern(bool includeRepository, bool includeImage, bool includeDigest, bool includeTag, bool matchAnyVersion, string? group)
         {
             var sb = new StringBuilder();
 
@@ -267,14 +293,34 @@ namespace UpDock.Imaging
                 sb.Append(Repository.Host).Append('/');
             }
 
+            var canIncludeDigest = HasDigest && includeDigest;
+
             if (includeImage)
             {
-                sb.Append(_image).Append(':');
+                sb.Append(_image);
             }
 
-            foreach (var part in _parts)
+            if (canIncludeDigest)
             {
-                sb.Append(part is FloatRange range ? (matchAnyVersion ? "{v}" : $"{{v{range}}}") : part);
+                if (includeImage)
+                {
+                    sb.Append('@');
+                }
+
+                sb.Append("{digest}");
+            }
+            
+            if(!canIncludeDigest || includeTag)
+            {
+                if (includeImage || canIncludeDigest)
+                {
+                    sb.Append(':');
+                }
+
+                foreach (var part in _parts)
+                {
+                    sb.Append(part is FloatRange range ? (matchAnyVersion ? "{v}" : $"{{v{range}}}") : part);
+                }
             }
 
             var pattern = sb.ToString();

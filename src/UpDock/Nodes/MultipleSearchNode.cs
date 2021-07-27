@@ -14,11 +14,11 @@ namespace UpDock.Nodes
             _children = new List<ISearchTreeNode>(children);
         }
 
-        public SearchTreeNodeResult Search(ReadOnlySpan<char> span, int endIndex, ImmutableList<NuGetVersion> versions)
+        public SearchTreeNodeResult Search(ReadOnlySpan<char> span, int endIndex, string? digest, ImmutableList<NuGetVersion> versions)
         {
             foreach (var child in _children)
             {
-                var childResult = child.Search(span, endIndex, versions);
+                var childResult = child.Search(span, endIndex, digest, versions);
 
                 if (childResult.Pattern != null)
                     return childResult;

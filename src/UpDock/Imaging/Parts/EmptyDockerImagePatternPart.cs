@@ -14,11 +14,11 @@ namespace UpDock.Imaging.Parts
 
         }
 
-        public void EnsureExecution(IEnumerable<NuGetVersion> versions)
+        public void EnsureExecution(string? digest, IEnumerable<NuGetVersion> versions)
         {
         }
 
-        public string Execute(IEnumerable<NuGetVersion> versions) => ToString();
+        public string Execute(string? digest, IEnumerable<NuGetVersion> versions) => ToString();
 
         public override string ToString() => string.Empty;
     }

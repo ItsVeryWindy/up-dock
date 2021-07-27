@@ -5,22 +5,37 @@ using NuGet.Versioning;
 
 namespace UpDock.Nodes
 {
-    public class TextSearchNode : ISearchTreeNode
+    public class DigestSearchNode : ISearchTreeNode
     {
-        private readonly string _text;
+        private const string DigestStart = "sha256:";
+        private const int DigestLength = 64;
+
         private readonly List<ISearchTreeNode> _children;
 
-        public TextSearchNode(string text, IEnumerable<ISearchTreeNode> children)
+        public DigestSearchNode(IEnumerable<ISearchTreeNode> children)
         {
-            _text = text;
             _children = new List<ISearchTreeNode>(children);
         }
 
         public SearchTreeNodeResult Search(ReadOnlySpan<char> span, int endIndex, string? digest, ImmutableList<NuGetVersion> versions)
         {
-            var result = span.StartsWith(_text, StringComparison.InvariantCultureIgnoreCase);
+            var length = DigestStart.Length + DigestLength;
 
-            return result ? GetChildResult(span.Slice(_text.Length), endIndex + _text.Length, digest, versions) : new SearchTreeNodeResult();
+            var sha = span.Slice(0, length);
+
+            if (!sha.StartsWith(DigestStart))
+                return new();
+
+            if (sha.Length < length)
+                return new();
+
+            foreach(var chr in sha.Slice(DigestStart.Length))
+            {
+                if ((chr < 'a' || chr > 'z') && !char.IsDigit(chr))
+                    return new();
+            }
+
+            return GetChildResult(span[length..], endIndex + length, sha.ToString(), versions);
         }
 
         private SearchTreeNodeResult GetChildResult(ReadOnlySpan<char> span, int endIndex, string? digest, ImmutableList<NuGetVersion> versions)
@@ -38,17 +53,6 @@ namespace UpDock.Nodes
             return new SearchTreeNodeResult();
         }
 
-        public int CompareTo(ISearchTreeNode? other)
-        {
-            if (other is TextSearchNode textSearchNode)
-            {
-                return _text.Length >= textSearchNode._text.Length ? -1 : 1;
-            }
-
-            if (other is VersionSearchNode)
-                return 1;
-
-            return -1;
-        }
+        public int CompareTo(ISearchTreeNode? other) => -1;
     }
 }

@@ -22,8 +22,9 @@ namespace UpDock
         private readonly HttpClient _client;
         private readonly ILogger<VersionCache> _logger;
         private readonly IConfigurationOptions _options;
-        private readonly ConcurrentDictionary<(Uri, string), TagList> _tagLists = new ConcurrentDictionary<(Uri, string), TagList>();
-        private readonly ConcurrentDictionary<(Uri, string), AuthToken> _authTokens = new ConcurrentDictionary<(Uri, string), AuthToken>();
+        private readonly ConcurrentDictionary<(Uri, string), TagList> _tagLists = new();
+        private readonly ConcurrentDictionary<Uri, AuthToken> _authTokens = new();
+        private readonly ConcurrentDictionary<(Uri, string, string), string> _digestsLists = new();
 
         public VersionCache(HttpClient client, ILogger<VersionCache> logger, IConfigurationOptions options)
         {
@@ -40,6 +41,14 @@ namespace UpDock
                 .Select(x => UpdateTagsAsync(x.Repository, x.Image, cancellationToken));
 
             await Task.WhenAll(tagListTasks);
+
+            var digestTasks = templates
+                .Where(x => x.HasDigest)
+                .Select(x => FetchLatest(x, false))
+                .Where(x => x is not null)
+                .Select(x => UpdateDigestsAsync(x!, cancellationToken));
+
+            await Task.WhenAll(digestTasks);
         }
 
         private async Task UpdateTagsAsync(Uri repository, string image, CancellationToken cancellationToken)
@@ -63,9 +72,27 @@ namespace UpDock
         {
             var url = new Uri(repository, $"v2/{image}/tags/list");
 
-            var request = new HttpRequestMessage(HttpMethod.Get, url);
+            HttpRequestMessage CreateRequest()
+            {
+                var request = new HttpRequestMessage(HttpMethod.Get, url);
 
-            request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+                return request;
+            }
+
+            var response = await MakeRequestAsync(repository, CreateRequest, cancellationToken);
+
+            var content = await response.Content.ReadAsStringAsync(cancellationToken);
+
+            return JsonSerializer.Deserialize<TagList>(content)!;
+        }
+
+        private static readonly SemaphoreSlim AuthenticationSemaphore = new(1);
+
+        private async Task<HttpResponseMessage> MakeRequestAsync(Uri repository, Func<HttpRequestMessage> factory, CancellationToken cancellationToken)
+        {
+            var request = factory();
 
             if (_options.Authentication.TryGetValue(repository.Host, out var authenticationOptions))
             {
@@ -75,7 +102,7 @@ namespace UpDock
             }
             else
             {
-                var token = GetExistingToken(repository, image);
+                var token = await GetExistingTokenAsync(repository, cancellationToken);
 
                 if (token != null)
                 {
@@ -87,27 +114,43 @@ namespace UpDock
 
             if (response.StatusCode == HttpStatusCode.Unauthorized)
             {
-                var token = await CreateAuthTokenAsync(response, cancellationToken);
+                await AuthenticationSemaphore.WaitAsync(cancellationToken);
 
-                if (token != null)
+                try
                 {
-                    _authTokens[(repository, image)] = token;
+                    var token = await CreateAuthTokenAsync(response, cancellationToken);
+
+                    if (token != null)
+                    {
+                        _authTokens[repository] = token;
+                    }
+                }
+                finally
+                {
+                    AuthenticationSemaphore.Release();
                 }
 
-                return await RequestTags(repository, image, cancellationToken);
+                return await MakeRequestAsync(repository, factory, cancellationToken);
             }
 
-            var content = await response.Content.ReadAsStringAsync(cancellationToken);
-
-            return JsonSerializer.Deserialize<TagList>(content)!;
+            return response;
         }
 
-        private AuthToken? GetExistingToken(Uri repository, string image)
+        private async Task<AuthToken?> GetExistingTokenAsync(Uri repository, CancellationToken cancellationToken)
         {
-            if(!_authTokens.TryGetValue((repository, image), out var token))
-                return null;
+            await AuthenticationSemaphore.WaitAsync(cancellationToken);
 
-            return token.Expired(DateTimeOffset.UtcNow) ? null : token;
+            try
+            {
+                if (!_authTokens.TryGetValue(repository, out var token))
+                    return null;
+
+                return token.Expired(DateTimeOffset.UtcNow) ? null : token;
+            }
+            finally
+            {
+                AuthenticationSemaphore.Release();
+            }
         }
 
         private static readonly Encoding Encoding = Encoding.GetEncoding("ISO-8859-1");
@@ -184,7 +227,7 @@ namespace UpDock
             if(span[0] != '\"')
                 return false;
 
-            var next = span.Slice(1);
+            var next = span[1..];
 
             return ReadValue(key, next, 1, next, dictionary);
         }
@@ -194,7 +237,7 @@ namespace UpDock
             if(span.IsEmpty)
                 return false;
 
-            var next = span.Slice(1);
+            var next = span[1..];
 
             return ReadEndQuote(key, value, length, next, dictionary) || ReadValue(key, value, length + 1, next, dictionary);
         }
@@ -225,20 +268,64 @@ namespace UpDock
             return ReadKey(next, 1, next, dictionary);
         }
 
-        public DockerImage? FetchLatest(DockerImageTemplate template)
+        private async Task UpdateDigestsAsync(DockerImage image, CancellationToken cancellationToken)
+        {
+            if (_digestsLists.ContainsKey((image.Repository, image.Image, image.Tag)))
+                return;
+
+            var digest = await RequestDigestAsync(image, cancellationToken);
+
+            if (digest is not null)
+            {
+                _digestsLists[(image.Repository, image.Image, image.Tag)] = digest;
+            }
+        }
+
+        private async Task<string?> RequestDigestAsync(DockerImage image, CancellationToken cancellationToken)
+        {
+            var request = new HttpRequestMessage(HttpMethod.Get, new Uri(image.Repository, $"v2/dotnet/core/sdk/manifests/{image.Tag}"));
+
+            request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/vnd.docker.distribution.manifest.v2+json"));
+
+            var response = await _client.SendAsync(request, cancellationToken);
+
+            if (!response.Headers.TryGetValues("Docker-Content-Digest", out var values))
+                return null;
+
+            return values.First();
+        }
+
+        public DockerImage? FetchLatest(DockerImageTemplate template) => FetchLatest(template, template.HasDigest);
+
+        private DockerImage? FetchLatest(DockerImageTemplate template, bool includeDigest)
         {
             if (!_tagLists.TryGetValue((template.Repository, template.Image), out var tagList))
                 return null;
 
             var builder = new SearchNodeBuilder();
 
-            builder.Add(template.CreatePattern(false, false, false));
+            builder.Add(template.CreatePattern(false, false, false, false, false));
 
             var node = builder.Build();
 
             var versions = FindMatchingDockerImages(node, tagList);
 
-            return versions.LastOrDefault();
+            var version = versions.LastOrDefault();
+
+            if (version is null)
+                return null;
+
+            if (includeDigest)
+            {
+                if (_digestsLists.TryGetValue((version.Repository, version.Image, version.Tag), out var digest))
+                {
+                    return template.CreateImage(digest, version.Versions.ToList());
+                }
+
+                return null;
+            }
+
+            return version;
         }
 
         private static IEnumerable<DockerImage> FindMatchingDockerImages(ISearchTreeNode node, TagList tagList)

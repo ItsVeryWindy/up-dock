@@ -7,9 +7,9 @@ namespace UpDock.Imaging.Parts
     {
         IDockerImagePatternPart? Next { get; }
 
-        void EnsureExecution(IEnumerable<NuGetVersion> versions);
+        void EnsureExecution(string? digest, IEnumerable<NuGetVersion> versions);
 
-        string Execute(IEnumerable<NuGetVersion> versions);
+        string Execute(string? digest, IEnumerable<NuGetVersion> versions);
 
         string ToString();
     }

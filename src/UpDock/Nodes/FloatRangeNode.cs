@@ -17,21 +17,21 @@ namespace UpDock.Nodes
             _children = children;
         }
 
-        public SearchTreeNodeResult Search(ReadOnlySpan<char> span, int index, ImmutableList<NuGetVersion> versions)
+        public SearchTreeNodeResult Search(ReadOnlySpan<char> span, int index, string? digest, ImmutableList<NuGetVersion> versions)
         {
             var version = versions.Last();
 
             if (!_range.Satisfies(version))
                 return new SearchTreeNodeResult();
 
-            return GetChildResult(span, index, versions);
+            return GetChildResult(span, index, digest, versions);
         }
 
-        private SearchTreeNodeResult GetChildResult(ReadOnlySpan<char> span, int index, ImmutableList<NuGetVersion> versions)
+        private SearchTreeNodeResult GetChildResult(ReadOnlySpan<char> span, int index, string? digest, ImmutableList<NuGetVersion> versions)
         {
             foreach (var child in _children)
             {
-                var childResult = child.Search(span, index, versions);
+                var childResult = child.Search(span, index, digest, versions);
 
                 if (childResult.Pattern != null)
                 {

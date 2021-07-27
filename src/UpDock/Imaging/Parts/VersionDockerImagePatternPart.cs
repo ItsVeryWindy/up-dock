@@ -17,26 +17,24 @@ namespace UpDock
             Next = next;
         }
 
-        public void EnsureExecution(IEnumerable<NuGetVersion> versions)
+        public void EnsureExecution(string? digest, IEnumerable<NuGetVersion> versions)
         {
             if(!versions.Any())
                 throw new ArgumentException("Pattern does not have the same number versions as the image", nameof(versions));
 
-            Next.EnsureExecution(versions.Skip(1));
+            Next.EnsureExecution(digest, versions.Skip(1));
         }
 
-        public string Execute(IEnumerable<NuGetVersion> versions)
+        public string Execute(string? digest, IEnumerable<NuGetVersion> versions)
         {
             var version = versions.First();
 
-            return version + Next.Execute(versions.Skip(1));
+            return version + Next.Execute(digest, versions.Skip(1));
         }
 
         public override string ToString() => $"{{v{Range}}}{Next}";
 
-        private static readonly object Version = new object();
-
-        public override int GetHashCode() => HashCode.Combine(Version, Next);
+        public override int GetHashCode() => HashCode.Combine(Range, Next);
 
         public override bool Equals(object? obj)
         {

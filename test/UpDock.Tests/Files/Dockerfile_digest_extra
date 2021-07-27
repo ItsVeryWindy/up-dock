@@ -1,0 +1,3 @@
+﻿FROM mcr.microsoft.com/dotnet/core/sdk@sha256:4f880368ed63767483b6f6c5bf7efde3af3faba816e71ff42db50326b0386bec #2.1.602-alpine3.9
+
+CMD["dotnet", "Project.dll"]

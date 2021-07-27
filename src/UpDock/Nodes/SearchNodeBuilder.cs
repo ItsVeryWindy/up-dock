@@ -27,7 +27,8 @@ namespace UpDock.Nodes
             Character,
             Version,
             FloatRange,
-            Root
+            Root,
+            Digest
         }
 
         private class TreeNode
@@ -106,6 +107,22 @@ namespace UpDock.Nodes
                     return;
                 }
 
+                if (part is DigestDockerImagePatternPart digestPart)
+                {
+                    var digestNode = Children.FirstOrDefault(x => x.Type == TreeNodeType.Digest);
+
+                    if (digestNode == null)
+                    {
+                        digestNode = new TreeNode(TreeNodeType.Digest);
+
+                        Children.Add(digestNode);
+                    }
+
+                    digestNode.Add(pattern, part.Next);
+
+                    return;
+                }
+
                 if (part is TextDockerImagePatternPart textPart)
                 {
                     Add(pattern, textPart, textPart.Text.AsSpan());
@@ -157,7 +174,7 @@ namespace UpDock.Nodes
                         return CreateNode(nodesWithThis);
                     }
 
-                    if (Type != TreeNodeType.Version && Type != TreeNodeType.FloatRange)
+                    if (Type != TreeNodeType.Version && Type != TreeNodeType.FloatRange && Type != TreeNodeType.Digest)
                     {
                         var node = Children.First().Build(nodesWithThis);
 
@@ -176,6 +193,11 @@ namespace UpDock.Nodes
                 if (Type == TreeNodeType.Version)
                 {
                     return new VersionSearchNode(BuildChildren());
+                }
+
+                if (Type == TreeNodeType.Digest)
+                {
+                    return new DigestSearchNode(BuildChildren());
                 }
 
                 if (Type == TreeNodeType.FloatRange)

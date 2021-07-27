@@ -89,7 +89,7 @@ namespace UpDock
 
                     var template = DockerImageTemplate.Parse(image);
 
-                    return pattern == null ? template.CreatePattern(true, true, true, group) : template.CreatePattern(pattern, group);
+                    return pattern == null ? template.CreatePattern(true, true, true, false, true, group) : template.CreatePattern(pattern, group);
                 }
                 default:
                     throw new InvalidOperationException("Invalid configuration file");
@@ -120,7 +120,7 @@ namespace UpDock
             return element.GetString()!;
         }
 
-        public static DockerImageTemplatePattern ParsePattern(string pattern) => DockerImageTemplate.Parse(pattern).CreatePattern(true, true, true, null);
+        public static DockerImageTemplatePattern ParsePattern(string pattern) => DockerImageTemplate.Parse(pattern).CreatePattern(true, true, true, false, true, null);
 
         public IConfigurationOptions Merge(IConfigurationOptions options)
         {

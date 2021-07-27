@@ -6,6 +6,6 @@ namespace UpDock.Nodes
 {
     public interface ISearchTreeNode : IComparable<ISearchTreeNode>
     {
-        SearchTreeNodeResult Search(ReadOnlySpan<char> span, int index, ImmutableList<NuGetVersion> versions);
+        SearchTreeNodeResult Search(ReadOnlySpan<char> span, int index, string? digest, ImmutableList<NuGetVersion> versions);
     }
 }

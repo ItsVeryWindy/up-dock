@@ -30,9 +30,19 @@ namespace UpDock.Tests
                 templates = new object[]
                 {
                     "example-image",
+                    "example-image@{digest}",
+                    "example-image@{digest}:{v1.*}",
                     new
                     {
                         image = "example-repository.com/example-image",
+                    },
+                    new
+                    {
+                        image = "example-repository.com/example-image@{digest}",
+                    },
+                    new
+                    {
+                        image = "example-repository.com/example-image@{digest}:{v1.*}",
                     },
                     new
                     {
@@ -48,7 +58,7 @@ namespace UpDock.Tests
             Assert.That(_options.Include, Does.Contain("include"));
             Assert.That(_options.Exclude, Has.Count.EqualTo(1));
             Assert.That(_options.Exclude, Does.Contain("exclude"));
-            Assert.That(_options.Patterns, Has.Count.EqualTo(3));
+            Assert.That(_options.Patterns, Has.Count.EqualTo(7));
 
             var first = _options.Patterns.First();
 
@@ -59,17 +69,45 @@ namespace UpDock.Tests
 
             var second = _options.Patterns.Skip(1).First();
 
-            Assert.That(second.ToString(), Is.EqualTo("example-repository.com/example-image:{v*}"));
-            Assert.That(second.Template.Image, Is.EqualTo("example-image"));
-            Assert.That(second.Template.Repository.ToString(), Is.EqualTo("https://example-repository.com/"));
+            Assert.That(second.ToString(), Is.EqualTo("example-image@{digest}"));
+            Assert.That(second.Template.Image, Is.EqualTo("library/example-image"));
+            Assert.That(second.Template.Repository, Is.EqualTo(DockerImageTemplate.DefaultRepository));
             Assert.That(second.Template.Tag, Is.EqualTo("{v*}"));
 
             var third = _options.Patterns.Skip(2).First();
 
-            Assert.That(third.ToString(), Is.EqualTo("example-pattern"));
-            Assert.That(third.Template.Image, Is.EqualTo("example-image"));
-            Assert.That(third.Template.Repository?.ToString(), Is.EqualTo("https://example-repository.com/"));
-            Assert.That(third.Template.Tag, Is.EqualTo("example-tag"));
+            Assert.That(third.ToString(), Is.EqualTo("example-image@{digest}"));
+            Assert.That(third.Template.Image, Is.EqualTo("library/example-image"));
+            Assert.That(third.Template.Repository, Is.EqualTo(DockerImageTemplate.DefaultRepository));
+            Assert.That(third.Template.Tag, Is.EqualTo("{v1.*}"));
+
+            var fourth = _options.Patterns.Skip(3).First();
+
+            Assert.That(fourth.ToString(), Is.EqualTo("example-repository.com/example-image:{v*}"));
+            Assert.That(fourth.Template.Image, Is.EqualTo("example-image"));
+            Assert.That(fourth.Template.Repository.ToString(), Is.EqualTo("https://example-repository.com/"));
+            Assert.That(fourth.Template.Tag, Is.EqualTo("{v*}"));
+
+            var fifth = _options.Patterns.Skip(4).First();
+
+            Assert.That(fifth.ToString(), Is.EqualTo("example-repository.com/example-image@{digest}"));
+            Assert.That(fifth.Template.Image, Is.EqualTo("example-image"));
+            Assert.That(fifth.Template.Repository.ToString(), Is.EqualTo("https://example-repository.com/"));
+            Assert.That(fifth.Template.Tag, Is.EqualTo("{v*}"));
+
+            var sixth = _options.Patterns.Skip(5).First();
+
+            Assert.That(sixth.ToString(), Is.EqualTo("example-repository.com/example-image@{digest}"));
+            Assert.That(sixth.Template.Image, Is.EqualTo("example-image"));
+            Assert.That(sixth.Template.Repository.ToString(), Is.EqualTo("https://example-repository.com/"));
+            Assert.That(sixth.Template.Tag, Is.EqualTo("{v1.*}"));
+
+            var seven = _options.Patterns.Skip(6).First();
+
+            Assert.That(seven.ToString(), Is.EqualTo("example-pattern"));
+            Assert.That(seven.Template.Image, Is.EqualTo("example-image"));
+            Assert.That(seven.Template.Repository?.ToString(), Is.EqualTo("https://example-repository.com/"));
+            Assert.That(seven.Template.Tag, Is.EqualTo("example-tag"));
         }
 
         [Test]

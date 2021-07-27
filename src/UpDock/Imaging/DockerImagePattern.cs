@@ -13,10 +13,10 @@ namespace UpDock.Imaging
             Pattern = pattern;
             Image = image;
 
-            Pattern.Part.EnsureExecution(image.Versions);
+            Pattern.Part.EnsureExecution(image.Digest, image.Versions);
         }
 
-        public override string ToString() => Pattern.Part.Execute(Image.Versions);
+        public override string ToString() => Pattern.Part.Execute(Image.Digest, Image.Versions);
 
         public DockerImagePattern Create(DockerImage image) => new DockerImagePattern(Pattern, image);
     }

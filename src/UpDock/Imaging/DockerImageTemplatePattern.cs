@@ -21,12 +21,14 @@ namespace UpDock.Imaging
             Template = template;
         }
 
-        public DockerImagePattern Create(IReadOnlyList<NuGetVersion> versions)
+        public DockerImagePattern Create(string? digest, IReadOnlyList<NuGetVersion> versions)
         {
-            var image = Template.CreateImage(versions);
+            var image = Template.CreateImage(digest, versions);
 
             return new DockerImagePattern(this, image);
         }
+
+        private static readonly object Digest = new();
 
         public static DockerImageTemplatePattern Parse(string pattern, string group, DockerImageTemplate template)
         {
@@ -40,9 +42,9 @@ namespace UpDock.Imaging
 
             for (var i = 0; i < span.Length;)
             {
-                var (range, length) = ParseFloatRange(span.Slice(i));
+                var (obj, length) = ParseNextObject(span[i..]);
 
-                if (range == null)
+                if (obj is null)
                 {
                     i++;
                     continue;
@@ -53,9 +55,12 @@ namespace UpDock.Imaging
                     parts.Add(span[strStart..i].ToString());
                 }
 
-                parts.Add(range);
+                parts.Add(obj);
 
-                versionCount++;
+                if (obj is FloatRange)
+                {
+                    versionCount++;
+                }
 
                 i += length;
                 strStart = i;
@@ -66,7 +71,7 @@ namespace UpDock.Imaging
                 parts.Add(span.Slice(strStart).ToString());
             }
 
-            if (versionCount != template.Versions.Count())
+            if ((versionCount > 0 || !parts.Contains(Digest)) && versionCount != template.Versions.Count())
             {
                 throw new FormatException("Pattern does not contain the same number of versions as the template");
             }
@@ -75,6 +80,11 @@ namespace UpDock.Imaging
 
             foreach (var part in parts.Reverse())
             {
+                if (part == Digest)
+                {
+                    currentPart = new DigestDockerImagePatternPart(currentPart);
+                }
+                else
                 if (part is FloatRange range)
                 {
                     currentPart = new VersionDockerImagePatternPart(range, currentPart);
@@ -86,6 +96,16 @@ namespace UpDock.Imaging
             }
 
             return new DockerImageTemplatePattern(group, currentPart, template);
+        }
+
+        private static (object? obj, int length) ParseNextObject(ReadOnlySpan<char> span)
+        {
+            if (span.StartsWith("{digest}"))
+            {
+                return (Digest, 8);
+            }
+
+            return ParseFloatRange(span);
         }
 
         private const string VersionStart = "{v";

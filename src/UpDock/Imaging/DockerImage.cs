@@ -13,15 +13,17 @@ namespace UpDock.Nodes
 
         public Uri Repository { get; }
         public string Image { get; }
+        public string? Digest { get; }
         public string Tag => string.Join("", _parts.Select(x => x.ToString()));
         public DockerImageTemplate Template { get; }
 
         public IEnumerable<NuGetVersion> Versions => _parts.OfType<NuGetVersion>();
 
-        public DockerImage(Uri repository, string image, IEnumerable<object> parts, DockerImageTemplate template)
+        public DockerImage(Uri repository, string image, string? digest, IEnumerable<object> parts, DockerImageTemplate template)
         {
             Repository = repository;
             Image = image;
+            Digest = digest;
             Template = template;
             _parts = new List<object>(parts);
         }
@@ -95,22 +97,32 @@ namespace UpDock.Nodes
 
             if(Repository != null)
             {
-                sb.Append(Repository.Host).Append("/");
+                sb.Append(Repository.Host).Append('/');
             }
 
-            sb.Append(Image).Append(":").Append(Tag);
+            sb.Append(Image);
+
+            if (Digest != null)
+            {
+                sb.Append('@').Append(Digest);
+            }
+
+            if(_parts.Count > 0)
+            {
+                sb.Append(':').Append(Tag);
+            }
 
             return sb.ToString();
         }
 
-        public override int GetHashCode() => HashCode.Combine(Repository, Image, Tag);
+        public override int GetHashCode() => HashCode.Combine(Repository, Image, Digest, Tag);
 
         public override bool Equals(object? obj)
         {
             if (obj is not DockerImage image)
                 return false;
 
-            return Equals(Repository, image.Repository) && Equals(Image, image.Image) && Equals(Tag, image.Tag);
+            return Equals(Repository, image.Repository) && Equals(Image, image.Image) && Equals(Digest, image.Digest) && Equals(Tag, image.Tag);
         }
     }
 }

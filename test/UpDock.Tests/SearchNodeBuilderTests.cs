@@ -13,7 +13,7 @@ namespace UpDock.Tests
 
             var template = DockerImageTemplate.Parse("abcd1234:{v}");
 
-            builder.Add(template.CreatePattern(true, true, true));
+            builder.Add(template.CreatePattern(true, true, true, false, true));
 
             var node = builder.Build();
 
@@ -34,8 +34,8 @@ namespace UpDock.Tests
 
             var template = DockerImageTemplate.Parse("abcd12345:{v}");
 
-            builder.Add(DockerImageTemplate.Parse("abcd1234:{v}").CreatePattern(true, true, true));
-            builder.Add(template.CreatePattern(true, true, true));
+            builder.Add(DockerImageTemplate.Parse("abcd1234:{v}").CreatePattern(true, true, true, false, true));
+            builder.Add(template.CreatePattern(true, true, true, false, true));
 
             var node = builder.Build();
 
@@ -57,7 +57,7 @@ namespace UpDock.Tests
 
             var template = DockerImageTemplate.Parse("abcd1234:{v}");
                 
-            var pattern = template.CreatePattern(true, true, true);
+            var pattern = template.CreatePattern(true, true, true, false, true);
 
             builder.Add(pattern);
 
