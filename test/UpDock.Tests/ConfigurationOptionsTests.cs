@@ -208,7 +208,7 @@ namespace UpDock.Tests
         {
             _options.Include.Add("file/path");
 
-            Assert.That(_options.CreateHash(), Is.EqualTo("fa473d06ec8465812e01c7b8ffeeb6a3b2bb77fb2b1a1833949b1c71f891b2f4"));
+            Assert.That(_options.CreateHash(), Is.EqualTo("de3a4e188405db0401be7f225ea7fbe651f82f1f87729de2947e8a6da25455cf"));
         }
 
         [Test]
@@ -216,7 +216,7 @@ namespace UpDock.Tests
         {
             _options.Exclude.Add("file/path");
 
-            Assert.That(_options.CreateHash(), Is.EqualTo("c118d3e8c488dd95702ba119786c1ca91a33ac34c8c38c512d4aa782384c5533"));
+            Assert.That(_options.CreateHash(), Is.EqualTo("176e66b095d851ed3ae016dba0df8691ce9f7958b86e5a4bb266bbe49f53b0f1"));
         }
 
         [Test]

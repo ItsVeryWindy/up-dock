@@ -154,14 +154,14 @@ namespace UpDock
 
             foreach (var include in Include)
             {
-                builder.AppendLine(include);
+                builder.Append(include).Append(':');
             }
 
             builder.Append(':');
 
             foreach (var exclude in Exclude)
             {
-                builder.AppendLine(exclude);
+                builder.Append(exclude).Append(':');
             }
 
             builder.Append(':').Append(DryRun).Append(':').Append(AllowDowngrade).Append(':');
