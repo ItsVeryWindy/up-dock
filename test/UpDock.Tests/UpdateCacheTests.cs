@@ -112,6 +112,7 @@ namespace UpDock.Tests
 
             Assume.That(options.CreateHash(), Is.EqualTo("8dc6e36ab1b53c503309e7e07ace0ba933cc11888166402a7993c9899995d6d0"));
             Assume.That(repository.PushedAt, Is.EqualTo(DateTimeOffset.MinValue));
+            Assume.That(repository.PushedAt.ToString(), Is.EqualTo("01/01/0001 00:00:00 +00:00"));
 
             _updateCache.Set(repository, options, Enumerable.Repeat(image, 1));
 
@@ -132,6 +133,7 @@ namespace UpDock.Tests
 
             Assume.That(options.CreateHash(), Is.EqualTo("8dc6e36ab1b53c503309e7e07ace0ba933cc11888166402a7993c9899995d6d0"));
             Assume.That(repository.PushedAt, Is.EqualTo(DateTimeOffset.MinValue));
+            Assume.That(repository.PushedAt.ToString(), Is.EqualTo("01/01/0001 00:00:00 +00:00"));
 
             _updateCache.Set(repository, options, Enumerable.Repeat(image, 1));
 
@@ -157,6 +159,7 @@ namespace UpDock.Tests
 
             Assume.That(options.CreateHash(), Is.EqualTo("8dc6e36ab1b53c503309e7e07ace0ba933cc11888166402a7993c9899995d6d0"));
             Assume.That(repository.PushedAt, Is.EqualTo(DateTimeOffset.MinValue));
+            Assume.That(repository.PushedAt.ToString(), Is.EqualTo("01/01/0001 00:00:00 +00:00"));
 
             _updateCache.Set(repository, options, Enumerable.Repeat(image, 1));
 
