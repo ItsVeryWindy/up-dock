@@ -16,6 +16,7 @@ jobs:
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: 5.0.302
+
     - name: Set up QEMU
       uses: docker/setup-qemu-action@v1
     - name: Set up Docker Buildx
@@ -25,7 +26,14 @@ jobs:
       with:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
-    - uses: ./.github/actions/build
+
+    - name: Install dependencies
+      run: dotnet restore
+    - name: Build
+      run: dotnet build --configuration Release --no-restore
+    - name: Test
+      run: dotnet test --no-restore --verbosity normal
+
     - name: Publish Windows
       run: dotnet publish -r win-x64 --configuration Release -p:PublishSingleFile=true -p:PublishTrimmed=true -p:IncludeNativeLibrariesForSelfExtract=true --self-contained true
     - name: Publish Mac
@@ -34,6 +42,7 @@ jobs:
       run: dotnet publish -r linux-x64 --configuration Release -p:PublishSingleFile=true -p:PublishTrimmed=true -p:IncludeNativeLibrariesForSelfExtract=true --self-contained true
     - name: Publish Alpine
       run: dotnet publish -r linux-musl-x64 --configuration Release -p:PublishSingleFile=true -p:PublishTrimmed=true -p:IncludeNativeLibrariesForSelfExtract=true --self-contained true
+    
     - name: Create Release
       id: create_release
       uses: actions/create-release@v1
@@ -44,6 +53,7 @@ jobs:
         release_name: Release ${{ github.event.inputs.version }}
         draft: false
         prerelease: false
+
     - name: Upload Windows Release Asset
       id: upload-windows-release-asset
       uses: actions/upload-release-asset@v1
@@ -54,6 +64,7 @@ jobs:
         asset_path: ./src/UpDock/bin/Release/net5.0/win-x64/publish/up-dock.exe
         asset_name: up-dock-win-x64.exe
         asset_content_type: application/vnd.microsoft.portable-executable
+
     - name: Upload Mac Release Asset
       id: upload-mac-release-asset
       uses: actions/upload-release-asset@v1
@@ -64,6 +75,7 @@ jobs:
         asset_path: ./src/UpDock/bin/Release/net5.0/osx-x64/publish/up-dock
         asset_name: up-dock-osx-x64
         asset_content_type: application/octet-stream
+
     - name: Upload Linux Release Asset
       id: upload-linux-release-asset 
       uses: actions/upload-release-asset@v1
@@ -74,6 +86,7 @@ jobs:
         asset_path: ./src/UpDock/bin/Release/net5.0/linux-x64/publish/up-dock
         asset_name: up-dock-linux-x64
         asset_content_type: application/octet-stream
+        
     - name: Build and push
       id: docker_build
       uses: docker/build-push-action@v2
