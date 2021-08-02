@@ -108,8 +108,12 @@ namespace UpDock.Tests
             var image = CreateImage("1234");
 
             var options = new ConfigurationOptions();
+            var repository = new StubRepository();
 
-            _updateCache.Set(new StubRepository(), options, Enumerable.Repeat(image, 1));
+            Assume.That(options.CreateHash(), Is.EqualTo("8dc6e36ab1b53c503309e7e07ace0ba933cc11888166402a7993c9899995d6d0"));
+            Assume.That(repository.PushedAt, Is.EqualTo(DateTimeOffset.MinValue));
+
+            _updateCache.Set(repository, options, Enumerable.Repeat(image, 1));
 
             Assert.That(() => _updateCache.SaveAsync(CancellationToken.None), Throws.Nothing);
 
@@ -124,8 +128,12 @@ namespace UpDock.Tests
             var image = CreateImage("abcd@{digest}", "abcd@sha256:4f880368ed63767483b6f6c5bf7efde3af3faba816e71ff42db50326b0386bec");
 
             var options = new ConfigurationOptions();
+            var repository = new StubRepository();
 
-            _updateCache.Set(new StubRepository(), options, Enumerable.Repeat(image, 1));
+            Assume.That(options.CreateHash(), Is.EqualTo("8dc6e36ab1b53c503309e7e07ace0ba933cc11888166402a7993c9899995d6d0"));
+            Assume.That(repository.PushedAt, Is.EqualTo(DateTimeOffset.MinValue));
+
+            _updateCache.Set(repository, options, Enumerable.Repeat(image, 1));
 
             Assert.That(() => _updateCache.SaveAsync(CancellationToken.None), Throws.Nothing);
 
@@ -145,8 +153,12 @@ namespace UpDock.Tests
                     .Image!;
 
             var options = new ConfigurationOptions();
+            var repository = new StubRepository();
 
-            _updateCache.Set(new StubRepository(), options, Enumerable.Repeat(image, 1));
+            Assume.That(options.CreateHash(), Is.EqualTo("8dc6e36ab1b53c503309e7e07ace0ba933cc11888166402a7993c9899995d6d0"));
+            Assume.That(repository.PushedAt, Is.EqualTo(DateTimeOffset.MinValue));
+
+            _updateCache.Set(repository, options, Enumerable.Repeat(image, 1));
 
             Assert.That(() => _updateCache.SaveAsync(CancellationToken.None), Throws.Nothing);
 
