@@ -27,13 +27,13 @@ jobs:
         password: ${{ secrets.DOCKERHUB_TOKEN }}
     - uses: ./.github/actions/build
     - name: Publish Windows
-      run: dotnet publish -r win-x64 --configuration Release -p:PublishSingleFile=true -p:PublishTrimmed=true
+      run: dotnet publish -r win-x64 --configuration Release -p:PublishSingleFile=true -p:PublishTrimmed=true -p:IncludeNativeLibrariesForSelfExtract=true --self-contained true
     - name: Publish Mac
-      run: dotnet publish -r osx-x64 --configuration Release -p:PublishSingleFile=true -p:PublishTrimmed=true
+      run: dotnet publish -r osx-x64 --configuration Release -p:PublishSingleFile=true -p:PublishTrimmed=true -p:IncludeNativeLibrariesForSelfExtract=true --self-contained true
     - name: Publish Linux
-      run: dotnet publish -r linux-x64 --configuration Release -p:PublishSingleFile=true -p:PublishTrimmed=true
+      run: dotnet publish -r linux-x64 --configuration Release -p:PublishSingleFile=true -p:PublishTrimmed=true -p:IncludeNativeLibrariesForSelfExtract=true --self-contained true
     - name: Publish Alpine
-      run: dotnet publish -r linux-musl-x64 --configuration Release -p:PublishSingleFile=true -p:PublishTrimmed=true
+      run: dotnet publish -r linux-musl-x64 --configuration Release -p:PublishSingleFile=true -p:PublishTrimmed=true -p:IncludeNativeLibrariesForSelfExtract=true --self-contained true
     - name: Create Release
       id: create_release
       uses: actions/create-release@v1
