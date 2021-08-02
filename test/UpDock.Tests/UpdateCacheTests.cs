@@ -110,9 +110,9 @@ namespace UpDock.Tests
             var options = new ConfigurationOptions();
             var repository = new StubRepository();
 
-            Assume.That(options.CreateHash(), Is.EqualTo("8dc6e36ab1b53c503309e7e07ace0ba933cc11888166402a7993c9899995d6d0"));
-            Assume.That(repository.PushedAt, Is.EqualTo(DateTimeOffset.MinValue));
-            Assume.That(repository.PushedAt.ToString(), Is.EqualTo("01/01/0001 00:00:00 +00:00"));
+            Assert.That(options.CreateHash(), Is.EqualTo("8dc6e36ab1b53c503309e7e07ace0ba933cc11888166402a7993c9899995d6d0"));
+            Assert.That(repository.PushedAt, Is.EqualTo(DateTimeOffset.MinValue));
+            Assert.That(repository.PushedAt?.ToString("u"), Is.EqualTo("0001-01-01 00:00:00Z"));
 
             _updateCache.Set(repository, options, Enumerable.Repeat(image, 1));
 
@@ -131,9 +131,9 @@ namespace UpDock.Tests
             var options = new ConfigurationOptions();
             var repository = new StubRepository();
 
-            Assume.That(options.CreateHash(), Is.EqualTo("8dc6e36ab1b53c503309e7e07ace0ba933cc11888166402a7993c9899995d6d0"));
-            Assume.That(repository.PushedAt, Is.EqualTo(DateTimeOffset.MinValue));
-            Assume.That(repository.PushedAt.ToString(), Is.EqualTo("01/01/0001 00:00:00 +00:00"));
+            Assert.That(options.CreateHash(), Is.EqualTo("8dc6e36ab1b53c503309e7e07ace0ba933cc11888166402a7993c9899995d6d0"));
+            Assert.That(repository.PushedAt, Is.EqualTo(DateTimeOffset.MinValue));
+            Assert.That(repository.PushedAt?.ToString("u"), Is.EqualTo("0001-01-01 00:00:00Z"));
 
             _updateCache.Set(repository, options, Enumerable.Repeat(image, 1));
 
@@ -157,9 +157,9 @@ namespace UpDock.Tests
             var options = new ConfigurationOptions();
             var repository = new StubRepository();
 
-            Assume.That(options.CreateHash(), Is.EqualTo("8dc6e36ab1b53c503309e7e07ace0ba933cc11888166402a7993c9899995d6d0"));
-            Assume.That(repository.PushedAt, Is.EqualTo(DateTimeOffset.MinValue));
-            Assume.That(repository.PushedAt.ToString(), Is.EqualTo("01/01/0001 00:00:00 +00:00"));
+            Assert.That(options.CreateHash(), Is.EqualTo("8dc6e36ab1b53c503309e7e07ace0ba933cc11888166402a7993c9899995d6d0"));
+            Assert.That(repository.PushedAt, Is.EqualTo(DateTimeOffset.MinValue));
+            Assert.That(repository.PushedAt?.ToString("u"), Is.EqualTo("0001-01-01 00:00:00Z"));
 
             _updateCache.Set(repository, options, Enumerable.Repeat(image, 1));
 

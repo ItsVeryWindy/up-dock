@@ -50,7 +50,7 @@ namespace UpDock.Caching
         {
             var hash = options.CreateHash();
 
-            return Sha256Hash.ComputeHash($"{hash}:{repository.PushedAt}");
+            return Sha256Hash.ComputeHash($"{hash}:{repository.PushedAt:u}");
         }
 
         public void Set(IRepository repository, IConfigurationOptions options, IEnumerable<DockerImage?> images)
