@@ -120,7 +120,7 @@ namespace UpDock.Tests
 
             var newContents = await TestUtilities.GetStringAsync(_provider.GetFile(_options.Cache!).CreateReadStream());
 
-            Assert.That(newContents, Is.EqualTo("{\"images\":{\"library/abcd:{v*}\":\"registry-1.docker.io/library/abcd:1234\"},\"repositories\":{\"CloneUrl\":{\"hash\":\"9ada877545c28a3da684301f18e73588d0f516fafc9449bd706c2ec02e274806\",\"entries\":[0]}}}"));
+            Assert.That(newContents, Is.EqualTo("{\"images\":{\"library/abcd:{v*}\":\"registry-1.docker.io/library/abcd:1234\"},\"repositories\":{\"CloneUrl\":{\"hash\":\"661629af27f72bd48e7188491f459263188fee65bd8e31e4ab217a09d52b1d99\",\"entries\":[0]}}}"));
         }
 
         [Test]
@@ -141,7 +141,7 @@ namespace UpDock.Tests
 
             var newContents = await TestUtilities.GetStringAsync(_provider.GetFile(_options.Cache!).CreateReadStream());
 
-            Assert.That(newContents, Is.EqualTo("{\"images\":{\"library/abcd@{digest}:{v*}\":\"registry-1.docker.io/library/abcd@sha256:4f880368ed63767483b6f6c5bf7efde3af3faba816e71ff42db50326b0386bec\"},\"repositories\":{\"CloneUrl\":{\"hash\":\"9ada877545c28a3da684301f18e73588d0f516fafc9449bd706c2ec02e274806\",\"entries\":[0]}}}"));
+            Assert.That(newContents, Is.EqualTo("{\"images\":{\"library/abcd@{digest}:{v*}\":\"registry-1.docker.io/library/abcd@sha256:4f880368ed63767483b6f6c5bf7efde3af3faba816e71ff42db50326b0386bec\"},\"repositories\":{\"CloneUrl\":{\"hash\":\"661629af27f72bd48e7188491f459263188fee65bd8e31e4ab217a09d52b1d99\",\"entries\":[0]}}}"));
         }
 
         [Test]
@@ -167,7 +167,7 @@ namespace UpDock.Tests
 
             var newContents = await TestUtilities.GetStringAsync(_provider.GetFile(_options.Cache!).CreateReadStream());
 
-            Assert.That(newContents, Is.EqualTo("{\"images\":{\"library/abcd@{digest}:{v*}\":\"registry-1.docker.io/library/abcd@sha256:4f880368ed63767483b6f6c5bf7efde3af3faba816e71ff42db50326b0386bec:1234\"},\"repositories\":{\"CloneUrl\":{\"hash\":\"9ada877545c28a3da684301f18e73588d0f516fafc9449bd706c2ec02e274806\",\"entries\":[0]}}}"));
+            Assert.That(newContents, Is.EqualTo("{\"images\":{\"library/abcd@{digest}:{v*}\":\"registry-1.docker.io/library/abcd@sha256:4f880368ed63767483b6f6c5bf7efde3af3faba816e71ff42db50326b0386bec:1234\"},\"repositories\":{\"CloneUrl\":{\"hash\":\"661629af27f72bd48e7188491f459263188fee65bd8e31e4ab217a09d52b1d99\",\"entries\":[0]}}}"));
         }
 
         [Test]
