@@ -10,7 +10,7 @@
 
   <ItemGroup>
     <PackageReference Include="DotNet.Glob" Version="3.1.2" />
-    <PackageReference Include="LibGit2Sharp" Version="0.27.0-preview-0096" />
+    <PackageReference Include="LibGit2Sharp" Version="0.27.0-preview-0102" />
     <PackageReference Include="Microsoft.Extensions.Logging" Version="5.0.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="5.0.0" />
     <PackageReference Include="NuGet.Versioning" Version="5.8.1" />
