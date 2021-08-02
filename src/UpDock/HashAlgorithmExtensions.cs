@@ -5,9 +5,11 @@ namespace UpDock
 {
     public static class HashAlgorithmExtensions
     {
+        private static readonly Encoding Encoding = new UTF8Encoding(false);
+
         public static string ComputeHash(this HashAlgorithm algorithm, string str)
         {
-            var bytes = algorithm.ComputeHash(Encoding.UTF8.GetBytes(str));
+            var bytes = algorithm.ComputeHash(Encoding.GetBytes(str));
 
             var builder = new StringBuilder();
 
