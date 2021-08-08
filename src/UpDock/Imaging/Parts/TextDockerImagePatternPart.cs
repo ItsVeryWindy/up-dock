@@ -27,7 +27,7 @@ namespace UpDock.Imaging.Parts
 
         public override bool Equals(object? obj)
         {
-            if (!(obj is TextDockerImagePatternPart part))
+            if (obj is not TextDockerImagePatternPart part)
                 return false;
 
             return Equals(Text, part.Text) && Equals(Next, part.Next);

@@ -68,7 +68,7 @@ namespace UpDock.Imaging
 
             if (strStart != span.Length)
             {
-                parts.Add(span.Slice(strStart).ToString());
+                parts.Add(span[strStart..].ToString());
             }
 
             if ((versionCount > 0 || !parts.Contains(Digest)) && versionCount != template.Versions.Count())
@@ -120,7 +120,7 @@ namespace UpDock.Imaging
             if (!span.StartsWith(VersionStart))
                 return (null, 0);
 
-            var remainingVersion = span.Slice(2);
+            var remainingVersion = span[2..];
 
             var closeBracketIndex = remainingVersion.IndexOf(VersionEnd);
 
@@ -146,7 +146,7 @@ namespace UpDock.Imaging
 
         public override bool Equals(object? obj)
         {
-            if (!(obj is DockerImageTemplatePattern pattern))
+            if (obj is not DockerImageTemplatePattern pattern)
                 return false;
 
             return Equals(Part, pattern.Part) && Equals(Template, pattern.Template);

@@ -184,7 +184,7 @@ namespace UpDock
             if (!response2.IsSuccessStatusCode)
                 return null;
 
-            var content = await response2.Content.ReadAsStringAsync();
+            var content = await response2.Content.ReadAsStringAsync(cancellationToken);
 
             return JsonSerializer.Deserialize<AuthToken>(content);
         }
@@ -203,7 +203,7 @@ namespace UpDock
             if(span.IsEmpty)
                 return false;
 
-            var next = span.Slice(1);
+            var next = span[1..];
 
             return ReadEquals(key, length, next, dictionary) || ReadKey(key, length + 1, next, dictionary);
         }
@@ -216,7 +216,7 @@ namespace UpDock
             if(span[0] != '=')
                 return false;
 
-            return ReadBeginQuote(key.Slice(0, length), span.Slice(1), dictionary);
+            return ReadBeginQuote(key.Slice(0, length), span[1..], dictionary);
         }
 
         private bool ReadBeginQuote(ReadOnlySpan<char> key, ReadOnlySpan<char> span, Dictionary<string, string> dictionary)
@@ -252,7 +252,7 @@ namespace UpDock
 
             dictionary[key.ToString()] = value.Slice(0, length).ToString();
 
-            return ReadComma(span.Slice(1), dictionary);
+            return ReadComma(span[1..], dictionary);
         }
 
         private bool ReadComma(ReadOnlySpan<char> span, Dictionary<string, string> dictionary)
@@ -263,7 +263,7 @@ namespace UpDock
             if(span[0] != ',')
                 return false;
 
-            var next = span.Slice(1);
+            var next = span[1..];
 
             return ReadKey(next, 1, next, dictionary);
         }

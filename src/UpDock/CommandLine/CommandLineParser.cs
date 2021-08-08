@@ -103,7 +103,7 @@ namespace UpDock.CommandLine
             return arguments;
         }
 
-        private object GetConvertedValue(PropertyInfo property, string value)
+        private static object GetConvertedValue(PropertyInfo property, string value)
         {
             var converter = GetConverter(property);
 

@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using UpDock.Imaging;
 
@@ -32,12 +33,12 @@ namespace UpDock.CommandLine
         [Shortcut("i", "template")]
         [Description("A template to apply")]
         [TypeConverter(typeof(DockerImageTemplatePatternConverter))]
-        public DockerImageTemplatePattern[] Templates { get; set; } = System.Array.Empty<DockerImageTemplatePattern>();
+        public DockerImageTemplatePattern[] Templates { get; set; } = Array.Empty<DockerImageTemplatePattern>();
 
         [Shortcut("a", "auth")]
         [Description("Authentication for a repository")]
         [ValidAuthenticationFormat]
-        public string[] Authentication { get; set; } = new string[0];
+        public string[] Authentication { get; set; } = Array.Empty<string>();
 
         [Shortcut("d", "dry-run")]
         [Description("Run without creating pull requests")]

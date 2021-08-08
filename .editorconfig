@@ -149,13 +149,6 @@ dotnet_naming_symbols.public_symbols.applicable_kinds = property,method,field,ev
 dotnet_naming_symbols.public_symbols.applicable_accessibilities = public
 dotnet_naming_symbols.public_symbols.required_modifiers = readonly
 
-# capitalize static variables
-dotnet_naming_rule.static_members_must_be_capitalized.symbols = static_symbols
-dotnet_naming_rule.static_members_must_be_capitalized.style = first_word_uppercase
-dotnet_naming_rule.public_members_must_be_capitalized.severity = suggestion
-
-dotnet_naming_symbols.static_symbols.required_modifiers = static
-
 #underscore private variables
 dotnet_naming_rule.private_members_with_underscore.symbols = private_fields
 dotnet_naming_rule.private_members_with_underscore.style = prefix_underscore
@@ -163,3 +156,10 @@ dotnet_naming_rule.private_members_with_underscore.severity = suggestion
 
 dotnet_naming_symbols.private_fields.applicable_kinds = field
 dotnet_naming_symbols.private_fields.applicable_accessibilities = private
+
+# capitalize static variables
+dotnet_naming_rule.static_members_must_be_capitalized.symbols = static_symbols
+dotnet_naming_rule.static_members_must_be_capitalized.style = first_word_uppercase
+dotnet_naming_rule.static_members_must_be_capitalized.severity = suggestion
+
+dotnet_naming_symbols.static_symbols.required_modifiers = static

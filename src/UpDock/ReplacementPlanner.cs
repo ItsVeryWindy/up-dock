@@ -39,7 +39,7 @@ namespace UpDock
             {
                 for (var i = 0; i < line.Length;)
                 {
-                    var (image, endIndex) = node.Search(line.AsSpan().Slice(i));
+                    var (image, endIndex) = node.Search(line.AsSpan()[i..]);
 
                     if (image == null)
                     {

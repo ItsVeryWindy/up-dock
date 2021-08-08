@@ -5,7 +5,7 @@ namespace UpDock.Tests.CommandLine
 {
     internal class StubConsoleWriter : IConsoleWriter
     {
-        private readonly List<string?> _lines = new List<string?>();
+        private readonly List<string?> _lines = new();
 
         public IReadOnlyList<string?> Lines => _lines;
 

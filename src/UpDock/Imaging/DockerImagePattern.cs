@@ -18,6 +18,6 @@ namespace UpDock.Imaging
 
         public override string ToString() => Pattern.Part.Execute(Image.Digest, Image.Versions);
 
-        public DockerImagePattern Create(DockerImage image) => new DockerImagePattern(Pattern, image);
+        public DockerImagePattern Create(DockerImage image) => new(Pattern, image);
     }
 }

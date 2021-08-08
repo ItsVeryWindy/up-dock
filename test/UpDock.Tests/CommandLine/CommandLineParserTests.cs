@@ -27,7 +27,7 @@ namespace UpDock.Tests.CommandLine
 
             Assert.That(arguments, Has.Count.EqualTo(1));
 
-            var argument = arguments.First();
+            var argument = arguments[0];
 
             Assert.That(argument.Argument, Is.EqualTo(Argument));
             Assert.That(argument.Index, Is.EqualTo(0));
@@ -42,7 +42,7 @@ namespace UpDock.Tests.CommandLine
 
             Assert.That(arguments, Has.Count.EqualTo(1));
 
-            var argument = arguments.First();
+            var argument = arguments[0];
 
             Assert.That(argument.Argument, Is.EqualTo("--exist"));
             Assert.That(argument.Index, Is.EqualTo(0));
@@ -62,7 +62,7 @@ namespace UpDock.Tests.CommandLine
 
             Assert.That(arguments, Has.Count.EqualTo(1));
 
-            var argument = arguments.First();
+            var argument = arguments[0];
 
             Assert.That(argument.Argument, Is.EqualTo(Argument));
             Assert.That(argument.Index, Is.EqualTo(0));
@@ -79,7 +79,7 @@ namespace UpDock.Tests.CommandLine
 
             Assert.That(arguments, Has.Count.EqualTo(1));
 
-            var argument = arguments.First();
+            var argument = arguments[0];
 
             Assert.That(argument.Argument, Is.EqualTo(Argument));
             Assert.That(argument.Index, Is.EqualTo(0));
@@ -96,7 +96,7 @@ namespace UpDock.Tests.CommandLine
 
             Assert.That(arguments, Has.Count.EqualTo(1));
 
-            var argument = arguments.First();
+            var argument = arguments[0];
 
             Assert.That(argument.Argument, Is.EqualTo(Argument));
             Assert.That(argument.Index, Is.EqualTo(0));
@@ -113,7 +113,7 @@ namespace UpDock.Tests.CommandLine
 
             Assert.That(arguments, Has.Count.EqualTo(1));
 
-            var argument = arguments.First();
+            var argument = arguments[0];
 
             Assert.That(argument.Argument, Is.EqualTo(Argument));
             Assert.That(argument.Index, Is.EqualTo(0));
@@ -132,14 +132,14 @@ namespace UpDock.Tests.CommandLine
 
             Assert.That(arguments, Has.Count.EqualTo(2));
 
-            var firstArgument = arguments.First();
+            var firstArgument = arguments[0];
 
             Assert.That(firstArgument.Argument, Is.EqualTo(Argument));
             Assert.That(firstArgument.Index, Is.EqualTo(0));
             Assert.That(firstArgument.OriginalValue, Is.EqualTo(value));
             Assert.That(firstArgument.Value, Is.EqualTo(value));
 
-            var lastArgument = arguments.Last();
+            var lastArgument = arguments[arguments.Count - 1];
 
             Assert.That(lastArgument.Argument, Is.EqualTo(Argument));
             Assert.That(lastArgument.Index, Is.EqualTo(1));
@@ -156,14 +156,14 @@ namespace UpDock.Tests.CommandLine
 
             Assert.That(arguments, Has.Count.EqualTo(2));
 
-            var firstArgument = arguments.First();
+            var firstArgument = arguments[0];
 
             Assert.That(firstArgument.Argument, Is.EqualTo(Argument));
             Assert.That(firstArgument.Index, Is.EqualTo(0));
             Assert.That(firstArgument.OriginalValue, Is.EqualTo(value));
             Assert.That(firstArgument.Value, Is.EqualTo(value));
 
-            var lastArgument = arguments.Last();
+            var lastArgument = arguments[arguments.Count - 1];
 
             Assert.That(lastArgument.Argument, Is.EqualTo(Argument));
             Assert.That(lastArgument.Index, Is.EqualTo(1));
@@ -180,7 +180,7 @@ namespace UpDock.Tests.CommandLine
 
             Assert.That(arguments, Has.Count.EqualTo(1));
 
-            var argument = arguments.First();
+            var argument = arguments[0];
 
             Assert.That(argument.Argument, Is.EqualTo(Argument));
             Assert.That(argument.Index, Is.EqualTo(0));
@@ -195,7 +195,7 @@ namespace UpDock.Tests.CommandLine
 
             Assert.That(arguments, Has.Count.EqualTo(1));
 
-            var argument = arguments.First();
+            var argument = arguments[0];
 
             Assert.That(argument.Argument, Is.EqualTo(Argument));
             Assert.That(argument.Index, Is.EqualTo(0));
@@ -214,7 +214,7 @@ namespace UpDock.Tests.CommandLine
 
             Assert.That(arguments, Has.Count.EqualTo(1));
 
-            var argument = arguments.First();
+            var argument = arguments[0];
 
             Assert.That(argument.Argument, Is.EqualTo(ArgumentForStdIn));
             Assert.That(argument.Index, Is.EqualTo(0));
@@ -233,14 +233,14 @@ namespace UpDock.Tests.CommandLine
 
             Assert.That(arguments, Has.Count.EqualTo(2));
 
-            var firstArgument = arguments.First();
+            var firstArgument = arguments[0];
 
             Assert.That(firstArgument.Argument, Is.EqualTo(ArgumentForStdIn));
             Assert.That(firstArgument.Index, Is.EqualTo(0));
             Assert.That(firstArgument.OriginalValue, Is.EqualTo(value));
             Assert.That(firstArgument.Value, Is.EqualTo(value));
 
-            var lastArgument = arguments.Last();
+            var lastArgument = arguments[arguments.Count - 1];
 
             Assert.That(lastArgument.Argument, Is.EqualTo(ArgumentForStdIn));
             Assert.That(lastArgument.Index, Is.EqualTo(1));
@@ -257,7 +257,7 @@ namespace UpDock.Tests.CommandLine
 
             Assert.That(arguments, Has.Count.EqualTo(1));
 
-            var argument = arguments.First();
+            var argument = arguments[0];
 
             Assert.That(argument.Argument, Is.EqualTo(ArgumentForStdIn));
             Assert.That(argument.Index, Is.EqualTo(0));
@@ -265,7 +265,7 @@ namespace UpDock.Tests.CommandLine
             Assert.That(argument.Value, Is.Null);
         }
 
-        private StreamReader CreateStandardInput(params string[] values)
+        private static StreamReader CreateStandardInput(params string[] values)
         {
             var stream = new MemoryStream();
             var writer = new StreamWriter(stream);
@@ -284,9 +284,7 @@ namespace UpDock.Tests.CommandLine
         public class Options<T>
         {
             [Shortcut("argument")]
-#pragma warning disable CS8618
-            public T Property { get; set; }
-#pragma warning disable CS8618
+            public T Property { get; set; } = default!;
 
         }
 

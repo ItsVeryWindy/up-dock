@@ -10,15 +10,10 @@ namespace UpDock.Tests
 {
     public class ConfigurationOptionsTests
     {
-#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
-        private ConfigurationOptions _options;
-#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
+        private ConfigurationOptions _options = null!;
 
         [SetUp]
-        public void SetUp()
-        {
-            _options = new ConfigurationOptions();
-        }
+        public void SetUp() => _options = new ConfigurationOptions();
 
         [Test]
         public async Task ShouldParseConfigurationFile()
@@ -176,10 +171,7 @@ namespace UpDock.Tests
         }
 
         [Test]
-        public void ShouldCreateHash()
-        {
-            Assert.That(_options.CreateHash(), Is.EqualTo("8dc6e36ab1b53c503309e7e07ace0ba933cc11888166402a7993c9899995d6d0"));
-        }
+        public void ShouldCreateHash() => Assert.That(_options.CreateHash(), Is.EqualTo("8dc6e36ab1b53c503309e7e07ace0ba933cc11888166402a7993c9899995d6d0"));
 
         [Test]
         public void ShouldCreateHashNotInfuencedBySomeOptions()

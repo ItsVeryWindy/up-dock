@@ -53,10 +53,7 @@ namespace UpDock.Tests
         }
 
         [Test]
-        public async Task ShouldNotLoadIfCacheFileNotFound()
-        {
-            await _updateCache.LoadAsync(CancellationToken.None);
-        }
+        public Task ShouldNotLoadIfCacheFileNotFound() => _updateCache.LoadAsync(CancellationToken.None);
 
         [TestCase("{", Description = "Invalid json")]
         [TestCase("{}", Description = "No images property")]
@@ -221,10 +218,7 @@ namespace UpDock.Tests
             Assert.That(_updateCache.HasChanged(repository, options), Is.True);
         }
 
-        private static DockerImage CreateImage(string version)
-        {
-            return CreateImage("abcd", $"abcd:{version}");
-        }
+        private static DockerImage CreateImage(string version) => CreateImage("abcd", $"abcd:{version}");
 
         private static DockerImage CreateImage(string template, string search)
         {

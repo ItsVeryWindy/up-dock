@@ -16,7 +16,7 @@ namespace UpDock.Git
 {
     public class LocalGitRepository : ILocalGitRepository
     {
-        private readonly LibGit2Sharp.Repository _localRepository;
+        private readonly Repository _localRepository;
         private readonly CommandLineOptions _options;
         private readonly IRemoteGitRepository _remoteRepository;
         private readonly IFileProvider _provider;
@@ -28,7 +28,7 @@ namespace UpDock.Git
 
         public bool IsDirty => _localRepository.RetrieveStatus(new StatusOptions()).IsDirty;
 
-        public LocalGitRepository(LibGit2Sharp.Repository localRepository, CommandLineOptions options, IRemoteGitRepository remoteRepository, IFileProvider provider, ILogger<LocalGitRepository> logger)
+        public LocalGitRepository(Repository localRepository, CommandLineOptions options, IRemoteGitRepository remoteRepository, IFileProvider provider, ILogger<LocalGitRepository> logger)
         {
             _localRepository = localRepository;
             _options = options;

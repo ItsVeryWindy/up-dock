@@ -8,7 +8,7 @@ namespace UpDock.Tests
 {
     internal class StubFileProvider : IFileProvider
     {
-        private readonly Dictionary<string, Stream> _files = new Dictionary<string, Stream>();
+        private readonly Dictionary<string, Stream> _files = new();
 
         public void AddFile(string path, string contents) => AddFile(path, new MemoryStream(Encoding.UTF8.GetBytes(contents)));
 

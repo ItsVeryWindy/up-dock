@@ -152,7 +152,7 @@ namespace UpDock.Nodes
                     Children.Add(charNode);
                 }
 
-                charNode.Add(pattern, part, span.Slice(1));
+                charNode.Add(pattern, part, span[1..]);
             }
 
             public ISearchTreeNode Build(ImmutableList<TreeNode> nodes)

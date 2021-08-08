@@ -5,11 +5,8 @@ namespace UpDock.Tests.CommandLine
 {
     public class DisplayHelpInformationTests
     {
-
-#pragma warning disable CS8618
-        private StubConsoleWriter _writer;
-        private DisplayHelpInformation _displayHelpInformation;
-#pragma warning restore CS8618
+        private StubConsoleWriter _writer = null!;
+        private DisplayHelpInformation _displayHelpInformation = null!;
 
         [SetUp]
         public void SetUp()

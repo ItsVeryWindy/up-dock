@@ -38,7 +38,7 @@ namespace UpDock
 
         public override bool Equals(object? obj)
         {
-            if (!(obj is VersionDockerImagePatternPart part))
+            if (obj is not VersionDockerImagePatternPart part)
                 return false;
 
             return Equals(Next, part.Next);

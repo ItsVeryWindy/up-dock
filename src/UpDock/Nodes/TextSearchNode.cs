@@ -20,7 +20,7 @@ namespace UpDock.Nodes
         {
             var result = span.StartsWith(_text, StringComparison.InvariantCultureIgnoreCase);
 
-            return result ? GetChildResult(span.Slice(_text.Length), endIndex + _text.Length, digest, versions) : new SearchTreeNodeResult();
+            return result ? GetChildResult(span[_text.Length..], endIndex + _text.Length, digest, versions) : new SearchTreeNodeResult();
         }
 
         private SearchTreeNodeResult GetChildResult(ReadOnlySpan<char> span, int endIndex, string? digest, ImmutableList<NuGetVersion> versions)

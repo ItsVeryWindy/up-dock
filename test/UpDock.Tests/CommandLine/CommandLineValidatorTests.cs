@@ -10,10 +10,8 @@ namespace UpDock.Tests.CommandLine
 {
     public class CommandLineValidatorTests
     {
-#pragma warning disable CS8618
-        private StubFileProvider _fileProvider;
-        private CommandLineValidator _commandLineValidator;
-#pragma warning restore CS8618
+        private StubFileProvider _fileProvider = null!;
+        private CommandLineValidator _commandLineValidator = null!;
 
         [SetUp]
         public void SetUp()

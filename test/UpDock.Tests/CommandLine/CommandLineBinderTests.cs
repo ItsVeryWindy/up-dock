@@ -6,9 +6,7 @@ namespace UpDock.Tests.CommandLine
 {
     public class CommandLineBinderTests
     {
-        #pragma warning disable CS8618
-        private CommandLineBinder _binder;
-        #pragma warning restore CS8618
+        private CommandLineBinder _binder = null!;
 
         [SetUp]
         public void SetUp() => _binder = new CommandLineBinder();

@@ -62,7 +62,7 @@ namespace UpDock.Imaging
             return new DockerImage(Repository, Image, digest, parts, this);
         }
 
-        public static readonly Uri DefaultRepository = new Uri("https://registry-1.docker.io");
+        public static readonly Uri DefaultRepository = new("https://registry-1.docker.io");
 
         public static DockerImageTemplate Parse(string str)
         {
@@ -109,7 +109,7 @@ namespace UpDock.Imaging
 
             if (strStart != tag.Length)
             {
-                parts.Add(ParseTagPart(tag.Substring(strStart)));
+                parts.Add(ParseTagPart(tag[strStart..]));
             }
 
             return parts;
@@ -135,7 +135,7 @@ namespace UpDock.Imaging
             if (!span.StartsWith(VersionStart))
                 return (null, 0);
 
-            var remainingVersion = span.Slice(2);
+            var remainingVersion = span[2..];
 
             var closeBracketIndex = remainingVersion.IndexOf(VersionEnd);
 
@@ -336,8 +336,8 @@ namespace UpDock.Imaging
         {
             var sb = new StringBuilder()
                 .Append(Repository.Host)
-                .Append("/")
-                .Append(ImageString()).Append(":");
+                .Append('/')
+                .Append(ImageString()).Append(':');
 
             foreach (var part in _parts)
             {

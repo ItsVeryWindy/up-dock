@@ -17,10 +17,7 @@ namespace UpDock.Imaging.Parts
         {
         }
 
-        public string Execute(string? digest, IEnumerable<NuGetVersion> versions)
-        {
-            return digest + Next.Execute(digest, versions);
-        }
+        public string Execute(string? digest, IEnumerable<NuGetVersion> versions) => digest + Next.Execute(digest, versions);
 
         public override string ToString() => $"{{digest}}{Next}";
 

@@ -5,7 +5,7 @@ namespace UpDock.Imaging.Parts
 {
     public class EmptyDockerImagePatternPart : IDockerImagePatternPart
     {
-        public static readonly EmptyDockerImagePatternPart Instance = new EmptyDockerImagePatternPart();
+        public static readonly EmptyDockerImagePatternPart Instance = new();
 
         public IDockerImagePatternPart? Next { get; } = null;
 

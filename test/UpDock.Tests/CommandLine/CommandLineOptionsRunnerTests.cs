@@ -8,12 +8,10 @@ namespace UpDock.Tests.CommandLine
 {
     public class CommandLineOptionsRunnerTests
     {
-#pragma warning disable CS8618
-        private StubConsoleWriter _writer;
-        private StubDisplayHelpInformation _displayHelpInformation;
-        private StubGitRepositoryProcessor _gitRepositoryProcessor;
-        private CommandLineOptionsRunner _commandLineOptionsRunner;
-#pragma warning restore CS8618
+        private StubConsoleWriter _writer = null!;
+        private StubDisplayHelpInformation _displayHelpInformation = null!;
+        private StubGitRepositoryProcessor _gitRepositoryProcessor = null!;
+        private CommandLineOptionsRunner _commandLineOptionsRunner = null!;
 
         [SetUp]
         public void SetUp()
@@ -48,7 +46,7 @@ namespace UpDock.Tests.CommandLine
             }, CancellationToken.None);
 
             Assert.That(_writer.Lines, Has.Count.EqualTo(1));
-            Assert.That(_writer.Lines.First(), Is.EqualTo("ProcessVersion"));
+            Assert.That(_writer.Lines[0], Is.EqualTo("ProcessVersion"));
             Assert.That(_gitRepositoryProcessor.WasCalled, Is.False);
         }
 

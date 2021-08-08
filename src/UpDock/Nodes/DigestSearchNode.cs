@@ -29,7 +29,7 @@ namespace UpDock.Nodes
             if (sha.Length < length)
                 return new();
 
-            foreach(var chr in sha.Slice(DigestStart.Length))
+            foreach(var chr in sha[DigestStart.Length..])
             {
                 if ((chr < 'a' || chr > 'z') && !char.IsDigit(chr))
                     return new();

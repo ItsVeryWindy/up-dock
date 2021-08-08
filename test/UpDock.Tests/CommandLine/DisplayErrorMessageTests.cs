@@ -7,10 +7,8 @@ namespace UpDock.Tests.CommandLine
 {
     public class DisplayErrorMessageTests
     {
-#pragma warning disable CS8618
-        private StubConsoleWriter _writer;
-        private DisplayErrorMessages _displayErrorMessages;
-#pragma warning restore CS8618
+        private StubConsoleWriter _writer = null!;
+        private DisplayErrorMessages _displayErrorMessages = null!;
 
         [SetUp]
         public void SetUp()
