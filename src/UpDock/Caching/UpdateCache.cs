@@ -5,10 +5,9 @@ using System.Security.Cryptography;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Options;
-using Octokit;
 using UpDock.CommandLine;
 using UpDock.Files;
+using UpDock.Git;
 using UpDock.Imaging;
 using UpDock.Nodes;
 using UpDock.Registry;
@@ -31,7 +30,7 @@ namespace UpDock.Caching
             _provider = provider;
         }
 
-        public bool HasChanged(IRepository repository, IConfigurationOptions options)
+        public bool HasChanged(IRemoteGitRepository repository, IConfigurationOptions options)
         {
             if (_options.Cache is null)
                 return true;
@@ -46,14 +45,14 @@ namespace UpDock.Caching
 
         private static readonly SHA256 Sha256Hash = SHA256.Create();
 
-        private static string CreateHash(IRepository repository, IConfigurationOptions options)
+        private static string CreateHash(IRemoteGitRepository repository, IConfigurationOptions options)
         {
             var hash = options.CreateHash();
 
             return Sha256Hash.ComputeHash($"{hash}:{repository.PushedAt:u}");
         }
 
-        public void Set(IRepository repository, IConfigurationOptions options, IEnumerable<DockerImage?> images)
+        public void Set(IRemoteGitRepository repository, IConfigurationOptions options, IEnumerable<DockerImage?> images)
         {
             if (_options.Cache is null)
                 return;

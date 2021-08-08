@@ -39,7 +39,6 @@ namespace UpDock
                         ? new InMemoryCredentialStore(Credentials.Anonymous)
                         : new InMemoryCredentialStore(new Credentials(token, AuthenticationType.Bearer)));
                 })
-                .AddSingleton<IGitRepositoryFactory, GitRepositoryFactory>()
                 .AddSingleton<IReplacementPlanner, ReplacementPlanner>()
                 .AddSingleton<IReplacementPlanExecutor, ReplacementPlanExecutor>()
                 .AddSingleton<IFileFilterFactory, FileFilterFactory>()

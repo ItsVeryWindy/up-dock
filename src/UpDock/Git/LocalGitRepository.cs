@@ -11,9 +11,6 @@ using UpDock.Files;
 using UpDock.Nodes;
 using LibGit2Sharp;
 using Microsoft.Extensions.Logging;
-using Octokit;
-using Branch = LibGit2Sharp.Branch;
-using Signature = LibGit2Sharp.Signature;
 
 namespace UpDock.Git
 {
@@ -21,7 +18,6 @@ namespace UpDock.Git
     {
         private readonly LibGit2Sharp.Repository _localRepository;
         private readonly CommandLineOptions _options;
-        private readonly IGitHubClient _client;
         private readonly IRemoteGitRepository _remoteRepository;
         private readonly IFileProvider _provider;
         private readonly ILogger<LocalGitRepository> _logger;
@@ -32,11 +28,10 @@ namespace UpDock.Git
 
         public bool IsDirty => _localRepository.RetrieveStatus(new StatusOptions()).IsDirty;
 
-        public LocalGitRepository(LibGit2Sharp.Repository localRepository, CommandLineOptions options, IGitHubClient client, IRemoteGitRepository remoteRepository, IFileProvider provider, ILogger<LocalGitRepository> logger)
+        public LocalGitRepository(LibGit2Sharp.Repository localRepository, CommandLineOptions options, IRemoteGitRepository remoteRepository, IFileProvider provider, ILogger<LocalGitRepository> logger)
         {
             _localRepository = localRepository;
             _options = options;
-            _client = client;
             _remoteRepository = remoteRepository;
             _provider = provider;
             _logger = logger;
@@ -60,33 +55,14 @@ namespace UpDock.Git
 
                 CleanUpOldReferences(remote, groupHash, branch);
 
-                var newPullRequest = CreatePullRequest(forkedRepository, replacements, branch);
+                var newPullRequest = CreatePullRequest(replacements, branch);
 
                 CreateCommit(newPullRequest.Title, branch, remote);
 
                 _logger.LogInformation("Creating pull request {Title} for repository {Repository}", newPullRequest.Title, _remoteRepository.CloneUrl);
 
-                try
-                {
-                    var createdPullRequest = await _client.PullRequest.Create(_remoteRepository.Owner, _remoteRepository.Name, newPullRequest);
+                await _remoteRepository.CreatePullRequestAsync(forkedRepository, newPullRequest);
 
-                    var labelUpdate = new IssueUpdate();
-
-                    labelUpdate.AddLabel("up-dock");
-
-                    _logger.LogInformation("Updating pull request {Url} with label", createdPullRequest.Url);
-
-                    await _client.Issue.Update(_remoteRepository.Owner, _remoteRepository.Name, createdPullRequest.Number, labelUpdate);
-                }
-                catch (ApiValidationException ex)
-                {
-                    if (ex.ApiError.Errors.Any(x => x.Message.Contains("already exists") && x.Message.Contains(branch.FriendlyName)))
-                    {
-                        _logger.LogInformation("Pull request already exists for branch {Branch} in repository {Repository}", branch.FriendlyName, _remoteRepository.CloneUrl);
-                        return;
-                    }
-                    throw;
-                }
             }
             finally
             {
@@ -149,7 +125,7 @@ namespace UpDock.Git
             });
         }
 
-        private NewPullRequest CreatePullRequest(IRemoteGitRepository forkedRepository, IReadOnlyCollection<TextReplacement> replacements, Branch branch)
+        private PullRequest CreatePullRequest(IReadOnlyCollection<TextReplacement> replacements, Branch branch)
         {
             string title;
 
@@ -192,13 +168,10 @@ namespace UpDock.Git
                 .AppendLine()
                 .AppendLine("This is an automated update. Merge only if it passes tests.");
 
-            return new NewPullRequest(
+            return new PullRequest(
                 title,
-                $"{forkedRepository.Owner}:{branch.FriendlyName}",
-                _remoteRepository.Branch)
-            {
-                Body = body.ToString()
-            };
+                branch.FriendlyName,
+                _remoteRepository.DefaultBranch, body.ToString());
         }
 
         private Branch CreateBranch(string name, Remote remote)
@@ -239,7 +212,7 @@ namespace UpDock.Git
 
         public void Reset()
         {
-            var branch = _localRepository.Branches.First(x => x.IsRemote && x.FriendlyName == $"origin/{_remoteRepository.Branch}");
+            var branch = _localRepository.Branches.First(x => x.IsRemote && x.FriendlyName == $"origin/{_remoteRepository.DefaultBranch}");
 
             Commands.Checkout(_localRepository, branch, new CheckoutOptions
             {

@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 
 namespace UpDock.Git
 {
@@ -7,10 +8,12 @@ namespace UpDock.Git
         string CloneUrl { get; }
         string Owner { get; }
         string Name { get; }
-        string Branch { get; }
+        string DefaultBranch { get; }
+        DateTimeOffset? PushedAt { get; }
+        string FullName { get; }
 
-        public Task<IRemoteGitRepository> ForkRepositoryAsync();
-
-        public ILocalGitRepository CheckoutRepository();
+        Task<IRemoteGitRepository> ForkRepositoryAsync();
+        ILocalGitRepository CheckoutRepository();
+        Task CreatePullRequestAsync(IRemoteGitRepository forkedRepository, PullRequest pullRequest);
     }
 }

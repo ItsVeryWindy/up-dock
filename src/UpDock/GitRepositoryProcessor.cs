@@ -16,7 +16,6 @@ namespace UpDock
     public class GitRepositoryProcessor : IGitRepositoryProcessor
     {
         private readonly IRepositorySearcher _searcher;
-        private readonly IGitRepositoryFactory _factory;
         private readonly IReplacementPlanner _planner;
         private readonly IReplacementPlanExecutor _executor;
         private readonly IConfigurationOptions _options;
@@ -25,10 +24,9 @@ namespace UpDock
         private readonly IUpdateCache _updateCache;
         private readonly ILogger<GitRepositoryProcessor> _logger;
 
-        public GitRepositoryProcessor(IRepositorySearcher searcher, IGitRepositoryFactory factory, IReplacementPlanner planner, IReplacementPlanExecutor executor, IConfigurationOptions options, IFileFilterFactory fileFilterFactory, IVersionCache cache, IUpdateCache updateCache, ILogger<GitRepositoryProcessor> logger)
+        public GitRepositoryProcessor(IRepositorySearcher searcher, IReplacementPlanner planner, IReplacementPlanExecutor executor, IConfigurationOptions options, IFileFilterFactory fileFilterFactory, IVersionCache cache, IUpdateCache updateCache, ILogger<GitRepositoryProcessor> logger)
         {
             _searcher = searcher;
-            _factory = factory;
             _planner = planner;
             _executor = executor;
             _options = options;
@@ -83,11 +81,9 @@ namespace UpDock
             }
         }
 
-        private async Task ProcessRepositoryAsync(IRepository repository, CancellationToken cancellationToken)
+        private async Task ProcessRepositoryAsync(IRemoteGitRepository repository, CancellationToken cancellationToken)
         {
-            var gitRepository = _factory.CreateRepository(repository);
-
-            var localRepository = gitRepository.CheckoutRepository();
+            var localRepository = repository.CheckoutRepository();
 
             var directory = localRepository.Directory;
 
@@ -134,7 +130,7 @@ namespace UpDock
                 if (_options.DryRun)
                     continue;
 
-                var forkedRepository = await gitRepository.ForkRepositoryAsync();
+                var forkedRepository = await repository.ForkRepositoryAsync();
 
                 await localRepository.CreatePullRequestAsync(forkedRepository, groupedReplacements, cancellationToken);
             }

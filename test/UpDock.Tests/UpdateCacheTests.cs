@@ -108,7 +108,7 @@ namespace UpDock.Tests
             var image = CreateImage("1234");
 
             var options = new ConfigurationOptions();
-            var repository = new StubRepository();
+            var repository = new StubRemoteGitRepository();
 
             Assert.That(options.CreateHash(), Is.EqualTo("8dc6e36ab1b53c503309e7e07ace0ba933cc11888166402a7993c9899995d6d0"));
             Assert.That(repository.PushedAt, Is.EqualTo(DateTimeOffset.MinValue));
@@ -129,7 +129,7 @@ namespace UpDock.Tests
             var image = CreateImage("abcd@{digest}", "abcd@sha256:4f880368ed63767483b6f6c5bf7efde3af3faba816e71ff42db50326b0386bec");
 
             var options = new ConfigurationOptions();
-            var repository = new StubRepository();
+            var repository = new StubRemoteGitRepository();
 
             Assert.That(options.CreateHash(), Is.EqualTo("8dc6e36ab1b53c503309e7e07ace0ba933cc11888166402a7993c9899995d6d0"));
             Assert.That(repository.PushedAt, Is.EqualTo(DateTimeOffset.MinValue));
@@ -155,7 +155,7 @@ namespace UpDock.Tests
                     .Image!;
 
             var options = new ConfigurationOptions();
-            var repository = new StubRepository();
+            var repository = new StubRemoteGitRepository();
 
             Assert.That(options.CreateHash(), Is.EqualTo("8dc6e36ab1b53c503309e7e07ace0ba933cc11888166402a7993c9899995d6d0"));
             Assert.That(repository.PushedAt, Is.EqualTo(DateTimeOffset.MinValue));
@@ -177,7 +177,7 @@ namespace UpDock.Tests
 
             var options = new ConfigurationOptions();
 
-            var repository = new StubRepository();
+            var repository = new StubRemoteGitRepository();
 
             _updateCache.Set(repository, options, Enumerable.Repeat(image, 1));
 
@@ -193,7 +193,7 @@ namespace UpDock.Tests
 
             var options = new ConfigurationOptions();
 
-            var repository = new StubRepository();
+            var repository = new StubRemoteGitRepository();
 
             _updateCache.Set(repository, options, Enumerable.Repeat(image, 1));
 
@@ -212,7 +212,7 @@ namespace UpDock.Tests
                 Patterns = { DockerImageTemplate.Parse("abcd").CreatePattern(true, true, true, false, true) }
             };
 
-            var repository = new StubRepository();
+            var repository = new StubRemoteGitRepository();
 
             _updateCache.Set(repository, options, Enumerable.Repeat(image, 1));
 
