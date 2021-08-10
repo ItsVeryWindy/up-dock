@@ -115,7 +115,7 @@ There is one exception to this rule if you're redefining an existing entry, wher
 ### Grouping
 By default, grouping of changes is done based off the image template specified. You can specify a `group` property with a string as the value and all changes with that group will be merged into a single pull request.
 
-# Report File
+## Report File
 One of the options is being able to output a report of what pull requests were created when the tool was run.
 The main purpose to allow for other tools to take this output and allow them to process it.
 
