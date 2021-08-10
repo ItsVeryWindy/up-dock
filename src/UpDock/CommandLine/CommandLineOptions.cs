@@ -59,5 +59,9 @@ namespace UpDock.CommandLine
         [Shortcut("cache")]
         [Description("Cache the results from this run to re-use in another")]
         public string? Cache { get; set; }
+
+        [Shortcut("r", "report")]
+        [Description("Output a report to a file on the pull requests that were created")]
+        public string? Report { get; set; }
     }
 }

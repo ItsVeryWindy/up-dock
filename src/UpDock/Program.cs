@@ -24,6 +24,7 @@ namespace UpDock
             services
                 .AddLogging(x => x.AddConsole())
                 .AddSingleton<HttpClient>()
+                .AddSingleton<ReportGenerator>()
                 .AddSingleton<IVersionCache, VersionCache>()
                 .AddSingleton<IUpdateCache, UpdateCache>()
                 .AddSingleton<IRepositorySearcher, GitHubRepositorySearcher>()

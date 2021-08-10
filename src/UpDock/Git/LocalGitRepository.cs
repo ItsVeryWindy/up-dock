@@ -39,7 +39,7 @@ namespace UpDock.Git
 
         private bool Ignored(IRepositoryFileInfo file) => _localRepository.Ignore.IsPathIgnored(file.RelativePath);
 
-        public async Task CreatePullRequestAsync(IRemoteGitRepository forkedRepository, IReadOnlyCollection<TextReplacement> replacements, CancellationToken cancellationToken)
+        public async Task<string?> CreatePullRequestAsync(IRemoteGitRepository forkedRepository, IReadOnlyCollection<TextReplacement> replacements, CancellationToken cancellationToken)
         {
             var head = _localRepository.Head;
 
@@ -61,8 +61,7 @@ namespace UpDock.Git
 
                 _logger.LogInformation("Creating pull request {Title} for repository {Repository}", newPullRequest.Title, _remoteRepository.CloneUrl);
 
-                await _remoteRepository.CreatePullRequestAsync(forkedRepository, newPullRequest);
-
+                return await _remoteRepository.CreatePullRequestAsync(forkedRepository, newPullRequest);
             }
             finally
             {

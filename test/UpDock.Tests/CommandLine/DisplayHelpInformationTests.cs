@@ -34,6 +34,7 @@ namespace UpDock.Tests.CommandLine
                 "--dry-run/-d            Run without creating pull requests",
                 "--email/-e*             Email to use in the commit",
                 "--help/-h               Display help information",
+                "--report/-r             Output a report to a file on the pull requests that were created",
                 "--search/-s*            Search query to get repositories",
                 "--template/-i           A template to apply",
                 "--token/-t              GitHub token to access the repository",                

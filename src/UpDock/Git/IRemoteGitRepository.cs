@@ -14,6 +14,6 @@ namespace UpDock.Git
 
         Task<IRemoteGitRepository> ForkRepositoryAsync();
         ILocalGitRepository CheckoutRepository();
-        Task CreatePullRequestAsync(IRemoteGitRepository forkedRepository, PullRequest pullRequest);
+        Task<string?> CreatePullRequestAsync(IRemoteGitRepository forkedRepository, PullRequest pullRequest);
     }
 }

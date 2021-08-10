@@ -53,7 +53,7 @@ namespace UpDock.Git
             return _factory.Create(CloneUrl, dir, this);
         }
 
-        public async Task CreatePullRequestAsync(IRemoteGitRepository forkedRepository, PullRequest pullRequest)
+        public async Task<string?> CreatePullRequestAsync(IRemoteGitRepository forkedRepository, PullRequest pullRequest)
         {
             try
             {
@@ -71,13 +71,15 @@ namespace UpDock.Git
                 _logger.LogInformation("Updating pull request {Url} with label", createdPullRequest.Url);
 
                 await _client.Issue.Update(Owner, Name, createdPullRequest.Number, labelUpdate);
+
+                return createdPullRequest.Url;
             }
             catch (ApiValidationException ex)
             {
                 if (ex.ApiError.Errors.Any(x => x.Message.Contains("already exists") && x.Message.Contains(pullRequest.Branch)))
                 {
                     _logger.LogInformation("Pull request already exists for branch {Branch} in repository {Repository}", pullRequest.Branch, CloneUrl);
-                    return;
+                    return null;
                 }
                 throw;
             }

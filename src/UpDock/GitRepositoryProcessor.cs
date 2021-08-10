@@ -22,9 +22,10 @@ namespace UpDock
         private readonly IFileFilterFactory _fileFilterFactory;
         private readonly IVersionCache _cache;
         private readonly IUpdateCache _updateCache;
+        private readonly ReportGenerator _reportGenerator;
         private readonly ILogger<GitRepositoryProcessor> _logger;
 
-        public GitRepositoryProcessor(IRepositorySearcher searcher, IReplacementPlanner planner, IReplacementPlanExecutor executor, IConfigurationOptions options, IFileFilterFactory fileFilterFactory, IVersionCache cache, IUpdateCache updateCache, ILogger<GitRepositoryProcessor> logger)
+        public GitRepositoryProcessor(IRepositorySearcher searcher, IReplacementPlanner planner, IReplacementPlanExecutor executor, IConfigurationOptions options, IFileFilterFactory fileFilterFactory, IVersionCache cache, IUpdateCache updateCache, ReportGenerator reportGenerator, ILogger<GitRepositoryProcessor> logger)
         {
             _searcher = searcher;
             _planner = planner;
@@ -33,6 +34,7 @@ namespace UpDock
             _fileFilterFactory = fileFilterFactory;
             _cache = cache;
             _updateCache = updateCache;
+            _reportGenerator = reportGenerator;
             _logger = logger;
         }
 
@@ -70,6 +72,8 @@ namespace UpDock
                 }
 
                 await _updateCache.SaveAsync(cancellationToken);
+
+                await _reportGenerator.GenerateReportAsync(cancellationToken);
             }
             catch(ApiValidationException ex)
             {
@@ -132,7 +136,12 @@ namespace UpDock
 
                 var forkedRepository = await repository.ForkRepositoryAsync();
 
-                await localRepository.CreatePullRequestAsync(forkedRepository, groupedReplacements, cancellationToken);
+                var url = await localRepository.CreatePullRequestAsync(forkedRepository, groupedReplacements, cancellationToken);
+
+                if (url is not null)
+                {
+                    _reportGenerator.AddPullRequest(url);
+                }
             }
 
             _updateCache.Set(repository, _options, localOptions.Patterns.Select(x => x.Template).Select(x => _cache.FetchLatest(x)));

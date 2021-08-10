@@ -14,6 +14,7 @@ UpDock is a tool for automatically updating docker images within github reposito
 --dry-run/-d     Run without creating pull requests
 --email/-e*      Email to use in the commit
 --help/-h        Display help information
+--report/-r      Output a report to a file on the pull requests that were created
 --search/-s*     Search query to get repositories
 --template/-i    A template to apply
 --token/-t       GitHub token to access the repository
@@ -113,3 +114,17 @@ There is one exception to this rule if you're redefining an existing entry, wher
 
 ### Grouping
 By default, grouping of changes is done based off the image template specified. You can specify a `group` property with a string as the value and all changes with that group will be merged into a single pull request.
+
+# Report File
+One of the options is being able to output a report of what pull requests were created when the tool was run.
+The main purpose to allow for other tools to take this output and allow them to process it.
+
+Currently this file just contains a json array of pull requests urls. If the file already exists it will be overwritten.
+
+```json
+[
+    {
+        "url": "https://github.com/ItsVeryWindy/test-docker-update/pull/6"
+    }
+]
+```
