@@ -46,13 +46,13 @@ namespace UpDock.Tests
         [Test]
         public async Task ShouldSaveReport()
         {
-            _reportGenerator.AddPullRequest("https://my-pull-request");
+            _reportGenerator.AddPullRequest("https://my-pull-request", "title");
 
             await _reportGenerator.GenerateReportAsync(CancellationToken.None);
 
             var newContents = await TestUtilities.GetStringAsync(_provider.GetFile(_options.Report!).CreateReadStream());
 
-            Assert.That(newContents, Is.EqualTo("[{\"url\":\"https://my-pull-request\"}]"));
+            Assert.That(newContents, Is.EqualTo("[{\"url\":\"https://my-pull-request\",\"title\":\"title\"}]"));
         }
     }
 }

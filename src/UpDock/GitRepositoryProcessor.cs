@@ -136,11 +136,11 @@ namespace UpDock
 
                 var forkedRepository = await repository.ForkRepositoryAsync();
 
-                var url = await localRepository.CreatePullRequestAsync(forkedRepository, groupedReplacements, cancellationToken);
+                var pullRequest = await localRepository.CreatePullRequestAsync(forkedRepository, groupedReplacements, cancellationToken);
 
-                if (url is not null)
+                if (pullRequest is not null)
                 {
-                    _reportGenerator.AddPullRequest(url);
+                    _reportGenerator.AddPullRequest(pullRequest.Value.url, pullRequest.Value.title);
                 }
             }
 

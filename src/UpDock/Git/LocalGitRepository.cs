@@ -39,7 +39,7 @@ namespace UpDock.Git
 
         private bool Ignored(IRepositoryFileInfo file) => _localRepository.Ignore.IsPathIgnored(file.RelativePath);
 
-        public async Task<string?> CreatePullRequestAsync(IRemoteGitRepository forkedRepository, IReadOnlyCollection<TextReplacement> replacements, CancellationToken cancellationToken)
+        public async Task<(string url, string title)?> CreatePullRequestAsync(IRemoteGitRepository forkedRepository, IReadOnlyCollection<TextReplacement> replacements, CancellationToken cancellationToken)
         {
             var head = _localRepository.Head;
 

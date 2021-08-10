@@ -53,7 +53,7 @@ namespace UpDock.Git
             return _factory.Create(CloneUrl, dir, this);
         }
 
-        public async Task<string?> CreatePullRequestAsync(IRemoteGitRepository forkedRepository, PullRequest pullRequest)
+        public async Task<(string url, string title)?> CreatePullRequestAsync(IRemoteGitRepository forkedRepository, PullRequest pullRequest)
         {
             try
             {
@@ -72,7 +72,7 @@ namespace UpDock.Git
 
                 await _client.Issue.Update(Owner, Name, createdPullRequest.Number, labelUpdate);
 
-                return createdPullRequest.Url;
+                return (createdPullRequest.Url, pullRequest.Title);
             }
             catch (ApiValidationException ex)
             {

@@ -24,9 +24,9 @@ namespace UpDock
             _provider = provider;
         }
 
-        public void AddPullRequest(string url)
+        public void AddPullRequest(string url, string title)
         {
-            _pullRequests.Add(new ReportEntry(url));
+            _pullRequests.Add(new ReportEntry(url, title));
         }
 
         public async Task GenerateReportAsync(CancellationToken cancellationToken)
@@ -47,11 +47,15 @@ namespace UpDock
         private class ReportEntry
         {
             [JsonPropertyName("url")]
-            public string Url { get; set; }
+            public string Url { get; }
 
-            public ReportEntry(string url)
+            [JsonPropertyName("title")]
+            public string Title { get; }
+
+            public ReportEntry(string url, string title)
             {
                 Url = url;
+                Title = title;
             }
         }
     }
