@@ -28,6 +28,7 @@ namespace UpDock
                 .AddSingleton<IVersionCache, VersionCache>()
                 .AddSingleton<IUpdateCache, UpdateCache>()
                 .AddSingleton<IRepositorySearcher, GitHubRepositorySearcher>()
+                .AddSingleton<ILocalGitRepositoryFactory, LocalGitRepositoryFactory>()
                 .AddSingleton<IFileProvider, PhysicalFileProvider>()
                 .AddSingleton<IGitHubClient>(sp => {
                     var token = sp.GetRequiredService<IConfigurationOptions>().Token;
