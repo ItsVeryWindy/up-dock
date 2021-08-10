@@ -119,12 +119,13 @@ By default, grouping of changes is done based off the image template specified. 
 One of the options is being able to output a report of what pull requests were created when the tool was run.
 The main purpose to allow for other tools to take this output and allow them to process it.
 
-Currently this file just contains a json array of pull requests urls. If the file already exists it will be overwritten.
+Currently this file just contains a json array of pull requests urls and titles. If the file already exists it will be overwritten.
 
 ```json
 [
     {
-        "url": "https://github.com/ItsVeryWindy/test-docker-update/pull/6"
+        "url": "https://github.com/ItsVeryWindy/test-docker-update/pull/6",
+        "title": "Automatic update of docker image mcr.microsoft.com/dotnet/core/sdk to 3.1.405"
     }
 ]
 ```
