@@ -339,7 +339,7 @@ namespace UpDock
             {
                 var result = node.Search(tag);
 
-                if(result.Pattern != null)
+                if(result.Pattern != null && result.EndIndex == tag.Length)
                 {
                     versions.Add(result.Pattern.Image);
                 }
