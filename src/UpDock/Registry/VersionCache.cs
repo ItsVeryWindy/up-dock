@@ -58,7 +58,7 @@ namespace UpDock
 
             try
             {
-                var tags = await RequestTags(repository, image, 0, cancellationToken);
+                var tags = await RequestTags(repository, image, cancellationToken);
 
                 _tagLists[(repository, image)] = tags;
             }
@@ -68,7 +68,7 @@ namespace UpDock
             }
         }
 
-        private async Task<TagList> RequestTags(Uri repository, string image, int attempt, CancellationToken cancellationToken)
+        private async Task<TagList> RequestTags(Uri repository, string image, CancellationToken cancellationToken)
         {
             var url = new Uri(repository, $"v2/{image}/tags/list");
 
@@ -81,7 +81,7 @@ namespace UpDock
                 return request;
             }
 
-            var response = await MakeRequestAsync(repository, image, attempt + 1, CreateRequest, cancellationToken);
+            var response = await MakeRequestAsync(repository, image, 0, CreateRequest, cancellationToken);
 
             var content = await response.Content.ReadAsStringAsync(cancellationToken);
 
