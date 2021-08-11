@@ -57,7 +57,7 @@ namespace UpDock.Git
         {
             try
             {
-                var newPullRequest = new NewPullRequest(pullRequest.Title, $"{forkedRepository.Owner}:{pullRequest.Branch}", pullRequest.Branch)
+                var newPullRequest = new NewPullRequest(pullRequest.Title, $"{forkedRepository.Owner}:{pullRequest.Branch}", DefaultBranch)
                 {
                     Body = pullRequest.Body
                 };
