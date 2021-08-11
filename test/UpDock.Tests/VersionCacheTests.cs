@@ -38,5 +38,49 @@ namespace UpDock.Tests
             Assert.That(latest, Is.Not.Null);
             Assert.That(latest!.ToString(), Is.EqualTo(latestStr));
         }
+
+        [TestCase("mcr.microsoft.com/dotnet/core/sdk:{v3.0.*}-al")]
+        public async Task ShouldNotReturnAVersion(string templateStr)
+        {
+            var sp = TestUtilities
+                .CreateServices()
+                .AddSingleton<HttpMessageHandler>(new StaticResponseHandler())
+                .AddSingleton<CommandLineOptions>()
+                .BuildServiceProvider();
+
+            var cache = sp.GetRequiredService<IVersionCache>();
+
+            var template = DockerImageTemplate.Parse(templateStr);
+
+            await cache.UpdateCacheAsync(Enumerable.Repeat(template, 1), CancellationToken.None);
+
+            var latest = cache.FetchLatest(template);
+
+            Assert.That(latest, Is.Null);
+        }
+
+        [Test]
+        public async Task ShouldNotReturnAVersionIfLoadingFailed()
+        {
+            var handler = new StaticResponseHandler();
+
+            var sp = TestUtilities
+                .CreateServices()
+                .AddSingleton<HttpMessageHandler>(handler)
+                .AddSingleton<CommandLineOptions>()
+                .BuildServiceProvider();
+
+            handler.Unauthorized = true;
+
+            var cache = sp.GetRequiredService<IVersionCache>();
+
+            var template = DockerImageTemplate.Parse("mcr.microsoft.com/dotnet/core/sdk:{v3.0.*}-alpine{v}");
+
+            await cache.UpdateCacheAsync(Enumerable.Repeat(template, 1), CancellationToken.None);
+
+            var latest = cache.FetchLatest(template);
+
+            Assert.That(latest, Is.Null);
+        }
     }
 }

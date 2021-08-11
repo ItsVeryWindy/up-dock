@@ -7,8 +7,16 @@ namespace UpDock.Tests
 {
     internal class StaticResponseHandler : DelegatingHandler
     {
+        public bool Unauthorized { get; set; }
+
         protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
+            if(Unauthorized)
+                return Task.FromResult(new HttpResponseMessage(HttpStatusCode.Unauthorized)
+                {
+                    RequestMessage = request
+                });
+
             if (request.RequestUri?.AbsolutePath.Contains("tags") == true)
             {
                 var stream = typeof(StaticResponseHandler).Assembly.GetManifestResourceStream("UpDock.Tests.tags_response.json");
