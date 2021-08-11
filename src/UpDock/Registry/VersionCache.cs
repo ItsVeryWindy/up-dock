@@ -23,7 +23,7 @@ namespace UpDock
         private readonly ILogger<VersionCache> _logger;
         private readonly IConfigurationOptions _options;
         private readonly ConcurrentDictionary<(Uri, string), TagList> _tagLists = new();
-        private readonly ConcurrentDictionary<Uri, AuthToken> _authTokens = new();
+        private readonly ConcurrentDictionary<(Uri, string), AuthToken> _authTokens = new();
         private readonly ConcurrentDictionary<(Uri, string, string), string> _digestsLists = new();
 
         public VersionCache(HttpClient client, ILogger<VersionCache> logger, IConfigurationOptions options)
@@ -58,7 +58,7 @@ namespace UpDock
 
             try
             {
-                var tags = await RequestTags(repository, image, cancellationToken);
+                var tags = await RequestTags(repository, image, 0, cancellationToken);
 
                 _tagLists[(repository, image)] = tags;
             }
@@ -68,7 +68,7 @@ namespace UpDock
             }
         }
 
-        private async Task<TagList> RequestTags(Uri repository, string image, CancellationToken cancellationToken)
+        private async Task<TagList> RequestTags(Uri repository, string image, int attempt, CancellationToken cancellationToken)
         {
             var url = new Uri(repository, $"v2/{image}/tags/list");
 
@@ -81,7 +81,7 @@ namespace UpDock
                 return request;
             }
 
-            var response = await MakeRequestAsync(repository, CreateRequest, cancellationToken);
+            var response = await MakeRequestAsync(repository, image, attempt + 1, CreateRequest, cancellationToken);
 
             var content = await response.Content.ReadAsStringAsync(cancellationToken);
 
@@ -90,8 +90,11 @@ namespace UpDock
 
         private static readonly SemaphoreSlim AuthenticationSemaphore = new(1);
 
-        private async Task<HttpResponseMessage> MakeRequestAsync(Uri repository, Func<HttpRequestMessage> factory, CancellationToken cancellationToken)
+        private async Task<HttpResponseMessage> MakeRequestAsync(Uri repository, string image, int attempt, Func<HttpRequestMessage> factory, CancellationToken cancellationToken)
         {
+            if (attempt > 1)
+                throw new HttpRequestException("Too many failed attempts");
+
             var request = factory();
 
             if (_options.Authentication.TryGetValue(repository.Host, out var authenticationOptions))
@@ -102,7 +105,7 @@ namespace UpDock
             }
             else
             {
-                var token = await GetExistingTokenAsync(repository, cancellationToken);
+                var token = await GetExistingTokenAsync(repository, image, cancellationToken);
 
                 if (token != null)
                 {
@@ -122,7 +125,7 @@ namespace UpDock
 
                     if (token != null)
                     {
-                        _authTokens[repository] = token;
+                        _authTokens[(repository, image)] = token;
                     }
                 }
                 finally
@@ -130,19 +133,19 @@ namespace UpDock
                     AuthenticationSemaphore.Release();
                 }
 
-                return await MakeRequestAsync(repository, factory, cancellationToken);
+                return await MakeRequestAsync(repository, image, attempt + 1, factory, cancellationToken);
             }
 
             return response;
         }
 
-        private async Task<AuthToken?> GetExistingTokenAsync(Uri repository, CancellationToken cancellationToken)
+        private async Task<AuthToken?> GetExistingTokenAsync(Uri repository, string image, CancellationToken cancellationToken)
         {
             await AuthenticationSemaphore.WaitAsync(cancellationToken);
 
             try
             {
-                if (!_authTokens.TryGetValue(repository, out var token))
+                if (!_authTokens.TryGetValue((repository, image), out var token))
                     return null;
 
                 return token.Expired(DateTimeOffset.UtcNow) ? null : token;

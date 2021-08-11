@@ -76,7 +76,7 @@ namespace UpDock.Git
             }
             catch (ApiValidationException ex)
             {
-                if (ex.ApiError.Errors.Any(x => x.Message.Contains("already exists") && x.Message.Contains(pullRequest.Branch)))
+                if (ex.ApiError?.Errors?.Any(x => x?.Message is not null && x.Message.Contains("already exists") && x.Message.Contains(pullRequest.Branch)) == true)
                 {
                     _logger.LogInformation("Pull request already exists for branch {Branch} in repository {Repository}", pullRequest.Branch, CloneUrl);
                     return null;
