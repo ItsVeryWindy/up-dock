@@ -170,7 +170,7 @@ namespace UpDock.Git
             return new PullRequest(
                 title,
                 branch.FriendlyName,
-                _remoteRepository.DefaultBranch, body.ToString());
+                body.ToString());
         }
 
         private Branch CreateBranch(string name, Remote remote)
