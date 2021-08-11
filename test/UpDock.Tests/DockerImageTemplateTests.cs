@@ -7,6 +7,7 @@ namespace UpDock.Tests
     public class DockerImageTemplateTests
     {
         [TestCase("nginx", "https://registry-1.docker.io/", "library/nginx", false, "{v*}", "nginx:{v*}")]
+        [TestCase("user/nginx", "https://registry-1.docker.io/", "user/nginx", false, "{v*}", "user/nginx:{v*}")]
         [TestCase("library/nginx", "https://registry-1.docker.io/", "library/nginx", false, "{v*}", "library/nginx:{v*}")]
         [TestCase("repository.com/nginx", "https://repository.com/", "nginx", false, "{v*}", "repository.com/nginx:{v*}")]
         [TestCase("nginx:_{v}", "https://registry-1.docker.io/", "library/nginx", false, "_{v*}", "nginx:_{v*}")]

@@ -224,7 +224,7 @@ namespace UpDock.Imaging
         {
             var sb = new StringBuilder();
 
-            if (Repository == DefaultRepository && !_image.StartsWith("library/"))
+            if (Repository == DefaultRepository && !_image.Contains("/") && !_image.StartsWith("library/"))
             {
                 sb.Append(DefaultLibraryName);
             }
