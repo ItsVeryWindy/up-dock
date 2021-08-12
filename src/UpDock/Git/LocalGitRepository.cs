@@ -57,7 +57,11 @@ namespace UpDock.Git
 
                 var newPullRequest = CreatePullRequest(replacements, branch);
 
-                CreateCommit(newPullRequest.Title, branch, remote);
+                if (!CreateCommit(newPullRequest.Title, branch, remote))
+                {
+                    _logger.LogError("Failed to create commit for for repository {Repository}", _remoteRepository.CloneUrl);
+                    return null;
+                }
 
                 _logger.LogInformation("Creating pull request {Title} for repository {Repository}", newPullRequest.Title, _remoteRepository.CloneUrl);
 
@@ -99,12 +103,15 @@ namespace UpDock.Git
 
                 _localRepository.Network.Push(remote, $"+:{reference.CanonicalName}", new PushOptions
                 {
-                    CredentialsProvider = CreateCredentials
+                    CredentialsProvider = CreateCredentials,
+                    OnPushStatusError = error => {
+                        _logger.LogError("Push failed for old reference {Reference} with message '{Message}'", error.Reference, error.Message);
+                    }
                 });
             }
         }
 
-        private void CreateCommit(string title, Branch branch, Remote remote)
+        private bool CreateCommit(string title, Branch branch, Remote remote)
         {
             var author = new Signature("up-dock", _options.Email, DateTime.Now);
 
@@ -118,10 +125,18 @@ namespace UpDock.Git
 
             _logger.LogInformation("Pushing to remote {RefSpec}", pushRefSpec);
 
+            var failed = false;
+
             _localRepository.Network.Push(remote, pushRefSpec, new PushOptions
             {
-                CredentialsProvider = CreateCredentials
+                CredentialsProvider = CreateCredentials,
+                OnPushStatusError = error => {
+                    failed = true;
+                    _logger.LogError("Push failed for {RefSpec} with message '{Message}'", error.Reference, error.Message);
+                }
             });
+
+            return failed;
         }
 
         private PullRequest CreatePullRequest(IReadOnlyCollection<TextReplacement> replacements, Branch branch)
