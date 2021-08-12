@@ -151,13 +151,22 @@ namespace UpDock.Git
 
                 body
                     .AppendLine($"{distinctReplacements.Count} docker images were updated in {distinctReplacements.SelectMany(x => x).Select(x => x.File.File.AbsolutePath).Distinct().Count()} files:")
-                    .AppendLine(string.Join(", ", distinctReplacements.Select(x => $"`{x.Key.Item1.Template.ToRepositoryImageString()}`")))
+                    .AppendLine(string.Join(", ", distinctReplacements.Select(x => $"`{x.Key.Item1.Template.ToRepositoryImageString()}:{x.Key.Item1.Tag}`")))
                     .AppendLine("<details>")
                     .AppendLine("<summary>Details of updated images</summary>");
 
+                var hr = false;
+
                 foreach (var replacement in distinctReplacements)
                 {
+                    if (hr)
+                    {
+                        body.AppendLine("<hr>");
+                    }
+
                     PopulateSingleUpdate(replacement, body);
+
+                    hr = true;
                 }
 
                 body.AppendLine("</details>");
@@ -199,6 +208,7 @@ namespace UpDock.Git
             var toVersion = replacement.First().ToPattern.Image.Tag;
 
             body
+                .AppendLine()
                 .AppendLine($"UpDock has generated an update of `{image}` from `{fromVersion}` to `{toVersion}`")
                 .AppendLine()
                 .AppendLine($"{replacement.Count()} file(s) updated");
