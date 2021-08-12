@@ -57,7 +57,7 @@ namespace UpDock.Git
 
                 var newPullRequest = CreatePullRequest(replacements, branch);
 
-                if (!CreateCommit(newPullRequest.Title, branch, remote))
+                if (!CreateCommit(newPullRequest.Title, replacements, branch, remote))
                 {
                     _logger.LogError("Failed to create commit for for repository {Repository}", _remoteRepository.CloneUrl);
                     return null;
@@ -111,11 +111,21 @@ namespace UpDock.Git
             }
         }
 
-        private bool CreateCommit(string title, Branch branch, Remote remote)
+        private bool CreateCommit(string title, IReadOnlyCollection<TextReplacement> replacements, Branch branch, Remote remote)
         {
             var author = new Signature("up-dock", _options.Email, DateTime.Now);
 
-            Commands.Stage(_localRepository, "*");
+            var files = replacements
+                .Select(x => x.File.RelativePath)
+                .Distinct()
+                .ToList();
+
+            foreach (var file in files)
+            {
+                _logger.LogInformation("Staging file '{File}'", file);
+
+                Commands.Stage(_localRepository, file);
+            }
 
             _logger.LogInformation("Creating commit {Title}", title);
 
@@ -125,18 +135,18 @@ namespace UpDock.Git
 
             _logger.LogInformation("Pushing to remote {RefSpec}", pushRefSpec);
 
-            var failed = false;
+            var succeeded = true;
 
             _localRepository.Network.Push(remote, pushRefSpec, new PushOptions
             {
                 CredentialsProvider = CreateCredentials,
                 OnPushStatusError = error => {
-                    failed = true;
+                    succeeded = false;
                     _logger.LogError("Push failed for {RefSpec} with message '{Message}'", error.Reference, error.Message);
                 }
             });
 
-            return failed;
+            return succeeded;
         }
 
         private PullRequest CreatePullRequest(IReadOnlyCollection<TextReplacement> replacements, Branch branch)
