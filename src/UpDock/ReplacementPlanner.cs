@@ -49,13 +49,13 @@ namespace UpDock
 
                     var currentVersion = line.Substring(i, endIndex);
 
+                    _logger.LogIdentifiedFromPattern(currentVersion, lineNumber + 1, file, image);
+
                     var latestImage = _cache.FetchLatest(image.Pattern.Template);
 
                     var latestPattern = latestImage is null ? null : image.Create(latestImage);
 
                     var latestVersion = latestPattern?.ToString();
-
-                    _logger.LogIdentifiedFromPattern(currentVersion, lineNumber + 1, file, image);
 
                     if (latestVersion != null && ((allowDowngrade && currentVersion != latestVersion) || (!allowDowngrade && latestPattern!.Image.CompareTo(image.Image) > 0)))
                     {

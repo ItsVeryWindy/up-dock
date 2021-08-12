@@ -10,6 +10,7 @@ using NuGet.Versioning;
 using NUnit.Framework;
 using UpDock.CommandLine;
 using UpDock.Imaging;
+using UpDock.Nodes;
 using UpDock.Registry;
 
 namespace UpDock.Tests
@@ -31,12 +32,15 @@ namespace UpDock.Tests
 
             var template = DockerImageTemplate.Parse(templateStr);
 
+            var expectedImage = CreateImage(template, latestStr);
+
             await cache.UpdateCacheAsync(Enumerable.Repeat(template, 1), CancellationToken.None);
 
             var latest = cache.FetchLatest(template);
 
             Assert.That(latest, Is.Not.Null);
             Assert.That(latest!.ToString(), Is.EqualTo(latestStr));
+            Assert.That(latest!.CompareTo(expectedImage), Is.EqualTo(0));
         }
 
         [TestCase("mcr.microsoft.com/dotnet/core/sdk:{v3.0.*}-al")]
@@ -81,6 +85,16 @@ namespace UpDock.Tests
             var latest = cache.FetchLatest(template);
 
             Assert.That(latest, Is.Null);
+        }
+
+        private static DockerImage CreateImage(DockerImageTemplate template, string search)
+        {
+            return new SearchNodeBuilder()
+                    .Add(template.CreatePattern(true, true, true, false, false))
+                    .Build()
+                    .Search(search)
+                    .Pattern?
+                    .Image!;
         }
     }
 }
