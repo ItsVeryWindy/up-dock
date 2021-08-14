@@ -57,11 +57,11 @@ namespace UpDock
 
                     var latestVersion = latestPattern?.ToString();
 
-                    if (latestVersion != null && ((allowDowngrade && currentVersion != latestVersion) || (!allowDowngrade && latestPattern!.Image.CompareTo(image.Image) > 0)))
+                    if (latestVersion is not null && latestPattern is not null && currentVersion != latestVersion && image.Image.CanUpgrade(latestImage, allowDowngrade))
                     {
                         _logger.LogReplacingOutdatedVersion(currentVersion, latestVersion);
 
-                        replacements.Add(new TextReplacement(image.Pattern.Group, file, currentVersion, image, latestVersion, latestPattern!, lineNumber, i));
+                        replacements.Add(new TextReplacement(image.Pattern.Group, file, currentVersion, image, latestVersion, latestPattern, lineNumber, i));
                     }
 
                     i += endIndex;

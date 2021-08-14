@@ -28,6 +28,29 @@ namespace UpDock.Nodes
             _parts = new List<object>(parts);
         }
 
+        public bool CanUpgrade(DockerImage? other, bool allowDowngrade)
+        {
+            if (other is null)
+                return false;
+
+            if (Repository.Host != other.Repository.Host)
+                return false;
+
+            if (Image != other.Image)
+                return false;
+
+            if (Template != other.Template)
+                return false;
+
+            if (Template.HasDigest && Digest != other.Digest && _parts.Count != other._parts.Count)
+                return true;
+
+            if (allowDowngrade)
+                return true;
+
+            return other.CompareTo(this) > 0;
+        }
+
         public int CompareTo(DockerImage? other)
         {
             if (other == null)

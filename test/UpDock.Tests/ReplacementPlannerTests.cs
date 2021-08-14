@@ -88,6 +88,9 @@ namespace UpDock.Tests
                     DockerImageTemplate.Parse("mcr.microsoft.com/dotnet/core/sdk@{digest}").CreatePattern(true, true, true, false, true),
                     "Dockerfile_digest", "mcr.microsoft.com/dotnet/core/sdk@sha256:4f880368ed63767483b6f6c5bf7efde3af3faba816e71ff42db50326b0386bec", 0, 5, "mcr.microsoft.com/dotnet/core/sdk@sha256:4f880368ed63767483b6f6c5bf7efde3af3faba816e71ff42db50326b0386bed", true);
                 yield return new TestCaseData(
+                    DockerImageTemplate.Parse("mcr.microsoft.com/dotnet/core/sdk@{digest}").CreatePattern(true, true, true, false, true),
+                    "Dockerfile_digest", "mcr.microsoft.com/dotnet/core/sdk@sha256:4f880368ed63767483b6f6c5bf7efde3af3faba816e71ff42db50326b0386bec", 0, 5, "mcr.microsoft.com/dotnet/core/sdk@sha256:4f880368ed63767483b6f6c5bf7efde3af3faba816e71ff42db50326b0386bed", false);
+                yield return new TestCaseData(
                     DockerImageTemplate.Parse("mcr.microsoft.com/dotnet/core/sdk@{digest}:{v}-alpine{v}").CreatePattern("sdk@{digest} #{v}-alpine{v}"),
                     "Dockerfile_digest_extra", "sdk@sha256:4f880368ed63767483b6f6c5bf7efde3af3faba816e71ff42db50326b0386bec #2.1.602-alpine3.9", 0, 35, "sdk@sha256:4f880368ed63767483b6f6c5bf7efde3af3faba816e71ff42db50326b0386bed #3.1.102-alpine3.11", true);
             }
@@ -101,6 +104,12 @@ namespace UpDock.Tests
                 yield return new TestCaseData(
                     DockerImageTemplate.Parse("mcr.microsoft.com/dotnet/core/sdk:{v}-alpine{v}").CreatePattern("mcr.microsoft.com/dotnet/core/sdk:{v3.0.*}-alpine{v}"),
                     "Dockerfile", true);
+                yield return new TestCaseData(
+                    DockerImageTemplate.Parse("mcr.microsoft.com/dotnet/core/sdk@{digest}").CreatePattern(true, true, true, false, true),
+                    "Dockerfile_digest_same", false);
+                yield return new TestCaseData(
+                    DockerImageTemplate.Parse("mcr.microsoft.com/dotnet/core/sdk@{digest}").CreatePattern(true, true, true, false, true),
+                    "Dockerfile_digest_same", true);
             }
         }
     }

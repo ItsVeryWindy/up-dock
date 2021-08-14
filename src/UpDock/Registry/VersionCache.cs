@@ -68,7 +68,7 @@ namespace UpDock
             }
         }
 
-        private async Task<TagList> RequestTags(Uri repository, string image, CancellationToken cancellationToken)
+        private Task<TagList> RequestTags(Uri repository, string image, CancellationToken cancellationToken)
         {
             var url = new Uri(repository, $"v2/{image}/tags/list");
 
@@ -81,62 +81,112 @@ namespace UpDock
                 return request;
             }
 
-            var response = await MakeRequestAsync(repository, image, 0, CreateRequest, cancellationToken);
-
-            var content = await response.Content.ReadAsStringAsync(cancellationToken);
-
-            return JsonSerializer.Deserialize<TagList>(content)!;
+            return MakeRequestAsync<TagList>(repository, image, CreateRequest, cancellationToken);
         }
 
         private static readonly SemaphoreSlim AuthenticationSemaphore = new(1);
 
-        private async Task<HttpResponseMessage> MakeRequestAsync(Uri repository, string image, int attempt, Func<HttpRequestMessage> factory, CancellationToken cancellationToken)
+        private Task<T> MakeRequestAsync<T>(Uri repository, string image, Func<HttpRequestMessage> factory, CancellationToken cancellationToken) => MakeRequestAsync(repository, image, factory, HandleResponseAsync<T>, cancellationToken);
+
+        private async Task<T> MakeRequestAsync<T>(Uri repository, string image, Func<HttpRequestMessage> factory, Func<HttpResponseMessage, CancellationToken, Task<T>> handleResponse, CancellationToken cancellationToken)
         {
-            if (attempt > 1)
-                throw new HttpRequestException("Too many failed attempts");
-
-            var request = factory();
-
             if (_options.Authentication.TryGetValue(repository.Host, out var authenticationOptions))
             {
-                var base64 = Convert.ToBase64String(Encoding.GetBytes($"{authenticationOptions.Username}:{authenticationOptions.Password}"));
-
-                request.Headers.Authorization = new AuthenticationHeaderValue("Basic", base64);
+                return await MakeRequestWithBasicAuthentication(factory, authenticationOptions, handleResponse, cancellationToken);
             }
             else
             {
                 var token = await GetExistingTokenAsync(repository, image, cancellationToken);
 
-                if (token != null)
+                if (token is not null)
                 {
-                    request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token.AccessToken);
+                    return await MakeRequestWithBearerToken(factory, token, handleResponse, cancellationToken);
                 }
             }
+
+            async Task<T> HandleResponse(HttpResponseMessage response, CancellationToken cancellationToken)
+            {
+                if (response.StatusCode == HttpStatusCode.Unauthorized)
+                {
+                    await AuthenticationSemaphore.WaitAsync(cancellationToken);
+
+                    AuthToken? token;
+
+                    try
+                    {
+                        token = await CreateAuthTokenAsync(response, cancellationToken);
+
+                        if (token is not null)
+                        {
+                            _authTokens[(repository, image)] = token;
+                        }
+                    }
+                    finally
+                    {
+                        AuthenticationSemaphore.Release();
+                    }
+
+                    if (token is not null)
+                    {
+                        return await MakeRequestWithBearerToken(factory, token, handleResponse, cancellationToken);
+                    }
+                }
+
+                return await handleResponse(response, cancellationToken);
+            }
+
+            return await MakeRequestAsync(factory, HandleResponse, cancellationToken);
+        }
+
+        private Task<T> MakeRequestWithBasicAuthentication<T>(Func<HttpRequestMessage> factory, AuthenticationOptions options, Func<HttpResponseMessage, CancellationToken, Task<T>> handleResponse, CancellationToken cancellationToken)
+        {
+            HttpRequestMessage ConfigureRequest()
+            {
+                var request = factory();
+
+                var base64 = Convert.ToBase64String(Encoding.GetBytes($"{options.Username}:{options.Password}"));
+
+                request.Headers.Authorization = new AuthenticationHeaderValue("Basic", base64);
+
+                return request;
+            }
+
+            return MakeRequestAsync(ConfigureRequest, handleResponse, cancellationToken);
+        }
+
+        private Task<T> MakeRequestWithBearerToken<T>(Func<HttpRequestMessage> factory, AuthToken token, Func<HttpResponseMessage, CancellationToken, Task<T>> handleResponse, CancellationToken cancellationToken)
+        {
+            HttpRequestMessage ConfigureRequest()
+            {
+                var request = factory();
+
+                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token.AccessToken);
+
+                return request;
+            }
+
+            return MakeRequestAsync(ConfigureRequest, handleResponse, cancellationToken);
+        }
+
+        private async Task<T> MakeRequestAsync<T>(Func<HttpRequestMessage> configureRequest, Func<HttpResponseMessage, CancellationToken, Task<T>> handleResponse, CancellationToken cancellationToken)
+        {
+            var request = configureRequest();
 
             var response = await _client.SendAsync(request, cancellationToken);
 
-            if (response.StatusCode == HttpStatusCode.Unauthorized)
-            {
-                await AuthenticationSemaphore.WaitAsync(cancellationToken);
+            return await handleResponse(response, cancellationToken);
+        }
 
-                try
-                {
-                    var token = await CreateAuthTokenAsync(response, cancellationToken);
+        private static async Task<T> HandleResponseAsync<T>(HttpResponseMessage response, CancellationToken cancellationToken)
+        {
+            response.EnsureSuccessStatusCode();
 
-                    if (token != null)
-                    {
-                        _authTokens[(repository, image)] = token;
-                    }
-                }
-                finally
-                {
-                    AuthenticationSemaphore.Release();
-                }
+            if (response.Content is null)
+                throw new HttpRequestException("Failed to read content");
 
-                return await MakeRequestAsync(repository, image, attempt + 1, factory, cancellationToken);
-            }
+            var content = await response.Content.ReadAsStreamAsync(cancellationToken);
 
-            return response;
+            return (await JsonSerializer.DeserializeAsync<T>(content, cancellationToken: cancellationToken))!;
         }
 
         private async Task<AuthToken?> GetExistingTokenAsync(Uri repository, string image, CancellationToken cancellationToken)
@@ -148,7 +198,7 @@ namespace UpDock
                 if (!_authTokens.TryGetValue((repository, image), out var token))
                     return null;
 
-                return token.Expired(DateTimeOffset.UtcNow) ? null : token;
+                return token is null || token.Expired(DateTimeOffset.UtcNow) ? null : token;
             }
             finally
             {
@@ -158,17 +208,17 @@ namespace UpDock
 
         private static readonly Encoding Encoding = Encoding.GetEncoding("ISO-8859-1");
 
-        private async Task<AuthToken?> CreateAuthTokenAsync(HttpResponseMessage response, CancellationToken cancellationToken)
+        private Task<AuthToken?> CreateAuthTokenAsync(HttpResponseMessage response, CancellationToken cancellationToken)
         {
             var authHeader = response.Headers.WwwAuthenticate.FirstOrDefault();
 
-            if (authHeader == null)
-                return null;
+            if (authHeader is null)
+                return Task.FromResult<AuthToken?>(null);
 
             var parsedHeader = ParseWWWAuthenticate(authHeader);
 
-            if(parsedHeader == null || !parsedHeader.TryGetValue("realm", out var realm))
-                return null;
+            if (parsedHeader is null || !parsedHeader.TryGetValue("realm", out var realm))
+                return Task.FromResult<AuthToken?>(null);
 
             var queryString = string.Join('&',
                 parsedHeader
@@ -180,16 +230,16 @@ namespace UpDock
                 Query = queryString
             };
 
-            var request = new HttpRequestMessage(HttpMethod.Get, builder.Uri);
+            HttpRequestMessage CreateRequest()
+            {
+                var request = new HttpRequestMessage(HttpMethod.Get, builder.Uri);
 
-            var response2 = await _client.SendAsync(request, cancellationToken);
+                request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
-            if (!response2.IsSuccessStatusCode)
-                return null;
+                return request;
+            }
 
-            var content = await response2.Content.ReadAsStringAsync(cancellationToken);
-
-            return JsonSerializer.Deserialize<AuthToken>(content);
+            return MakeRequestAsync(CreateRequest, HandleResponseAsync<AuthToken?>, cancellationToken);
         }
 
         private Dictionary<string,string>? ParseWWWAuthenticate(AuthenticationHeaderValue authHeader)
@@ -284,18 +334,25 @@ namespace UpDock
             }
         }
 
-        private async Task<string?> RequestDigestAsync(DockerImage image, CancellationToken cancellationToken)
+        private Task<string?> RequestDigestAsync(DockerImage image, CancellationToken cancellationToken)
         {
-            var request = new HttpRequestMessage(HttpMethod.Get, new Uri(image.Repository, $"v2/dotnet/core/sdk/manifests/{image.Tag}"));
+            var url = new Uri(image.Repository, $"v2/{image.Image}/manifests/{image.Tag}");
 
-            request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/vnd.docker.distribution.manifest.v2+json"));
+            HttpRequestMessage CreateRequest()
+            {
+                var request = new HttpRequestMessage(HttpMethod.Get, url);
 
-            var response = await _client.SendAsync(request, cancellationToken);
+                request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/vnd.docker.distribution.manifest.v2+json"));
 
-            if (!response.Headers.TryGetValues("Docker-Content-Digest", out var values))
-                return null;
+                return request;
+            }
 
-            return values.First();
+            Task<string?> HandleResponse(HttpResponseMessage response, CancellationToken cancellationToken)
+            {
+                return Task.FromResult(response.Headers.TryGetValues("Docker-Content-Digest", out var values) ? values.First() : null);
+            }
+
+            return MakeRequestAsync(image.Repository, image.Image, CreateRequest, HandleResponse, cancellationToken);
         }
 
         public DockerImage? FetchLatest(DockerImageTemplate template) => FetchLatest(template, template.HasDigest);

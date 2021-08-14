@@ -9,12 +9,14 @@
   <ItemGroup>
     <EmbeddedResource Include="Files\Dockerfile_digest" />
     <EmbeddedResource Include="Files\Dockerfile_digest_extra" />
-    <EmbeddedResource Include="Files\Dockerfile_higher" />
+	<EmbeddedResource Include="Files\Dockerfile_digest_same" />
+	<EmbeddedResource Include="Files\Dockerfile_higher" />
     <EmbeddedResource Include="Files\another_file.txt" />
     <EmbeddedResource Include="Files\another_file_expected.txt" />
-    <EmbeddedResource Include="tags_response.json" />
     <EmbeddedResource Include="Files\Dockerfile_expected" />
     <EmbeddedResource Include="Files\Dockerfile" />
+	<EmbeddedResource Include="tags_response.json" />
+	<EmbeddedResource Include="token_response.json" />
   </ItemGroup>
 
   <ItemGroup>
