@@ -63,5 +63,9 @@ namespace UpDock.CommandLine
         [Shortcut("r", "report")]
         [Description("Output a report to a file on the pull requests that were created")]
         public string? Report { get; set; }
+
+        [Shortcut("f", "fork-only")]
+        [Description("Should only create pull requests using forks")]
+        public bool ForkOnly { get; set; }
     }
 }

@@ -33,6 +33,7 @@ namespace UpDock.Tests.CommandLine
                 "--config/-c             Default configuration to apply",
                 "--dry-run/-d            Run without creating pull requests",
                 "--email/-e*             Email to use in the commit",
+                "--fork-only/-f          Should only create pull requests using forks",
                 "--help/-h               Display help information",
                 "--report/-r             Output a report to a file on the pull requests that were created",
                 "--search/-s*            Search query to get repositories",

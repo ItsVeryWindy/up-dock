@@ -134,9 +134,7 @@ namespace UpDock
                 if (_options.DryRun)
                     continue;
 
-                var forkedRepository = await repository.ForkRepositoryAsync();
-
-                var pullRequest = await localRepository.CreatePullRequestAsync(forkedRepository, groupedReplacements, cancellationToken);
+                var pullRequest = await localRepository.CreatePullRequestAsync(groupedReplacements, cancellationToken);
 
                 if (pullRequest is not null)
                 {

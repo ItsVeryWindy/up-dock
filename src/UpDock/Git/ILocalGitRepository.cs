@@ -11,7 +11,7 @@ namespace UpDock.Git
         bool IsDirty { get; }
         IEnumerable<IRepositoryFileInfo> Files { get; }
 
-        Task<(string url, string title)?> CreatePullRequestAsync(IRemoteGitRepository forkedRepository, IReadOnlyCollection<TextReplacement> replacements, CancellationToken cancellationToken);
+        Task<(string url, string title)?> CreatePullRequestAsync(IReadOnlyCollection<TextReplacement> replacements, CancellationToken cancellationToken);
         
         void Reset();
     }

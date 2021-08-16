@@ -19,6 +19,7 @@ namespace UpDock.Git
         private readonly Repository _localRepository;
         private readonly CommandLineOptions _options;
         private readonly IRemoteGitRepository _remoteRepository;
+        private IRemoteGitRepository? _forkedRepository;
         private readonly IFileProvider _provider;
         private readonly ILogger<LocalGitRepository> _logger;
 
@@ -39,38 +40,61 @@ namespace UpDock.Git
 
         private bool Ignored(IRepositoryFileInfo file) => _localRepository.Ignore.IsPathIgnored(file.RelativePath);
 
-        public async Task<(string url, string title)?> CreatePullRequestAsync(IRemoteGitRepository forkedRepository, IReadOnlyCollection<TextReplacement> replacements, CancellationToken cancellationToken)
+        public async Task<(string url, string title)?> CreatePullRequestAsync(IReadOnlyCollection<TextReplacement> replacements, CancellationToken cancellationToken)
         {
             var head = _localRepository.Head;
 
             try
             {
-                var remote = GetRemote(forkedRepository);
-
                 var groupHash = CreateHash(replacements.First().Group);
 
                 var hash = CreateHash(replacements);
 
-                var branch = CreateBranch($"up-dock-{groupHash}-{hash}", remote);
-
-                CleanUpOldReferences(remote, groupHash, branch);
+                var branch = CreateBranch($"up-dock-{groupHash}-{hash}");
 
                 var newPullRequest = CreatePullRequest(replacements, branch);
 
-                if (!CreateCommit(newPullRequest.Title, replacements, branch, remote))
-                {
-                    _logger.LogError("Failed to create commit for for repository {Repository}", _remoteRepository.CloneUrl);
+                CreateCommit(newPullRequest.Title, replacements);
+
+                var remoteRepository = await PushAsync(groupHash, branch);
+
+                if (remoteRepository is null)
                     return null;
-                }
 
                 _logger.LogInformation("Creating pull request {Title} for repository {Repository}", newPullRequest.Title, _remoteRepository.CloneUrl);
 
-                return await _remoteRepository.CreatePullRequestAsync(forkedRepository, newPullRequest);
+                return await _remoteRepository.CreatePullRequestAsync(remoteRepository, newPullRequest);
             }
             finally
             {
                 Commands.Checkout(_localRepository, head);
             }
+        }
+
+        private async Task<IRemoteGitRepository?> PushAsync(string groupHash, Branch branch)
+        {
+            if (!_options.ForkOnly && _forkedRepository is null && Push(_remoteRepository, groupHash, branch))
+                return _remoteRepository;
+
+            _forkedRepository ??= await _remoteRepository.ForkRepositoryAsync();
+
+            return Push(_forkedRepository, groupHash, branch) ? _forkedRepository : null;
+        }
+
+        private bool Push(IRemoteGitRepository remoteRepository, string groupHash, Branch branch)
+        {
+            var remote = GetRemote(remoteRepository);
+
+            TrackBranch(branch, remote);
+
+            CleanUpOldReferences(remote, groupHash, branch);
+
+            if (PushCommit(branch, remote))
+                return true;
+
+            _logger.LogError("Failed to push commit to repository {Repository}", remoteRepository.CloneUrl);
+
+            return false;
         }
 
         private Remote GetRemote(IRemoteGitRepository forkedRepository)
@@ -111,7 +135,7 @@ namespace UpDock.Git
             }
         }
 
-        private bool CreateCommit(string title, IReadOnlyCollection<TextReplacement> replacements, Branch branch, Remote remote)
+        private void CreateCommit(string title, IReadOnlyCollection<TextReplacement> replacements)
         {
             var author = new Signature("up-dock", _options.Email, DateTime.Now);
 
@@ -130,7 +154,10 @@ namespace UpDock.Git
             _logger.LogInformation("Creating commit {Title}", title);
 
             _localRepository.Commit(title, author, author);
+        }
 
+        private bool PushCommit(Branch branch, Remote remote)
+        {
             var pushRefSpec = string.Format("+{0}:{0}", branch.CanonicalName);
 
             _logger.LogInformation("Pushing to remote {RefSpec}", pushRefSpec);
@@ -207,23 +234,26 @@ namespace UpDock.Git
                 body.ToString());
         }
 
-        private Branch CreateBranch(string name, Remote remote)
+        private Branch CreateBranch(string name)
         {
             _logger.LogInformation("Creating branch {Name}", name);
 
             var branch = _localRepository.CreateBranch(name);
-
-            _logger.LogInformation("Tracking branch {Name} with {CanonicalName}", name, branch.CanonicalName);
-
-            _localRepository.Branches.Update(branch,
-                b => b.Remote = remote.Name,
-                b => b.UpstreamBranch = branch.CanonicalName);
 
             _logger.LogInformation("Checking out branch {Name}", name);
 
             Commands.Checkout(_localRepository, branch);
 
             return branch;
+        }
+
+        private void TrackBranch(Branch branch, Remote remote)
+        {
+            _logger.LogInformation("Tracking branch {Name} with {CanonicalName}", branch.FriendlyName, branch.CanonicalName);
+
+            _localRepository.Branches.Update(branch,
+                b => b.Remote = remote.Name,
+                b => b.UpstreamBranch = branch.CanonicalName);
         }
 
         private static void PopulateSingleUpdate(IGrouping<(DockerImage FromImage, DockerImage ToImage), TextReplacement> replacement, StringBuilder body)
