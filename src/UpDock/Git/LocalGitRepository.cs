@@ -9,27 +9,27 @@ using System.Threading.Tasks;
 using UpDock.CommandLine;
 using UpDock.Files;
 using UpDock.Nodes;
-using LibGit2Sharp;
 using Microsoft.Extensions.Logging;
+using UpDock.Git.Drivers;
 
 namespace UpDock.Git
 {
     public class LocalGitRepository : ILocalGitRepository
     {
-        private readonly Repository _localRepository;
+        private readonly IRepository _localRepository;
         private readonly CommandLineOptions _options;
         private readonly IRemoteGitRepository _remoteRepository;
         private IRemoteGitRepository? _forkedRepository;
         private readonly IFileProvider _provider;
         private readonly ILogger<LocalGitRepository> _logger;
 
-        public IEnumerable<IRepositoryFileInfo> Files => Directory.Files.Select(x => new LocalGitRepositoryFileInfo(this, x));
+        public IEnumerable<IRepositoryFileInfo> Files => _localRepository.Files;
 
-        public IDirectoryInfo Directory => _provider.GetDirectory(_localRepository.Info.WorkingDirectory);
+        public IDirectoryInfo Directory => _localRepository.Directory;
 
-        public bool IsDirty => _localRepository.RetrieveStatus(new StatusOptions()).IsDirty;
+        public bool IsDirty => _localRepository.IsDirty;
 
-        public LocalGitRepository(Repository localRepository, CommandLineOptions options, IRemoteGitRepository remoteRepository, IFileProvider provider, ILogger<LocalGitRepository> logger)
+        public LocalGitRepository(IRepository localRepository, CommandLineOptions options, IRemoteGitRepository remoteRepository, IFileProvider provider, ILogger<LocalGitRepository> logger)
         {
             _localRepository = localRepository;
             _options = options;
@@ -37,8 +37,6 @@ namespace UpDock.Git
             _provider = provider;
             _logger = logger;
         }
-
-        private bool Ignored(IRepositoryFileInfo file) => _localRepository.Ignore.IsPathIgnored(file.RelativePath);
 
         public async Task<(string url, string title)?> CreatePullRequestAsync(IReadOnlyCollection<TextReplacement> replacements, CancellationToken cancellationToken)
         {
@@ -67,11 +65,11 @@ namespace UpDock.Git
             }
             finally
             {
-                Commands.Checkout(_localRepository, head);
+                head.Checkout();
             }
         }
 
-        private async Task<IRemoteGitRepository?> PushAsync(string groupHash, Branch branch)
+        private async Task<IRemoteGitRepository?> PushAsync(string groupHash, IBranch branch)
         {
             if (!_options.ForkOnly && _forkedRepository is null && Push(_remoteRepository, groupHash, branch))
                 return _remoteRepository;
@@ -81,15 +79,15 @@ namespace UpDock.Git
             return Push(_forkedRepository, groupHash, branch) ? _forkedRepository : null;
         }
 
-        private bool Push(IRemoteGitRepository remoteRepository, string groupHash, Branch branch)
+        private bool Push(IRemoteGitRepository remoteRepository, string groupHash, IBranch branch)
         {
             var remote = GetRemote(remoteRepository);
 
-            TrackBranch(branch, remote);
+            var trackedBranch = TrackBranch(branch, remote);
 
             CleanUpOldReferences(remote, groupHash, branch);
 
-            if (PushCommit(branch, remote))
+            if (PushCommit(trackedBranch))
                 return true;
 
             _logger.LogError("Failed to push commit to repository {Repository}", remoteRepository.CloneUrl);
@@ -97,86 +95,79 @@ namespace UpDock.Git
             return false;
         }
 
-        private Remote GetRemote(IRemoteGitRepository forkedRepository)
+        private IRemote GetRemote(IRemoteGitRepository repository)
         {
             const string remoteName = "downstream";
 
-            var existingRemote = _localRepository.Network.Remotes.FirstOrDefault(x => x.Name == remoteName);
+            var existingRemote = _localRepository.Remotes.FirstOrDefault(x => x.Name == remoteName);
 
             if (existingRemote != null)
                 return existingRemote;
 
-            var newRemote = _localRepository.Network.Remotes.Add(remoteName, forkedRepository.CloneUrl);
+            var newRemote = _localRepository.CreateRemote(remoteName, repository);
 
             return newRemote;
         }
 
-        private void CleanUpOldReferences(Remote remote, string groupHash, Branch branch)
+        private void CleanUpOldReferences(IRemote remote, string groupHash, IBranch branch)
         {
-            var references = _localRepository.Network.ListReferences(remote, CreateCredentials);
-
-            foreach (var reference in references)
+            foreach (var reference in remote.Branches)
             {
-                if (!reference.CanonicalName.StartsWith($"refs/heads/up-dock-{groupHash}"))
+                if (!reference.FullName.StartsWith($"refs/heads/up-dock-{groupHash}"))
                     continue;
 
-                if (reference.CanonicalName == branch.CanonicalName)
+                if (reference.FullName == branch.FullName)
                     continue;
 
-                _logger.LogInformation("Removing old reference {Reference} for repository {Repository}", reference.CanonicalName, _remoteRepository.CloneUrl);
+                _logger.LogInformation("Removing old reference {Reference} for repository {Repository}", reference.FullName, _remoteRepository.CloneUrl);
 
-                _localRepository.Network.Push(remote, $"+:{reference.CanonicalName}", new PushOptions
+                try
                 {
-                    CredentialsProvider = CreateCredentials,
-                    OnPushStatusError = error => {
-                        _logger.LogError("Push failed for old reference {Reference} with message '{Message}'", error.Reference, error.Message);
-                    }
-                });
+                    reference.Remove();
+                }
+                catch(PushException ex)
+                {
+                    _logger.LogError("Push failed for old reference {Reference} with message '{Message}'", ex.Reference, ex.Message);
+                }
             }
         }
 
         private void CreateCommit(string title, IReadOnlyCollection<TextReplacement> replacements)
         {
-            var author = new Signature("up-dock", _options.Email, DateTime.Now);
-
             var files = replacements
-                .Select(x => x.File.RelativePath)
-                .Distinct()
+                .Select(x => x.File)
                 .ToList();
 
             foreach (var file in files)
             {
                 _logger.LogInformation("Staging file '{File}'", file);
 
-                Commands.Stage(_localRepository, file);
+                file.Stage();
             }
 
             _logger.LogInformation("Creating commit {Title}", title);
 
-            _localRepository.Commit(title, author, author);
+            _localRepository.Commit(title, _options.Email!);
         }
 
-        private bool PushCommit(Branch branch, Remote remote)
+        private bool PushCommit(IRemoteBranch branch)
         {
-            var pushRefSpec = string.Format("+{0}:{0}", branch.CanonicalName);
+            _logger.LogInformation("Pushing to remote {RefSpec}", branch.FullName);
 
-            _logger.LogInformation("Pushing to remote {RefSpec}", pushRefSpec);
-
-            var succeeded = true;
-
-            _localRepository.Network.Push(remote, pushRefSpec, new PushOptions
+            try
             {
-                CredentialsProvider = CreateCredentials,
-                OnPushStatusError = error => {
-                    succeeded = false;
-                    _logger.LogError("Push failed for {RefSpec} with message '{Message}'", error.Reference, error.Message);
-                }
-            });
+                branch.Push();
+            }
+            catch(PushException ex)
+            {
+                _logger.LogError("Push failed for {RefSpec} with message '{Message}'", ex.Reference, ex.Message);
+                return false;
+            }
 
-            return succeeded;
+            return true;
         }
 
-        private PullRequest CreatePullRequest(IReadOnlyCollection<TextReplacement> replacements, Branch branch)
+        private PullRequest CreatePullRequest(IReadOnlyCollection<TextReplacement> replacements, IBranch branch)
         {
             string title;
 
@@ -230,11 +221,11 @@ namespace UpDock.Git
 
             return new PullRequest(
                 title,
-                branch.FriendlyName,
+                branch.Name,
                 body.ToString());
         }
 
-        private Branch CreateBranch(string name)
+        private IBranch CreateBranch(string name)
         {
             _logger.LogInformation("Creating branch {Name}", name);
 
@@ -242,18 +233,16 @@ namespace UpDock.Git
 
             _logger.LogInformation("Checking out branch {Name}", name);
 
-            Commands.Checkout(_localRepository, branch);
+            branch.Checkout();
 
             return branch;
         }
 
-        private void TrackBranch(Branch branch, Remote remote)
+        private IRemoteBranch TrackBranch(IBranch branch, IRemote remote)
         {
-            _logger.LogInformation("Tracking branch {Name} with {CanonicalName}", branch.FriendlyName, branch.CanonicalName);
+            _logger.LogInformation("Tracking branch {Name} with {CanonicalName}", branch.Name, branch.FullName);
 
-            _localRepository.Branches.Update(branch,
-                b => b.Remote = remote.Name,
-                b => b.UpstreamBranch = branch.CanonicalName);
+            return branch.Track(remote);
         }
 
         private static void PopulateSingleUpdate(IGrouping<(DockerImage FromImage, DockerImage ToImage), TextReplacement> replacement, StringBuilder body)
@@ -276,12 +265,9 @@ namespace UpDock.Git
 
         public void Reset()
         {
-            var branch = _localRepository.Branches.First(x => x.IsRemote && x.FriendlyName == $"origin/{_remoteRepository.DefaultBranch}");
+            var branch = _localRepository.Branches.First(x => x.IsRemote && x.Name == $"origin/{_remoteRepository.DefaultBranch}");
 
-            Commands.Checkout(_localRepository, branch, new CheckoutOptions
-            {
-                CheckoutModifiers = CheckoutModifiers.Force
-            });
+            branch.Checkout(true);
         }
 
         private static string CreateHash(IEnumerable<TextReplacement> replacements)
@@ -307,33 +293,6 @@ namespace UpDock.Git
             }
 
             return builder.ToString();
-        }
-
-        private UsernamePasswordCredentials CreateCredentials(string url, string user, SupportedCredentialTypes cred)
-        {
-            return new UsernamePasswordCredentials
-            {
-                Username = "username", Password = _options.Token
-            };
-        }
-
-        private class LocalGitRepositoryFileInfo : IRepositoryFileInfo
-        {
-            private readonly LocalGitRepository _localGitRepository;
-
-            public LocalGitRepositoryFileInfo(LocalGitRepository localGitRepository, IFileInfo file)
-            {
-                _localGitRepository = localGitRepository;
-                File = file;
-            }
-
-            public IFileInfo File { get; }
-
-            public bool Ignored => _localGitRepository.Ignored(this);
-
-            public string RelativePath => Path.GetRelativePath(_localGitRepository._localRepository.Info.WorkingDirectory, File.AbsolutePath);
-
-            public IDirectoryInfo Root => _localGitRepository.Directory;
         }
     }
 }

@@ -8,5 +8,7 @@ namespace UpDock.Git
         bool Ignored { get; }
         string RelativePath { get; }
         IDirectoryInfo Root { get; }
+
+        void Stage();
     }
 }

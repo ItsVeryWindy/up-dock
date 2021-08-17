@@ -66,7 +66,9 @@ namespace UpDock.Tests
 
             _files.Remove(AbsolutePath);
         }
-        
+
+        public void Stage() => throw new NotImplementedException();
+
         private class StubMemoryStream : MemoryStream
         {
             protected override void Dispose(bool disposing)
