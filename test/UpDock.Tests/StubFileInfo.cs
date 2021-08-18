@@ -68,6 +68,7 @@ namespace UpDock.Tests
         }
 
         public void Stage() => throw new NotImplementedException();
+        public void SetAttributes(FileAttributes normal) => throw new NotImplementedException();
 
         private class StubMemoryStream : MemoryStream
         {

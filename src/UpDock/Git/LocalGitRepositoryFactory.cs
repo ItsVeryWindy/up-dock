@@ -1,5 +1,4 @@
 ﻿using System.IO;
-using LibGit2Sharp;
 using Microsoft.Extensions.Logging;
 using UpDock.CommandLine;
 using UpDock.Files;
@@ -23,41 +22,40 @@ namespace UpDock.Git
 
         public ILocalGitRepository Create(string cloneUrl, string dir, IRemoteGitRepository remoteGitRepository)
         {
-            CleanupRepository(dir);
+            var directory = _provider.GetDirectory(dir);
+
+            CleanupRepository(directory);
 
             var repository = _driver.Clone(cloneUrl, dir, _options.Token);
 
             return new LocalGitRepository(repository, _options, remoteGitRepository, _provider, _logger);
         }
 
-        private void CleanupRepository(string dir)
+        private void CleanupRepository(IDirectoryInfo dir)
         {
-            if (!Directory.Exists(dir))
+            if (!dir.Exists)
                 return;
 
             _logger.LogInformation("{Directory} already exists, cleaning up", dir);
 
             NormalizeAttributes(dir);
 
-            Directory.Delete(dir, true);
+            dir.Delete();
         }
 
-        private static void NormalizeAttributes(string directoryPath)
+        private static void NormalizeAttributes(IDirectoryInfo directory)
         {
-            var filePaths = Directory.GetFiles(directoryPath);
-            var subDirectoryPaths = Directory.GetDirectories(directoryPath);
-
-            foreach (var filePath in filePaths)
+            foreach (var file in directory.Files)
             {
-                File.SetAttributes(filePath, FileAttributes.Normal);
+                file.SetAttributes(FileAttributes.Normal);
             }
 
-            foreach (var subDirectoryPath in subDirectoryPaths)
+            foreach (var subDirectory in directory.Directories)
             {
-                NormalizeAttributes(subDirectoryPath);
+                NormalizeAttributes(subDirectory);
             }
 
-            File.SetAttributes(directoryPath, FileAttributes.Normal);
+            directory.SetAttributes(FileAttributes.Normal);
         }
     }
 }

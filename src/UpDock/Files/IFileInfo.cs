@@ -11,5 +11,6 @@ namespace UpDock.Files
         Stream CreateWriteStream();
         Stream? CreateReadStream();
         void Move(IFileInfo file);
+        void SetAttributes(FileAttributes normal);
     }
 }

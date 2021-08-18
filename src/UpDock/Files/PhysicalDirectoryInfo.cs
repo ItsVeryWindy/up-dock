@@ -13,7 +13,7 @@ namespace UpDock.Files
             _directory = directory;
         }
 
-        public IEnumerable<IFileInfo> Files => _directory.GetFiles("*", SearchOption.AllDirectories).Select(x => new PhysicalFileInfo(x));
+        public IEnumerable<IFileInfo> AllFiles => _directory.GetFiles("*", SearchOption.AllDirectories).Select(x => new PhysicalFileInfo(x));
 
         public string AbsolutePath => _directory.FullName;
 
@@ -21,6 +21,16 @@ namespace UpDock.Files
 
         public IDirectoryInfo? Parent => _directory.Parent == null ? null : new PhysicalDirectoryInfo(_directory.Parent);
 
+        public bool Exists => _directory.Exists;
+
+        public IEnumerable<IFileInfo> Files => _directory.GetFiles().Select(x => new PhysicalFileInfo(x));
+
+        public IEnumerable<IDirectoryInfo> Directories => _directory.GetDirectories().Select(x => new PhysicalDirectoryInfo(x));
+
+        public void Delete() => _directory.Delete(true);
+
         public IFileInfo GetFile(string relativePath) => new PhysicalFileInfo(new FileInfo(Path.Join(_directory.FullName, relativePath)));
+
+        public void SetAttributes(FileAttributes fileAttributes) => File.SetAttributes(_directory.FullName, fileAttributes);
     }
 }

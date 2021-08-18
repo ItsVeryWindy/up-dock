@@ -42,5 +42,7 @@ namespace UpDock.Files
         }
 
         public void Move(IFileInfo file) => File.Move(AbsolutePath, file.AbsolutePath);
+
+        public void SetAttributes(FileAttributes fileAttributes) => File.SetAttributes(_file.FullName, fileAttributes);
     }
 }

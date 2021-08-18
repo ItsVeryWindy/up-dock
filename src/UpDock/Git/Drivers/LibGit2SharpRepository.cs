@@ -27,7 +27,7 @@ namespace UpDock.Git.Drivers
 
         public IEnumerable<IBranch> Branches => _repository.Branches.Select(x => new LibGit2SharpBranch(_repository, x, null, _credentialsHandler));
 
-        public IEnumerable<IRepositoryFileInfo> Files => Directory.Files.Select(x => new RepositoryFileInfo(this, x));
+        public IEnumerable<IRepositoryFileInfo> Files => Directory.AllFiles.Select(x => new RepositoryFileInfo(this, x));
 
         public IDirectoryInfo Directory => _provider.GetDirectory(_repository.Info.WorkingDirectory);
 
