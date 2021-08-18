@@ -71,17 +71,17 @@ namespace UpDock.Git
 
         private async Task<IRemoteGitRepository?> PushAsync(string groupHash, IBranch branch)
         {
-            if (!_options.ForkOnly && _forkedRepository is null && Push(_remoteRepository, groupHash, branch))
+            if (!_options.ForkOnly && _forkedRepository is null && Push(_remoteRepository, "origin", groupHash, branch))
                 return _remoteRepository;
 
             _forkedRepository ??= await _remoteRepository.ForkRepositoryAsync();
 
-            return Push(_forkedRepository, groupHash, branch) ? _forkedRepository : null;
+            return Push(_forkedRepository, "upstream", groupHash, branch) ? _forkedRepository : null;
         }
 
-        private bool Push(IRemoteGitRepository remoteRepository, string groupHash, IBranch branch)
+        private bool Push(IRemoteGitRepository remoteRepository, string remoteName, string groupHash, IBranch branch)
         {
-            var remote = GetRemote(remoteRepository);
+            var remote = GetRemote(remoteRepository, remoteName);
 
             var trackedBranch = TrackBranch(branch, remote);
 
@@ -95,10 +95,8 @@ namespace UpDock.Git
             return false;
         }
 
-        private IRemote GetRemote(IRemoteGitRepository repository)
+        private IRemote GetRemote(IRemoteGitRepository repository, string remoteName)
         {
-            const string remoteName = "downstream";
-
             var existingRemote = _localRepository.Remotes.FirstOrDefault(x => x.Name == remoteName);
 
             if (existingRemote != null)
@@ -281,18 +279,6 @@ namespace UpDock.Git
 
         private static readonly SHA256 Sha256Hash = SHA256.Create();
 
-        private static string CreateHash(string str)
-        {
-            var bytes = Sha256Hash.ComputeHash(Encoding.UTF8.GetBytes(str));
-
-            var builder = new StringBuilder();
-
-            foreach (var b in bytes)
-            {
-                builder.Append(b.ToString("x2"));
-            }
-
-            return builder.ToString();
-        }
+        private static string CreateHash(string str) => Sha256Hash.ComputeHash(str);
     }
 }
