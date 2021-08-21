@@ -6,6 +6,7 @@ using Microsoft.Extensions.Logging;
 using Octokit;
 using System.Linq;
 using System;
+using System.Threading;
 
 namespace UpDock.Git
 {
@@ -46,11 +47,11 @@ namespace UpDock.Git
             return new RemoteGitRepository(repository, _client, _options, _provider, _logger, _factory);
         }
 
-        public ILocalGitRepository CheckoutRepository()
+        public Task<ILocalGitRepository> CheckoutRepositoryAsync(CancellationToken cancellationToken)
         {
             var dir = Path.Combine(Path.GetTempPath(), "git-repositories", Owner, Name);
 
-            return _factory.Create(CloneUrl, dir, this);
+            return _factory.CreateAsync(CloneUrl, dir, this, cancellationToken);
         }
 
         public async Task<(string url, string title)?> CreatePullRequestAsync(IRemoteGitRepository forkedRepository, PullRequest pullRequest)

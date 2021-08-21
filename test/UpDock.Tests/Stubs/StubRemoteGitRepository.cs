@@ -1,10 +1,11 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using UpDock.Git;
 
-namespace UpDock.Tests
+namespace UpDock.Tests.Stubs
 {
-    internal class StubRemoteGitRepository : IRemoteGitRepository
+    public class StubRemoteGitRepository : IRemoteGitRepository
     {
         public string FullName => "FullName";
 
@@ -18,8 +19,10 @@ namespace UpDock.Tests
 
         public string DefaultBranch => "DefaultBranch";
 
-        public ILocalGitRepository CheckoutRepository() => throw new NotImplementedException();
+        public Task<ILocalGitRepository> CheckoutRepositoryAsync(CancellationToken cancellationToken) => throw new NotImplementedException();
+
         public Task<(string url, string title)?> CreatePullRequestAsync(IRemoteGitRepository forkedRepository, PullRequest newPullRequest) => throw new NotImplementedException();
+
         public Task<IRemoteGitRepository> ForkRepositoryAsync() => throw new NotImplementedException();
     }
 }

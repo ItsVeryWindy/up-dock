@@ -10,6 +10,7 @@ using Microsoft.Extensions.Options;
 using Octokit;
 using Octokit.Internal;
 using UpDock.Caching;
+using UpDock.Git.Drivers;
 
 namespace UpDock
 {
@@ -30,6 +31,7 @@ namespace UpDock
                 .AddSingleton<IRepositorySearcher, GitHubRepositorySearcher>()
                 .AddSingleton<ILocalGitRepositoryFactory, LocalGitRepositoryFactory>()
                 .AddSingleton<IFileProvider, PhysicalFileProvider>()
+                .AddSingleton<IGitDriver, LibGit2SharpDriver>()
                 .AddSingleton<IGitHubClient>(sp => {
                     var token = sp.GetRequiredService<IConfigurationOptions>().Token;
 

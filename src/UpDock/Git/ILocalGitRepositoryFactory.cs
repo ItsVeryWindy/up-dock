@@ -1,7 +1,10 @@
-﻿namespace UpDock.Git
+﻿using System.Threading;
+using System.Threading.Tasks;
+
+namespace UpDock.Git
 {
     public interface ILocalGitRepositoryFactory
     {
-        ILocalGitRepository Create(string cloneUrl, string dir, IRemoteGitRepository remoteGitRepository);
+        Task<ILocalGitRepository> CreateAsync(string cloneUrl, string dir, IRemoteGitRepository remoteGitRepository, CancellationToken cancellationToken);
     }
 }

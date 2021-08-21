@@ -1,11 +1,12 @@
 ﻿using System.Collections.Generic;
-using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
-using UpDock.CommandLine;
 using UpDock.Files;
 using Microsoft.Extensions.DependencyInjection;
 using NUnit.Framework;
+using UpDock.Tests.Stubs;
+using System.Linq;
+using UpDock.Git;
 
 namespace UpDock.Tests
 {
@@ -14,13 +15,9 @@ namespace UpDock.Tests
         [Test]
         public async Task ShouldPerformReplaceOnSingleFile()
         {
-            var stream = TestUtilities.GetResource("Files.Dockerfile")!;
-
             var provider = new StubFileProvider();
 
-            var tempFile = provider.GetFile("Dockerfile");
-
-            await stream.CopyToAsync(tempFile.CreateWriteStream());
+            var file = await CreateFileAsync(provider, "Dockerfile");
 
             var sp = TestUtilities
                 .CreateServices()
@@ -31,16 +28,35 @@ namespace UpDock.Tests
 
             var replacements = new List<TextReplacement>
             {
-                new TextReplacement("group", tempFile, "mcr.microsoft.com/dotnet/core/sdk:3.1.101-alpine3.10", null!, "mcr.microsoft.com/dotnet/core/sdk:3.1.102-alpine3.11", null!, 0, 5)
+                new TextReplacement("group", file, "mcr.microsoft.com/dotnet/core/sdk:3.1.101-alpine3.10", null!, "mcr.microsoft.com/dotnet/core/sdk:3.1.102-alpine3.11", null!, 0, 5)
             };
 
             await executor.ExecutePlanAsync(replacements, CancellationToken.None);
 
-            var replacedFile = await tempFile.CreateReadStream().GetStringAsync();
+            var replacedFile = await file.File.CreateReadStream().GetStringAsync();
 
             var expectedFile = await TestUtilities.GetResource("Files.Dockerfile_expected").GetStringAsync();
 
             Assert.That(replacedFile, Is.EqualTo(expectedFile));
+        }
+
+        private async Task<IRepositoryFileInfo> CreateFileAsync(StubFileProvider provider, string resource)
+        {
+            var driver = new StubGitDriver();
+
+            var remoteDirectory = provider.GetDirectory("/remote").Create();
+
+            await driver.CreateRemoteAsync(remoteDirectory, CancellationToken.None);
+
+            var repository = await driver.CloneAsync(remoteDirectory.AbsolutePath, provider.GetDirectory("/clone"), null, CancellationToken.None);
+
+            var stream = TestUtilities.GetResource($"Files.{resource}")!;
+
+            var file = provider.GetFile("/clone/file/path");
+
+            await stream.CopyToAsync(file.CreateWriteStream());
+
+            return repository.Files.First();
         }
     }
 }

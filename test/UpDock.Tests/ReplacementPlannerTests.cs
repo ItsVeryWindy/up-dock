@@ -9,6 +9,8 @@ using UpDock.Nodes;
 using UpDock.Registry;
 using Microsoft.Extensions.DependencyInjection;
 using NUnit.Framework;
+using UpDock.Tests.Stubs;
+using UpDock.Git;
 
 namespace UpDock.Tests
 {
@@ -31,11 +33,9 @@ namespace UpDock.Tests
 
             var planner = sp.GetRequiredService<IReplacementPlanner>();
 
-            var stream = TestUtilities.GetResource($"Files.{fileName}")!;
+            var file = await CreateFileAsync(fileName);
 
-            var fileInfo = new StubFileInfo(stream, "/file/path");
-
-            var results = await planner.GetReplacementPlanAsync(fileInfo, node, allowDowngrade, CancellationToken.None);
+            var results = await planner.GetReplacementPlanAsync(file, node, allowDowngrade, CancellationToken.None);
 
             Assert.That(results, Has.Count.EqualTo(1));
             Assert.That(results.First().From, Is.EqualTo(expectedFrom));
@@ -59,13 +59,32 @@ namespace UpDock.Tests
 
             var planner = sp.GetRequiredService<IReplacementPlanner>();
 
-            var stream = TestUtilities.GetResource($"Files.{fileName}")!;
+            var file = await CreateFileAsync(fileName);
 
-            var fileInfo = new StubFileInfo(stream, "/file/path");
-
-            var results = await planner.GetReplacementPlanAsync(fileInfo, node, allowDowngrade, CancellationToken.None);
+            var results = await planner.GetReplacementPlanAsync(file, node, allowDowngrade, CancellationToken.None);
 
             Assert.That(results, Has.Count.EqualTo(0));
+        }
+
+        private async Task<IRepositoryFileInfo> CreateFileAsync(string resource)
+        {
+            var provider = new StubFileProvider();
+
+            var driver = new StubGitDriver();
+
+            var remoteDirectory = provider.GetDirectory("/remote").Create();
+
+            await driver.CreateRemoteAsync(remoteDirectory, CancellationToken.None);
+
+            var repository = await driver.CloneAsync(remoteDirectory.AbsolutePath, provider.GetDirectory("/clone"), null, CancellationToken.None);
+
+            var stream = TestUtilities.GetResource($"Files.{resource}")!;
+
+            var file = provider.GetFile("/clone/file/path");
+
+            await stream.CopyToAsync(file.CreateWriteStream());
+
+            return repository.Files.First();
         }
 
         public static IEnumerable<TestCaseData> PositiveTestCases

@@ -1,7 +1,10 @@
 ﻿using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using UpDock.CommandLine;
 using UpDock.Files;
+using UpDock.Git.Drivers;
 
 namespace UpDock.Git
 {
@@ -20,13 +23,13 @@ namespace UpDock.Git
             _logger = logger;
         }
 
-        public ILocalGitRepository Create(string cloneUrl, string dir, IRemoteGitRepository remoteGitRepository)
+        public async Task<ILocalGitRepository> CreateAsync(string cloneUrl, string dir, IRemoteGitRepository remoteGitRepository, CancellationToken cancellationToken)
         {
             var directory = _provider.GetDirectory(dir);
 
             CleanupRepository(directory);
 
-            var repository = _driver.Clone(cloneUrl, dir, _options.Token);
+            var repository = await _driver.CloneAsync(cloneUrl, directory, _options.Token, cancellationToken);
 
             return new LocalGitRepository(repository, _options, remoteGitRepository, _provider, _logger);
         }

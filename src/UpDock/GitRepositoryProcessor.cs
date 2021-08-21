@@ -87,7 +87,7 @@ namespace UpDock
 
         private async Task ProcessRepositoryAsync(IRemoteGitRepository repository, CancellationToken cancellationToken)
         {
-            var localRepository = repository.CheckoutRepository();
+            var localRepository = await repository.CheckoutRepositoryAsync(cancellationToken);
 
             var directory = localRepository.Directory;
 
@@ -122,11 +122,13 @@ namespace UpDock
             {
                 var groupedReplacements = replacement.ToList();
 
-                localRepository.Reset();
+                await localRepository.ResetAsync(cancellationToken);
 
                 await _executor.ExecutePlanAsync(groupedReplacements, cancellationToken);
 
-                if (!localRepository.IsDirty)
+                var isDirty = await localRepository.IsDirtyAsync(cancellationToken);
+
+                if (!isDirty)
                     continue;
 
                 _logger.LogChangesDetectedInRepository(repository);
@@ -149,7 +151,9 @@ namespace UpDock
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            if(!filter.Filter(file))
+            var isFiltered = await filter.FilterAsync(file, cancellationToken);
+
+            if(!isFiltered)
                 return;
 
             var plan = await _planner.GetReplacementPlanAsync(file, node, _options.AllowDowngrade, cancellationToken);

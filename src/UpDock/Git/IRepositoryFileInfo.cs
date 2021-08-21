@@ -1,14 +1,17 @@
-﻿using UpDock.Files;
+﻿using System.Threading;
+using System.Threading.Tasks;
+using UpDock.Files;
 
 namespace UpDock.Git
 {
     public interface IRepositoryFileInfo
     {
         IFileInfo File { get; }
-        bool Ignored { get; }
         string RelativePath { get; }
         IDirectoryInfo Root { get; }
 
-        void Stage();
+        Task StageAsync(CancellationToken cancellationToken);
+
+        Task<bool> IsIgnoredAsync(CancellationToken cancellationToken);
     }
 }

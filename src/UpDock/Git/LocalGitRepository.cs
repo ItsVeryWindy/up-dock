@@ -27,7 +27,7 @@ namespace UpDock.Git
 
         public IDirectoryInfo Directory => _localRepository.Directory;
 
-        public bool IsDirty => _localRepository.IsDirty;
+        public Task<bool> IsDirtyAsync(CancellationToken cancellationToken) => _localRepository.IsDirtyAsync(cancellationToken);
 
         public LocalGitRepository(IRepository localRepository, CommandLineOptions options, IRemoteGitRepository remoteRepository, IFileProvider provider, ILogger<LocalGitRepository> logger)
         {
@@ -40,7 +40,7 @@ namespace UpDock.Git
 
         public async Task<(string url, string title)?> CreatePullRequestAsync(IReadOnlyCollection<TextReplacement> replacements, CancellationToken cancellationToken)
         {
-            var head = _localRepository.Head;
+            var head = await _localRepository.GetHeadAsync(cancellationToken);
 
             try
             {
@@ -48,13 +48,13 @@ namespace UpDock.Git
 
                 var hash = CreateHash(replacements);
 
-                var branch = CreateBranch($"up-dock-{groupHash}-{hash}");
+                var branch = await CreateBranchAsync($"up-dock-{groupHash}-{hash}", cancellationToken);
 
                 var newPullRequest = CreatePullRequest(replacements, branch);
 
-                CreateCommit(newPullRequest.Title, replacements);
+                await CreateCommitAsync(newPullRequest.Title, replacements, cancellationToken);
 
-                var remoteRepository = await PushAsync(groupHash, branch);
+                var remoteRepository = await PushAsync(groupHash, branch, cancellationToken);
 
                 if (remoteRepository is null)
                     return null;
@@ -65,29 +65,29 @@ namespace UpDock.Git
             }
             finally
             {
-                head.Checkout();
+                await head.CheckoutAsync(cancellationToken);
             }
         }
 
-        private async Task<IRemoteGitRepository?> PushAsync(string groupHash, IBranch branch)
+        private async Task<IRemoteGitRepository?> PushAsync(string groupHash, IBranch branch, CancellationToken cancellationToken)
         {
-            if (!_options.ForkOnly && _forkedRepository is null && Push(_remoteRepository, "origin", groupHash, branch))
+            if (!_options.ForkOnly && _forkedRepository is null && await PushAsync(_remoteRepository, "origin", groupHash, branch, cancellationToken))
                 return _remoteRepository;
 
             _forkedRepository ??= await _remoteRepository.ForkRepositoryAsync();
 
-            return Push(_forkedRepository, "upstream", groupHash, branch) ? _forkedRepository : null;
+            return (await PushAsync(_forkedRepository, "upstream", groupHash, branch, cancellationToken)) ? _forkedRepository : null;
         }
 
-        private bool Push(IRemoteGitRepository remoteRepository, string remoteName, string groupHash, IBranch branch)
+        private async Task<bool> PushAsync(IRemoteGitRepository remoteRepository, string remoteName, string groupHash, IBranch branch, CancellationToken cancellationToken)
         {
-            var remote = GetRemote(remoteRepository, remoteName);
+            var remote = await GetRemoteAsync(remoteRepository, remoteName, cancellationToken);
 
-            var trackedBranch = TrackBranch(branch, remote);
+            var trackedBranch = await TrackBranchAsync(branch, remote, cancellationToken);
 
-            CleanUpOldReferences(remote, groupHash, branch);
+            await CleanUpOldReferencesAsync(remote, groupHash, branch, cancellationToken);
 
-            if (PushCommit(trackedBranch))
+            if (await PushCommitAsync(trackedBranch, cancellationToken))
                 return true;
 
             _logger.LogError("Failed to push commit to repository {Repository}", remoteRepository.CloneUrl);
@@ -95,21 +95,21 @@ namespace UpDock.Git
             return false;
         }
 
-        private IRemote GetRemote(IRemoteGitRepository repository, string remoteName)
+        private async Task<IRemote> GetRemoteAsync(IRemoteGitRepository repository, string remoteName, CancellationToken cancellationToken)
         {
-            var existingRemote = _localRepository.Remotes.FirstOrDefault(x => x.Name == remoteName);
+            var existingRemote = (await _localRepository.GetRemotesAsync(cancellationToken)).FirstOrDefault(x => x.Name == remoteName);
 
             if (existingRemote != null)
                 return existingRemote;
 
-            var newRemote = _localRepository.CreateRemote(remoteName, repository);
+            var newRemote = await _localRepository.CreateRemoteAsync(remoteName, repository, cancellationToken);
 
             return newRemote;
         }
 
-        private void CleanUpOldReferences(IRemote remote, string groupHash, IBranch branch)
+        private async Task CleanUpOldReferencesAsync(IRemote remote, string groupHash, IBranch branch, CancellationToken cancellationToken)
         {
-            foreach (var reference in remote.Branches)
+            foreach (var reference in await remote.GetReferencesAsync(cancellationToken))
             {
                 if (!reference.FullName.StartsWith($"refs/heads/up-dock-{groupHash}"))
                     continue;
@@ -121,7 +121,7 @@ namespace UpDock.Git
 
                 try
                 {
-                    reference.Remove();
+                    await reference.RemoveAsync(cancellationToken);
                 }
                 catch(PushException ex)
                 {
@@ -130,7 +130,7 @@ namespace UpDock.Git
             }
         }
 
-        private void CreateCommit(string title, IReadOnlyCollection<TextReplacement> replacements)
+        private async Task CreateCommitAsync(string title, IReadOnlyCollection<TextReplacement> replacements, CancellationToken cancellationToken)
         {
             var files = replacements
                 .Select(x => x.File)
@@ -140,21 +140,21 @@ namespace UpDock.Git
             {
                 _logger.LogInformation("Staging file '{File}'", file);
 
-                file.Stage();
+                await file.StageAsync(cancellationToken);
             }
 
             _logger.LogInformation("Creating commit {Title}", title);
 
-            _localRepository.Commit(title, _options.Email!);
+            await _localRepository.CommitAsync(title, _options.Email!, cancellationToken);
         }
 
-        private bool PushCommit(IRemoteBranch branch)
+        private async Task<bool> PushCommitAsync(IRemoteBranch branch, CancellationToken cancellationToken)
         {
             _logger.LogInformation("Pushing to remote {RefSpec}", branch.FullName);
 
             try
             {
-                branch.Push();
+                await branch.PushAsync(cancellationToken);
             }
             catch(PushException ex)
             {
@@ -223,24 +223,24 @@ namespace UpDock.Git
                 body.ToString());
         }
 
-        private IBranch CreateBranch(string name)
+        private async Task<IBranch> CreateBranchAsync(string name, CancellationToken cancellationToken)
         {
             _logger.LogInformation("Creating branch {Name}", name);
 
-            var branch = _localRepository.CreateBranch(name);
+            var branch = await _localRepository.CreateBranchAsync(name, cancellationToken);
 
             _logger.LogInformation("Checking out branch {Name}", name);
 
-            branch.Checkout();
+            await branch.CheckoutAsync(cancellationToken);
 
             return branch;
         }
 
-        private IRemoteBranch TrackBranch(IBranch branch, IRemote remote)
+        private Task<IRemoteBranch> TrackBranchAsync(IBranch branch, IRemote remote, CancellationToken cancellationToken)
         {
             _logger.LogInformation("Tracking branch {Name} with {CanonicalName}", branch.Name, branch.FullName);
 
-            return branch.Track(remote);
+            return branch.TrackAsync(remote, cancellationToken);
         }
 
         private static void PopulateSingleUpdate(IGrouping<(DockerImage FromImage, DockerImage ToImage), TextReplacement> replacement, StringBuilder body)
@@ -261,11 +261,11 @@ namespace UpDock.Git
             }
         }
 
-        public void Reset()
+        public async Task ResetAsync(CancellationToken cancellationToken)
         {
-            var branch = _localRepository.Branches.First(x => x.IsRemote && x.Name == $"origin/{_remoteRepository.DefaultBranch}");
+            var branch = (await _localRepository.GetBranchesAsync(cancellationToken)).First(x => x.IsRemote && x.Name == $"origin/{_remoteRepository.DefaultBranch}");
 
-            branch.Checkout(true);
+            await branch.CheckoutAsync(true, cancellationToken);
         }
 
         private static string CreateHash(IEnumerable<TextReplacement> replacements)

@@ -1,7 +1,10 @@
-﻿namespace UpDock.Git.Drivers
+﻿using System.Threading;
+using System.Threading.Tasks;
+
+namespace UpDock.Git.Drivers
 {
     public interface IRemoteBranch : IBranch
     {
-        void Push();
+        Task PushAsync(CancellationToken cancellationToken);
     }
 }

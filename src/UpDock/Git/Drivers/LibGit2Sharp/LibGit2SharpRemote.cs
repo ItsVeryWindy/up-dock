@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using LibGit2Sharp;
 using LibGit2Sharp.Handlers;
 
@@ -12,14 +14,11 @@ namespace UpDock.Git.Drivers
         private readonly CredentialsHandler _credentialsHandler;
         private IEnumerable<Reference>? _references;
 
-        public IEnumerable<IRemoteReference> Branches
+        public Task<IEnumerable<IRemoteReference>> GetReferencesAsync(CancellationToken cancellationToken)
         {
-            get
-            {
-                _references ??= _repository.Network.ListReferences(_remote, _credentialsHandler);
+            _references ??= _repository.Network.ListReferences(_remote, _credentialsHandler);
 
-                return _references.Select(x => new LibGit2SharpRemoteReference(_repository, _remote, x, _credentialsHandler));
-            }
+            return Task.FromResult<IEnumerable<IRemoteReference>>(_references.Where(x => x.CanonicalName != "HEAD").Select(x => new LibGit2SharpRemoteReference(_repository, _remote, x, _credentialsHandler)));
         }
 
         public string Name => _remote.Name;

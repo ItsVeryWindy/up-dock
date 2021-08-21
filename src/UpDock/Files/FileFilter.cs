@@ -2,6 +2,8 @@
 using System.Linq;
 using UpDock.Git;
 using DotNet.Globbing;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace UpDock.Files
 {
@@ -16,11 +18,13 @@ namespace UpDock.Files
             _exclude = options.Exclude.Select(Glob.Parse).ToList();
         }
 
-        public bool Filter(IRepositoryFileInfo file)
+        public async Task<bool> FilterAsync(IRepositoryFileInfo file, CancellationToken cancellationToken)
         {
             var relativePath = file.RelativePath;
 
-            if (file.Ignored)
+            var ignored = await file.IsIgnoredAsync(cancellationToken);
+
+            if (ignored)
                 return false;
 
             if(_include.Count > 0 && !_include.Any(x => x.IsMatch(relativePath)))

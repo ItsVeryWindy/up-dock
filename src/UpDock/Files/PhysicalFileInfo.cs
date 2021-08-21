@@ -19,7 +19,7 @@ namespace UpDock.Files
 
         public void Delete() => _file.Delete();
 
-        public Stream CreateWriteStream() => new FileStream(AbsolutePath, FileMode.Truncate, FileAccess.Write);
+        public Stream CreateWriteStream() => new FileStream(AbsolutePath, FileMode.Create, FileAccess.Write);
 
         public Stream? CreateReadStream()
         {

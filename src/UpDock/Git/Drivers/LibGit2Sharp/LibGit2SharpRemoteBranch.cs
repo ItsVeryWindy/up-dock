@@ -1,4 +1,6 @@
-﻿using LibGit2Sharp;
+﻿using System.Threading;
+using System.Threading.Tasks;
+using LibGit2Sharp;
 using LibGit2Sharp.Handlers;
 
 namespace UpDock.Git.Drivers
@@ -20,7 +22,7 @@ namespace UpDock.Git.Drivers
             _credentialsHandler = credentialsHandler;
         }
 
-        public void Remove()
+        public Task RemoveAsync(CancellationToken cancellationToken)
         {
             PushException? exception = null;
 
@@ -34,6 +36,8 @@ namespace UpDock.Git.Drivers
 
             if (exception is not null)
                 throw exception;
+
+            return Task.CompletedTask;
         }
     }
 }

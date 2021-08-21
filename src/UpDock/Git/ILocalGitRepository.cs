@@ -8,11 +8,13 @@ namespace UpDock.Git
     public interface ILocalGitRepository
     {
         IDirectoryInfo Directory { get; }
-        bool IsDirty { get; }
+        
         IEnumerable<IRepositoryFileInfo> Files { get; }
+
+        Task<bool> IsDirtyAsync(CancellationToken cancellationToken);
 
         Task<(string url, string title)?> CreatePullRequestAsync(IReadOnlyCollection<TextReplacement> replacements, CancellationToken cancellationToken);
         
-        void Reset();
+        Task ResetAsync(CancellationToken cancellationToken);
     }
 }

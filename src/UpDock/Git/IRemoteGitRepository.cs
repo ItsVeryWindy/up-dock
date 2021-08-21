@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace UpDock.Git
@@ -13,7 +14,7 @@ namespace UpDock.Git
         string FullName { get; }
 
         Task<IRemoteGitRepository> ForkRepositoryAsync();
-        ILocalGitRepository CheckoutRepository();
+        Task<ILocalGitRepository> CheckoutRepositoryAsync(CancellationToken cancellationToken);
         Task<(string url, string title)?> CreatePullRequestAsync(IRemoteGitRepository forkedRepository, PullRequest pullRequest);
     }
 }

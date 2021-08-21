@@ -27,10 +27,22 @@ namespace UpDock.Files
 
         public IEnumerable<IDirectoryInfo> Directories => _directory.GetDirectories().Select(x => new PhysicalDirectoryInfo(x));
 
+        public IDirectoryInfo Create()
+        {
+            Directory.CreateDirectory(AbsolutePath);
+
+            return this;
+        }
+
         public void Delete() => _directory.Delete(true);
 
         public IFileInfo GetFile(string relativePath) => new PhysicalFileInfo(new FileInfo(Path.Join(_directory.FullName, relativePath)));
 
-        public void SetAttributes(FileAttributes fileAttributes) => File.SetAttributes(_directory.FullName, fileAttributes);
+        public IDirectoryInfo SetAttributes(FileAttributes fileAttributes)
+        {
+            File.SetAttributes(_directory.FullName, fileAttributes);
+
+            return this;
+        }
     }
 }

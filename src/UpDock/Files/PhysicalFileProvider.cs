@@ -20,5 +20,12 @@ namespace UpDock.Files
 
             return new PhysicalFileInfo(new FileInfo(tempFileName));
         }
+
+        public IDirectoryInfo CreateTemporaryDirectory()
+        {
+            var path = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+
+            return new PhysicalDirectoryInfo(Directory.CreateDirectory(path));
+        }
     }
 }

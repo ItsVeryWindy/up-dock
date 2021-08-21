@@ -15,6 +15,7 @@ namespace UpDock.Files
 
         IFileInfo GetFile(string relativePath);
         void Delete();
-        void SetAttributes(FileAttributes fileAttributes);
+        IDirectoryInfo SetAttributes(FileAttributes fileAttributes);
+        IDirectoryInfo Create();
     }
 }

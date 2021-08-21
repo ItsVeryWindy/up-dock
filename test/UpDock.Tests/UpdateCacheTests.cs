@@ -1,19 +1,17 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using NUnit.Framework;
-using Octokit;
 using UpDock.Caching;
 using UpDock.CommandLine;
 using UpDock.Files;
 using UpDock.Imaging;
 using UpDock.Nodes;
 using UpDock.Registry;
+using UpDock.Tests.Stubs;
 
 namespace UpDock.Tests
 {

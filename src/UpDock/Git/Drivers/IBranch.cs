@@ -1,4 +1,7 @@
-﻿namespace UpDock.Git.Drivers
+﻿using System.Threading;
+using System.Threading.Tasks;
+
+namespace UpDock.Git.Drivers
 {
     public interface IBranch
     {
@@ -6,8 +9,8 @@
         string FullName { get; }
         bool IsRemote { get; }
 
-        void Checkout();
-        void Checkout(bool force);
-        public IRemoteBranch Track(IRemote remote);
+        Task CheckoutAsync(CancellationToken cancellationToken) => CheckoutAsync(false, cancellationToken);
+        Task CheckoutAsync(bool force, CancellationToken cancellationToken);
+        Task<IRemoteBranch> TrackAsync(IRemote remote, CancellationToken cancellationToken);
     }
 }
