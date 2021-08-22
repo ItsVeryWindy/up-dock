@@ -7,6 +7,7 @@ namespace UpDock.Git.Drivers
     public class GitProcessRemote : IRemote
     {
         private readonly GitProcess _process;
+        private List<IRemoteReference>? _references;
 
         public string Name { get; }
 
@@ -18,20 +19,23 @@ namespace UpDock.Git.Drivers
 
         public async Task<IEnumerable<IRemoteReference>> GetReferencesAsync(CancellationToken cancellationToken)
         {
+            if (_references is not null)
+                return _references;
+
             using var result = await _process.ExecuteAsync(cancellationToken, "ls-remote", "--heads", "--refs", Name);
 
             await result.EnsureSuccessExitCodeAsync();
 
-            var references = new List<IRemoteReference>();
+            _references = new List<IRemoteReference>();
 
             await foreach (var line in result.ReadLinesAsync())
             {
                 var split = line.Split('\t')[1];
 
-                references.Add(new GitProcessRemoteBranch(_process, this, split));
+                _references.Add(new GitProcessRemoteBranch(_process, this, split));
             }
 
-            return references;
+            return _references;
         }
     }
 }

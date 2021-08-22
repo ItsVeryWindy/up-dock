@@ -21,7 +21,7 @@ namespace UpDock.Tests
         private IServiceProvider _sp = null!;
         private IDirectoryInfo _remoteDirectory = null!;
         private TDriver _driver = null!;
-        private string _cloneUrl;
+        private string _cloneUrl = null!;
         private IDirectoryInfo _cloneDirectory = null!;
         private IDirectoryInfo _separateCloneDirectory = null!;
 
