@@ -67,5 +67,9 @@ namespace UpDock.CommandLine
         [Shortcut("f", "fork-only")]
         [Description("Should only create pull requests using forks")]
         public bool ForkOnly { get; set; }
+
+        [Shortcut("g", "use-git")]
+        [Description("Use the git process instead")]
+        public bool UseGit { get; set; }
     }
 }

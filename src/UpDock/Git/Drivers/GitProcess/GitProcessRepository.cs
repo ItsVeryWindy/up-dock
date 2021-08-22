@@ -120,6 +120,8 @@ namespace UpDock.Git.Drivers
             return new GitProcessBranch(_process, this, name, name, null);
         }
 
+        public void Dispose() { }
+
         private class RepositoryFileInfo : IRepositoryFileInfo
         {
             private readonly GitProcessRepository _repository;

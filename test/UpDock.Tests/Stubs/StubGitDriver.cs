@@ -64,11 +64,11 @@ namespace UpDock.Tests.Stubs
                 Directory = directory;
                 RemoteRepository = remoteRepository;
 
-                foreach(var remoteBranch in remoteRepository.Branches.Values)
+                foreach (var remoteBranch in remoteRepository.Branches.Values)
                 {
                     var branch = new StubBranch(this, remoteBranch.FullName, remoteBranch.Name, remoteBranch.IsRemote);
 
-                    foreach(var commit in remoteBranch.Commits)
+                    foreach (var commit in remoteBranch.Commits)
                     {
                         branch.Commits.Enqueue(commit);
                     }
@@ -94,9 +94,46 @@ namespace UpDock.Tests.Stubs
 
             public Task<IBranch> GetHeadAsync(CancellationToken none) => Task.FromResult<IBranch>(Branches[Head]);
 
-            public Task<bool> IsDirtyAsync(CancellationToken cancellationToken) => throw new NotImplementedException();
+            public async Task<bool> IsDirtyAsync(CancellationToken cancellationToken)
+            {
+                var files = new Dictionary<string, byte[]>();
+
+                foreach (var commit in Branches[Head].Commits)
+                {
+                    foreach (var file in commit.Files)
+                    {
+                        files[file.Key] = file.Value;
+                    }
+                }
+
+                foreach (var file in Files)
+                {
+                    if (files.TryGetValue(file.RelativePath, out var oldValue))
+                    {
+                        using var ms = new MemoryStream();
+
+                        await file.File.CreateReadStream()!.CopyToAsync(ms, cancellationToken);
+
+                        ms.Position = 0;
+
+                        var value = ms.ToArray();
+
+                        if (oldValue.Length != value.Length)
+                            return true;
+
+                        for (var i = 0; i < oldValue.Length; i++)
+                        {
+                            if (oldValue[i] != value[i])
+                                return true;
+                        }
+                    }
+                }
+
+                return false;
+            }
+
             public Task<IReadOnlyCollection<IRemote>> GetRemotesAsync(CancellationToken cancellationToken) => Task.FromResult<IReadOnlyCollection<IRemote>>(_remotes.Select(x => new StubRemote(this, x)).ToList());
-            
+
             public Task CommitAsync(string message, string email, CancellationToken cancellationToken)
             {
                 Branches[Head].Commits.Enqueue(new StubCommit(message, email, StagedFiles.ToDictionary(x => x.Key, x => x.Value)));
@@ -113,6 +150,8 @@ namespace UpDock.Tests.Stubs
 
                 return Task.FromResult<IBranch>(branch);
             }
+
+            public void Dispose() { }
 
             private class RepositoryFileInfo : IRepositoryFileInfo
             {

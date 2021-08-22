@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace UpDock.Git.Drivers
@@ -33,11 +34,18 @@ namespace UpDock.Git.Drivers
 
         public async Task PushAsync(CancellationToken cancellationToken)
         {
-            var result = await _process.ExecuteAsync(cancellationToken, "push", "-u", _remote!.Name, Name);
+            try
+            {
+                var result = await _process.ExecuteAsync(cancellationToken, "push", "-u", _remote!.Name, Name);
 
-            await result.EnsureSuccessExitCodeAsync();
+                await result.EnsureSuccessExitCodeAsync();
 
-            var c = await result.ReadContentAsync();
+                var c = await result.ReadContentAsync();
+            }
+            catch (Exception ex)
+            {
+                throw new PushException(FullName, ex);
+            }
         }
 
         public async Task<IRemoteBranch> TrackAsync(IRemote remote, CancellationToken cancellationToken)

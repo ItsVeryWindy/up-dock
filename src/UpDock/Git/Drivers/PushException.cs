@@ -10,5 +10,10 @@ namespace UpDock.Git.Drivers
         {
             Reference = reference;
         }
+
+        public PushException(string reference, Exception innerException) : base("Failed to push reference", innerException)
+        {
+            Reference = reference;
+        }
     }
 }

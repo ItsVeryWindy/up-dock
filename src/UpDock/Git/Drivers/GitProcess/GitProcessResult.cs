@@ -42,6 +42,13 @@ namespace UpDock.Git.Drivers
             return 1;
         }
 
+        public Task CauseFailureAsync(string message)
+        {
+            _logger.LogError("Git command failure: {Message}", message);
+
+            return HandleFailureAsync();
+        }
+
         private async Task HandleFailureAsync()
         {
             var outStr = await _process.StandardOutput.ReadToEndAsync();

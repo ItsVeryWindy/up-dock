@@ -87,7 +87,7 @@ namespace UpDock
 
         private async Task ProcessRepositoryAsync(IRemoteGitRepository repository, CancellationToken cancellationToken)
         {
-            var localRepository = await repository.CheckoutRepositoryAsync(cancellationToken);
+            using var localRepository = await repository.CheckoutRepositoryAsync(cancellationToken);
 
             var directory = localRepository.Directory;
 

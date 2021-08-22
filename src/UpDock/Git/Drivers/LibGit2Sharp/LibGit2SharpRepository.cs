@@ -49,6 +49,7 @@ namespace UpDock.Git.Drivers
         public Task<IBranch> GetHeadAsync(CancellationToken none) => Task.FromResult<IBranch>(new LibGit2SharpBranch(_repository, _repository.Head, null, _credentialsHandler));
         public Task<IReadOnlyCollection<IBranch>> GetBranchesAsync(CancellationToken cancellationToken) => Task.FromResult<IReadOnlyCollection<IBranch>>(_repository.Branches.Select(x => new LibGit2SharpBranch(_repository, x, null, _credentialsHandler)).ToList());
         public Task<IBranch> CreateBranchAsync(string name, CancellationToken cancellationToken) => Task.FromResult<IBranch>(new LibGit2SharpBranch(_repository, _repository.CreateBranch(name), null, _credentialsHandler));
+        public void Dispose() => _repository.Dispose();
 
         private class RepositoryFileInfo : IRepositoryFileInfo
         {

@@ -1,11 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using UpDock.Files;
 
 namespace UpDock.Git.Drivers
 {
-    public interface IRepository
+    public interface IRepository : IDisposable
     {
         Task<bool> IsDirtyAsync(CancellationToken cancellationToken);
         IEnumerable<IRepositoryFileInfo> Files { get; }

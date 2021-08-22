@@ -20,7 +20,6 @@ namespace UpDock.Git
         private readonly CommandLineOptions _options;
         private readonly IRemoteGitRepository _remoteRepository;
         private IRemoteGitRepository? _forkedRepository;
-        private readonly IFileProvider _provider;
         private readonly ILogger<LocalGitRepository> _logger;
 
         public IEnumerable<IRepositoryFileInfo> Files => _localRepository.Files;
@@ -29,12 +28,11 @@ namespace UpDock.Git
 
         public Task<bool> IsDirtyAsync(CancellationToken cancellationToken) => _localRepository.IsDirtyAsync(cancellationToken);
 
-        public LocalGitRepository(IRepository localRepository, CommandLineOptions options, IRemoteGitRepository remoteRepository, IFileProvider provider, ILogger<LocalGitRepository> logger)
+        public LocalGitRepository(IRepository localRepository, CommandLineOptions options, IRemoteGitRepository remoteRepository, ILogger<LocalGitRepository> logger)
         {
             _localRepository = localRepository;
             _options = options;
             _remoteRepository = remoteRepository;
-            _provider = provider;
             _logger = logger;
         }
 
@@ -280,5 +278,7 @@ namespace UpDock.Git
         private static readonly SHA256 Sha256Hash = SHA256.Create();
 
         private static string CreateHash(string str) => Sha256Hash.ComputeHash(str);
+
+        public void Dispose() => _localRepository.Dispose();
     }
 }

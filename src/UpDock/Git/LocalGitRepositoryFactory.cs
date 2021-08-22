@@ -31,7 +31,7 @@ namespace UpDock.Git
 
             var repository = await _driver.CloneAsync(cloneUrl, directory, _options.Token, cancellationToken);
 
-            return new LocalGitRepository(repository, _options, remoteGitRepository, _provider, _logger);
+            return new LocalGitRepository(repository, _options, remoteGitRepository, _logger);
         }
 
         private void CleanupRepository(IDirectoryInfo dir)

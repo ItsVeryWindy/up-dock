@@ -1,11 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using UpDock.Files;
 
 namespace UpDock.Git
 {
-    public interface ILocalGitRepository
+    public interface ILocalGitRepository : IDisposable
     {
         IDirectoryInfo Directory { get; }
         

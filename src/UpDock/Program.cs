@@ -31,7 +31,10 @@ namespace UpDock
                 .AddSingleton<IRepositorySearcher, GitHubRepositorySearcher>()
                 .AddSingleton<ILocalGitRepositoryFactory, LocalGitRepositoryFactory>()
                 .AddSingleton<IFileProvider, PhysicalFileProvider>()
-                .AddSingleton<IGitDriver, LibGit2SharpDriver>()
+                .AddSingleton<LibGit2SharpDriver>()
+                .AddSingleton<GitProcessDriver>()
+                .AddSingleton<GitDriverFactory>()
+                .AddSingleton(sp => sp.GetRequiredService<GitDriverFactory>().Create())
                 .AddSingleton<IGitHubClient>(sp => {
                     var token = sp.GetRequiredService<IConfigurationOptions>().Token;
 

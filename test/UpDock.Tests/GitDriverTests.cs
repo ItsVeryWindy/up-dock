@@ -62,7 +62,7 @@ namespace UpDock.Tests
             const string committedFileName = "my-file";
             const string ignoredFileName = "my-ignored-file";
 
-            var repository = await _driver.CloneAsync(_remoteDirectory.AbsolutePath, _cloneDirectory, null, CancellationToken.None);
+            using var repository = await _driver.CloneAsync(_remoteDirectory.AbsolutePath, _cloneDirectory, null, CancellationToken.None);
 
             var head = await repository.GetHeadAsync(CancellationToken.None);
 
@@ -129,11 +129,23 @@ namespace UpDock.Tests
             GitDriverTests<TDriver, TFileProvider>.AssertBranch(branches.Skip(2).First(), "refs/remotes/origin/master", "origin/master", true);
             GitDriverTests<TDriver, TFileProvider>.AssertBranch(branches.Skip(3).First(), "refs/remotes/origin/my-branch", "origin/my-branch", true);
 
-            var separateRepository = await _driver.CloneAsync(_remoteDirectory.AbsolutePath, _separateCloneDirectory, null, CancellationToken.None);
+            using var separateRepository = await _driver.CloneAsync(_remoteDirectory.AbsolutePath, _separateCloneDirectory, null, CancellationToken.None);
 
             var separateFile = separateRepository.Files.FirstOrDefault(x => x.RelativePath == committedFileName);
 
             Assert.That(separateFile, Is.Not.Null);
+
+            using var separateStream = separateFile!.File.CreateWriteStream();
+
+            using var separateSW = new StreamWriter(separateStream);
+
+            separateSW.WriteLine(committedFileName);
+
+            separateSW.Dispose();
+
+            var isDirty = await separateRepository.IsDirtyAsync(CancellationToken.None);
+
+            Assert.That(isDirty, Is.True);
         }
 
         private static void AssertBranch(IBranch branch, string fullName, string name, bool isRemote)

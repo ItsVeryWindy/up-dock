@@ -18,6 +18,7 @@ UpDock is a tool for automatically updating docker images within github reposito
 --search/-s*     Search query to get repositories
 --template/-i    A template to apply
 --token/-t       GitHub token to access the repository
+--use-git/-g     Use the git process instead
 --version/-v     Display what the version is
 
 Prefixing the argument with an @ (eg. -@a, --@argument) will signify that value
