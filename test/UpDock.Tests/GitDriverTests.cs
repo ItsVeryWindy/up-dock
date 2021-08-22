@@ -21,6 +21,7 @@ namespace UpDock.Tests
         private IServiceProvider _sp = null!;
         private IDirectoryInfo _remoteDirectory = null!;
         private TDriver _driver = null!;
+        private string _cloneUrl;
         private IDirectoryInfo _cloneDirectory = null!;
         private IDirectoryInfo _separateCloneDirectory = null!;
 
@@ -37,7 +38,7 @@ namespace UpDock.Tests
 
             _driver = _sp.GetRequiredService<TDriver>();
 
-            await _driver.CreateRemoteAsync(_remoteDirectory, CancellationToken.None);
+            _cloneUrl = await _driver.CreateRemoteAsync(_remoteDirectory, CancellationToken.None);
 
             _cloneDirectory = _sp.GetRequiredService<IFileProvider>().CreateTemporaryDirectory();
 
@@ -62,7 +63,7 @@ namespace UpDock.Tests
             const string committedFileName = "my-file";
             const string ignoredFileName = "my-ignored-file";
 
-            using var repository = await _driver.CloneAsync(_remoteDirectory.AbsolutePath, _cloneDirectory, null, CancellationToken.None);
+            using var repository = await _driver.CloneAsync(_cloneUrl, _cloneDirectory, null, CancellationToken.None);
 
             var head = await repository.GetHeadAsync(CancellationToken.None);
 
@@ -153,13 +154,6 @@ namespace UpDock.Tests
             Assert.That(branch.FullName, Is.EqualTo(fullName));
             Assert.That(branch.Name, Is.EqualTo(name));
             Assert.That(branch.IsRemote, Is.EqualTo(isRemote));
-        }
-
-        private static async Task ExecuteProcessAsync(GitProcess process, params string[] args)
-        {
-            using var result = await process.ExecuteAsync(CancellationToken.None, args);
-
-            await result.EnsureSuccessExitCodeAsync();
         }
 
         private static void NormalizeAttributes(IDirectoryInfo? directory)

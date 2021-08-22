@@ -7,6 +7,6 @@ namespace UpDock.Git.Drivers
     public interface IGitDriver
     {
         Task<IRepository> CloneAsync(string cloneUrl, IDirectoryInfo directory, string? token, CancellationToken cancellationToken);
-        Task CreateRemoteAsync(IDirectoryInfo remoteDirectory, CancellationToken cancellationToken);
+        Task<string> CreateRemoteAsync(IDirectoryInfo remoteDirectory, CancellationToken cancellationToken);
     }
 }

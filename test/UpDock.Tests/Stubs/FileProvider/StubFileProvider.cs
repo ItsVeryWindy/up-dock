@@ -47,6 +47,6 @@ namespace UpDock.Tests
             return new StubDirectoryInfo(_files, path);
         }
 
-        public IDirectoryInfo CreateTemporaryDirectory() => GetDirectory(Guid.NewGuid().ToString()).Create();
+        public IDirectoryInfo CreateTemporaryDirectory() => GetDirectory($"/{Guid.NewGuid()}").Create();
     }
 }

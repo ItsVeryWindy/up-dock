@@ -41,11 +41,11 @@ namespace UpDock.Tests.Stubs
             return repository;
         }
 
-        public Task CreateRemoteAsync(IDirectoryInfo remoteDirectory, CancellationToken cancellationToken)
+        public Task<string> CreateRemoteAsync(IDirectoryInfo remoteDirectory, CancellationToken cancellationToken)
         {
             _repositories[remoteDirectory.AbsolutePath] = new StubRepository(remoteDirectory);
 
-            return Task.CompletedTask;
+            return Task.FromResult(remoteDirectory.AbsolutePath);
         }
 
         private class StubRepository : IRepository

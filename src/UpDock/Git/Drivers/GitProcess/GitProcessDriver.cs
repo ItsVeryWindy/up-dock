@@ -9,18 +9,16 @@ namespace UpDock.Git.Drivers
 {
     public class GitProcessDriver : IGitDriver
     {
-        private readonly IFileProvider _provider;
         private readonly ILogger<GitProcess> _logger;
 
-        public GitProcessDriver(IFileProvider provider, ILogger<GitProcess> logger)
+        public GitProcessDriver(ILogger<GitProcess> logger)
         {
-            _provider = provider;
             _logger = logger;
         }
 
         public async Task<IRepository> CloneAsync(string cloneUrl, IDirectoryInfo directory, string? token, CancellationToken cancellationToken)
         {
-            var builder = new UriBuilder(cloneUrl); ;
+            var builder = new UriBuilder(cloneUrl);
 
             if (token is not null)
             {
@@ -41,7 +39,7 @@ namespace UpDock.Git.Drivers
             return new GitProcessRepository(process, directory);
         }
 
-        public async Task CreateRemoteAsync(IDirectoryInfo remoteDirectory, CancellationToken cancellationToken)
+        public async Task<string> CreateRemoteAsync(IDirectoryInfo remoteDirectory, CancellationToken cancellationToken)
         {
             var process = new GitProcess(remoteDirectory, _logger);
 
@@ -50,9 +48,21 @@ namespace UpDock.Git.Drivers
             using var result = await process.ExecuteAsync(cancellationToken, "init", "--bare", ".");
 
             await result.EnsureSuccessExitCodeAsync();
+
+            return CreateLocalUri(remoteDirectory);
         }
 
-        private static readonly FloatRange MinVersion = new FloatRange(NuGetVersionFloatBehavior.AbsoluteLatest, NuGetVersion.Parse("2.22"));
+        private static string CreateLocalUri(IDirectoryInfo directory)
+        {
+            var dirStr = directory.AbsolutePath;
+
+            if (!dirStr.StartsWith('/'))
+                dirStr = '/' + dirStr;
+
+            return $"file://{dirStr}";
+        }
+
+        private static readonly FloatRange MinVersion = new(NuGetVersionFloatBehavior.AbsoluteLatest, NuGetVersion.Parse("2.22"));
 
         private static async Task EnsureValidVersionAsync(GitProcess process, CancellationToken cancellationToken)
         {

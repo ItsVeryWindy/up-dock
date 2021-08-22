@@ -34,11 +34,11 @@ namespace UpDock.Git.Drivers
             return Task.FromResult<IRepository>(new LibGit2SharpRepository(new Repository(path), _provider, CreateCredentials));
         }
 
-        public Task CreateRemoteAsync(IDirectoryInfo remoteDirectory, CancellationToken cancellationToken)
+        public Task<string> CreateRemoteAsync(IDirectoryInfo remoteDirectory, CancellationToken cancellationToken)
         {
-            Repository.Init(remoteDirectory.AbsolutePath, true);
+            var path = Repository.Init(remoteDirectory.AbsolutePath, true);
 
-            return Task.CompletedTask;
+            return Task.FromResult(path);
         }
     }
 }
