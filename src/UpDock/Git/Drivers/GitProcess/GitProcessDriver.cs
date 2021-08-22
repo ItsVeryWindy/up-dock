@@ -49,7 +49,11 @@ namespace UpDock.Git.Drivers
 
             await result.EnsureSuccessExitCodeAsync();
 
-            return new Uri(new Uri("file://"), remoteDirectory.AbsolutePath).ToString();
+            var cloneUrl = new Uri(new Uri("file://"), remoteDirectory.AbsolutePath).ToString();
+
+            _logger.LogInformation("Creating remote {Remote}", cloneUrl);
+
+            return cloneUrl;
         }
 
         private static readonly FloatRange MinVersion = new(NuGetVersionFloatBehavior.AbsoluteLatest, NuGetVersion.Parse("2.22"));
