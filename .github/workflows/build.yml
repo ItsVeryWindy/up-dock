@@ -32,6 +32,9 @@ jobs:
     - name: Test Executable
       if: matrix.os == 'windows-latest'
       run: ./src/UpDock/bin/Release/net5.0/win-x64/publish/up-dock.exe -e ItsVeryWindy@users.noreply.github.com -s repo:ItsVeryWindy/test-docker-update -d -t ${{ secrets.GITHUB_TOKEN }}
+    - name: Test Executable (Git Process)
+      if: matrix.os == 'windows-latest'
+      run: ./src/UpDock/bin/Release/net5.0/win-x64/publish/up-dock.exe -e ItsVeryWindy@users.noreply.github.com -s repo:ItsVeryWindy/test-docker-update -d -t -g ${{ secrets.GITHUB_TOKEN }}
 
     - name: Publish Executable
       if: matrix.os == 'ubuntu-latest'
@@ -39,3 +42,7 @@ jobs:
     - name: Test Executable
       if: matrix.os == 'ubuntu-latest'
       run: ./src/UpDock/bin/Release/net5.0/linux-x64/publish/up-dock -e ItsVeryWindy@users.noreply.github.com -s repo:ItsVeryWindy/test-docker-update -d -t ${{ secrets.GITHUB_TOKEN }}
+    - name: Test Executable (Git Process)
+      if: matrix.os == 'ubuntu-latest'
+      run: ./src/UpDock/bin/Release/net5.0/linux-x64/publish/up-dock -e ItsVeryWindy@users.noreply.github.com -s repo:ItsVeryWindy/test-docker-update -d -t -g ${{ secrets.GITHUB_TOKEN }}
+
