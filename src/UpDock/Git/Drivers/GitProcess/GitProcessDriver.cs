@@ -49,17 +49,7 @@ namespace UpDock.Git.Drivers
 
             await result.EnsureSuccessExitCodeAsync();
 
-            return CreateLocalUri(remoteDirectory);
-        }
-
-        private static string CreateLocalUri(IDirectoryInfo directory)
-        {
-            var dirStr = directory.AbsolutePath;
-
-            if (!dirStr.StartsWith('/'))
-                dirStr = '/' + dirStr;
-
-            return $"file://{dirStr}";
+            return new Uri(new Uri("file://"), remoteDirectory.AbsolutePath).ToString();
         }
 
         private static readonly FloatRange MinVersion = new(NuGetVersionFloatBehavior.AbsoluteLatest, NuGetVersion.Parse("2.22"));
