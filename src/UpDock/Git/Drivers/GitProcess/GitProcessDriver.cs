@@ -18,12 +18,13 @@ namespace UpDock.Git.Drivers
 
         public async Task<IRepository> CloneAsync(string cloneUrl, IDirectoryInfo directory, string? token, CancellationToken cancellationToken)
         {
-            var builder = new UriBuilder(cloneUrl);
-
             if (token is not null)
             {
-                builder.UserName = "username";
-                builder.Password = token;
+                cloneUrl = new UriBuilder(cloneUrl)
+                {
+                    UserName = "username",
+                    Password = token
+                }.Uri.ToString();
             }
 
             directory.Create();
@@ -32,7 +33,7 @@ namespace UpDock.Git.Drivers
 
             await EnsureValidVersionAsync(process, cancellationToken);
 
-            var result = await process.ExecuteAsync(cancellationToken, "clone", "--depth" , "1", "--no-single-branch", builder.Uri.ToString(), ".");
+            var result = await process.ExecuteAsync(cancellationToken, "clone", "--depth" , "1", "--no-single-branch", cloneUrl, ".");
 
             await result.EnsureSuccessExitCodeAsync();
 
