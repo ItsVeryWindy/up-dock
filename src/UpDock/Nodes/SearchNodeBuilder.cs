@@ -70,67 +70,12 @@ namespace UpDock.Nodes
 
             private void Add(DockerImageTemplatePattern pattern, IDockerImagePatternPart? part)
             {
-                if (part == EmptyDockerImagePatternPart.Instance)
-                {
-                    if(!Children.Any(x => x.Type == TreeNodeType.End && x.Pattern == pattern))
-                    {
-                        Children.Add(new TreeNode(pattern));
-                    }
-
+                if (part is null)
                     return;
-                }
 
-                if (part is VersionDockerImagePatternPart versionPart)
-                {
-                    var versionNode = Children.FirstOrDefault(x => x.Type == TreeNodeType.Version);
+                var visitor = new DockerImagePatternPartVisitor(pattern, this);
 
-                    if (versionNode == null)
-                    {
-                        versionNode = new TreeNode(TreeNodeType.Version);
-
-                        Children.Add(versionNode);
-                    }
-
-                    var floatRange = versionNode
-                        .Children
-                        .FirstOrDefault(x => x.FloatRange == versionPart.Range);
-
-                    if (floatRange == null)
-                    {
-                        floatRange = new TreeNode(versionPart.Range);
-
-                        versionNode.Children.Add(floatRange);
-                    }
-
-                    floatRange.Add(pattern, part.Next);
-
-                    return;
-                }
-
-                if (part is DigestDockerImagePatternPart digestPart)
-                {
-                    var digestNode = Children.FirstOrDefault(x => x.Type == TreeNodeType.Digest);
-
-                    if (digestNode == null)
-                    {
-                        digestNode = new TreeNode(TreeNodeType.Digest);
-
-                        Children.Add(digestNode);
-                    }
-
-                    digestNode.Add(pattern, part.Next);
-
-                    return;
-                }
-
-                if (part is TextDockerImagePatternPart textPart)
-                {
-                    Add(pattern, textPart, textPart.Text.AsSpan());
-
-                    return;
-                }
-
-                throw new InvalidOperationException($"Part type {(part is null ? "null" : part.GetType().ToString())} is not supported");
+                part.Accept(visitor);
             }
 
             private void Add(DockerImageTemplatePattern pattern, IDockerImagePatternPart? part, ReadOnlySpan<char> span)
@@ -216,6 +161,71 @@ namespace UpDock.Nodes
             }
 
             private IEnumerable<ISearchTreeNode> BuildChildren() => Children.Select(x => x.Build(ImmutableList<TreeNode>.Empty)).OrderBy(x => x);
+
+            private class DockerImagePatternPartVisitor : IDockerImagePatternPartVisitor
+            {
+                private readonly DockerImageTemplatePattern _pattern;
+                private readonly TreeNode _node;
+
+                public DockerImagePatternPartVisitor(DockerImageTemplatePattern pattern, TreeNode node)
+                {
+                    _pattern = pattern;
+                    _node = node;
+                }
+
+                public void VisitDigestDockerImagePatternPart(DigestDockerImagePatternPart part)
+                {
+                    var digestNode = _node.Children.FirstOrDefault(x => x.Type == TreeNodeType.Digest);
+
+                    if (digestNode == null)
+                    {
+                        digestNode = new TreeNode(TreeNodeType.Digest);
+
+                        _node.Children.Add(digestNode);
+                    }
+
+                    digestNode.Add(_pattern, part.Next);
+                }
+
+                public void VisitEmptyDockerImagePatternPart(EmptyDockerImagePatternPart part)
+                {
+                    if (!_node.Children.Any(x => x.Type == TreeNodeType.End && x.Pattern == _pattern))
+                    {
+                        _node.Children.Add(new TreeNode(_pattern));
+                    }
+
+                    return;
+                }
+
+                public void VisitTextDockerImagePatternPart(TextDockerImagePatternPart part) => _node.Add(_pattern, part, part.Text.AsSpan());
+
+                public void VisitVersionDockerImagePatternPart(VersionDockerImagePatternPart part)
+                {
+                    var versionNode = _node.Children.FirstOrDefault(x => x.Type == TreeNodeType.Version);
+
+                    if (versionNode == null)
+                    {
+                        versionNode = new TreeNode(TreeNodeType.Version);
+
+                        _node.Children.Add(versionNode);
+                    }
+
+                    var floatRange = versionNode
+                        .Children
+                        .FirstOrDefault(x => x.FloatRange == part.Range);
+
+                    if (floatRange == null)
+                    {
+                        floatRange = new TreeNode(part.Range);
+
+                        versionNode.Children.Add(floatRange);
+                    }
+
+                    floatRange.Add(_pattern, part.Next);
+
+                    return;
+                }
+            }
         }
     }
 }

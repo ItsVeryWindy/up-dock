@@ -43,5 +43,7 @@ namespace UpDock
 
             return Equals(Next, part.Next);
         }
+
+        public void Accept(IDockerImagePatternPartVisitor visitor) => visitor.VisitVersionDockerImagePatternPart(this);
     }
 }

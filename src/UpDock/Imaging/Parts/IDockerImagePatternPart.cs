@@ -12,5 +12,7 @@ namespace UpDock.Imaging.Parts
         string Execute(string? digest, IEnumerable<NuGetVersion> versions);
 
         string ToString();
+
+        void Accept(IDockerImagePatternPartVisitor visitor);
     }
 }

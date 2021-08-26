@@ -32,5 +32,7 @@ namespace UpDock.Imaging.Parts
 
             return Equals(Next, part.Next);
         }
+
+        public void Accept(IDockerImagePatternPartVisitor visitor) => visitor.VisitDigestDockerImagePatternPart(this);
     }
 }
