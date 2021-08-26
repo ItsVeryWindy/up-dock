@@ -1,15 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using NuGet.Versioning;
 
 namespace UpDock.Nodes
 {
-    public class VersionSearchNode : ISearchTreeNode
+    public class VersionSearchNode : ParentSearchNode
     {
         private static readonly HashSet<char> ValidCharacters;
-
-        private readonly List<ISearchTreeNode> _children;
 
         static VersionSearchNode()
         {
@@ -34,23 +31,22 @@ namespace UpDock.Nodes
             ValidCharacters.Add('-');
         }
 
-        public VersionSearchNode(IEnumerable<ISearchTreeNode> children)
+        public VersionSearchNode(IEnumerable<ISearchTreeNode> children) : base(children)
         {
-            _children = new List<ISearchTreeNode>(children);
         }
 
-        public SearchTreeNodeResult Search(ReadOnlySpan<char> span, int endIndex, string? digest, ImmutableList<NuGetVersion> versions)
+        public override SearchTreeNodeResult Search(SearchTreeNodeContext context)
         {
-            var versionEndIndex = GetEndOfVersion(span);
+            var versionEndIndex = GetEndOfVersion(context.Span);
 
             for (var i = 0; i < versionEndIndex; i++)
             {
-                var subString = span.Slice(0, versionEndIndex - i).ToString();
+                var subString = context.Span.Slice(0, versionEndIndex - i).ToString();
 
                 if (!NuGetVersion.TryParse(subString, out var version))
                     continue;
 
-                var childResult = GetChildResult(span[subString.Length..], endIndex + subString.Length, digest, versions.Add(version));
+                var childResult = base.Search(context.Next(subString.Length).WithVersion(version));
 
                 if(childResult.Pattern == null)
                     continue;
@@ -75,22 +71,5 @@ namespace UpDock.Nodes
 
             return span.Length;
         }
-
-        private SearchTreeNodeResult GetChildResult(ReadOnlySpan<char> span, int endIndex, string? digest, ImmutableList<NuGetVersion> versions)
-        {
-            foreach (var child in _children)
-            {
-                var childResult = child.Search(span, endIndex, digest, versions);
-
-                if (childResult.Pattern != null)
-                {
-                    return childResult;
-                }
-            }
-
-            return new SearchTreeNodeResult();
-        }
-
-        public int CompareTo(ISearchTreeNode? other) => -1;
     }
 }

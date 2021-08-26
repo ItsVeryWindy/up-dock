@@ -21,6 +21,6 @@ namespace UpDock.Tests
 
         public int CompareTo(ISearchTreeNode? other) => 1;
 
-        public SearchTreeNodeResult Search(ReadOnlySpan<char> span, int endIndex, string? digest, ImmutableList<NuGetVersion> versions) => new(Image, endIndex);
+        public SearchTreeNodeResult Search(SearchTreeNodeContext context) => new(Image, context.Index);
     }
 }

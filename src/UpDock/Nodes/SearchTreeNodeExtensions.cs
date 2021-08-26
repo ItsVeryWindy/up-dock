@@ -6,6 +6,6 @@ namespace UpDock.Nodes
 {
     public static class SearchTreeNodeExtensions
     {
-        public static SearchTreeNodeResult Search(this ISearchTreeNode node, ReadOnlySpan<char> span) => node.Search(span, 0, null, ImmutableList<NuGetVersion>.Empty);
+        public static SearchTreeNodeResult Search(this ISearchTreeNode node, ReadOnlySpan<char> span) => node.Search(new(span, 0, null, ImmutableList<NuGetVersion>.Empty));
     }
 }

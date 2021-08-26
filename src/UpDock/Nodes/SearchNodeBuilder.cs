@@ -105,7 +105,7 @@ namespace UpDock.Nodes
                 switch (Type)
                 {
                     case TreeNodeType.Root:
-                        return new MultipleSearchNode(Children.Select(x => x.Build(nodes)));
+                        return new ParentSearchNode(Children.Select(x => x.Build(nodes)));
                     case TreeNodeType.End:
                         return new DockerImageTemplatePatternNode(Pattern!);
                 }

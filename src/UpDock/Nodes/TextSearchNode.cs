@@ -1,44 +1,25 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
-using NuGet.Versioning;
 
 namespace UpDock.Nodes
 {
-    public class TextSearchNode : ISearchTreeNode
+    public class TextSearchNode : ParentSearchNode
     {
         private readonly string _text;
-        private readonly List<ISearchTreeNode> _children;
 
-        public TextSearchNode(string text, IEnumerable<ISearchTreeNode> children)
+        public TextSearchNode(string text, IEnumerable<ISearchTreeNode> children) : base(children)
         {
             _text = text;
-            _children = new List<ISearchTreeNode>(children);
         }
 
-        public SearchTreeNodeResult Search(ReadOnlySpan<char> span, int endIndex, string? digest, ImmutableList<NuGetVersion> versions)
+        public override SearchTreeNodeResult Search(SearchTreeNodeContext context)
         {
-            var result = span.StartsWith(_text, StringComparison.InvariantCultureIgnoreCase);
+            var result = context.Span.StartsWith(_text, StringComparison.InvariantCultureIgnoreCase);
 
-            return result ? GetChildResult(span[_text.Length..], endIndex + _text.Length, digest, versions) : new SearchTreeNodeResult();
+            return result ? base.Search(context.Next(_text.Length)) : new SearchTreeNodeResult();
         }
 
-        private SearchTreeNodeResult GetChildResult(ReadOnlySpan<char> span, int endIndex, string? digest, ImmutableList<NuGetVersion> versions)
-        {
-            foreach (var child in _children)
-            {
-                var childResult = child.Search(span, endIndex, digest, versions);
-
-                if (childResult.Pattern != null)
-                {
-                    return childResult;
-                }
-            }
-
-            return new SearchTreeNodeResult();
-        }
-
-        public int CompareTo(ISearchTreeNode? other)
+        public override int CompareTo(ISearchTreeNode? other)
         {
             if (other is TextSearchNode textSearchNode)
             {

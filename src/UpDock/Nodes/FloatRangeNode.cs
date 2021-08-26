@@ -6,42 +6,23 @@ using NuGet.Versioning;
 
 namespace UpDock.Nodes
 {
-    public class FloatRangeNode : ISearchTreeNode
+    public class FloatRangeNode : ParentSearchNode
     {
         private readonly FloatRange _range;
-        private readonly IEnumerable<ISearchTreeNode> _children;
 
-        public FloatRangeNode(FloatRange range, IEnumerable<ISearchTreeNode> children)
+        public FloatRangeNode(FloatRange range, IEnumerable<ISearchTreeNode> children) : base(children)
         {
             _range = range;
-            _children = children;
         }
 
-        public SearchTreeNodeResult Search(ReadOnlySpan<char> span, int index, string? digest, ImmutableList<NuGetVersion> versions)
+        public override SearchTreeNodeResult Search(SearchTreeNodeContext context)
         {
-            var version = versions.Last();
+            var version = context.Versions.Last();
 
             if (!_range.Satisfies(version))
                 return new SearchTreeNodeResult();
 
-            return GetChildResult(span, index, digest, versions);
+            return base.Search(context);
         }
-
-        private SearchTreeNodeResult GetChildResult(ReadOnlySpan<char> span, int index, string? digest, ImmutableList<NuGetVersion> versions)
-        {
-            foreach (var child in _children)
-            {
-                var childResult = child.Search(span, index, digest, versions);
-
-                if (childResult.Pattern != null)
-                {
-                    return childResult;
-                }
-            }
-
-            return new SearchTreeNodeResult();
-        }
-
-        public int CompareTo(ISearchTreeNode? other) => -1;
     }
 }

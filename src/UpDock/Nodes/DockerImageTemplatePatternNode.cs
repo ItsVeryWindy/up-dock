@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Immutable;
-using UpDock.Imaging;
-using NuGet.Versioning;
+﻿using UpDock.Imaging;
 
 namespace UpDock.Nodes
 {
@@ -14,7 +11,7 @@ namespace UpDock.Nodes
             _pattern = pattern;
         }
 
-        public SearchTreeNodeResult Search(ReadOnlySpan<char> span, int endIndex, string? digest, ImmutableList<NuGetVersion> versions) => new(_pattern.Create(digest, versions), endIndex);
+        public SearchTreeNodeResult Search(SearchTreeNodeContext context) => new(_pattern.Create(context.Digest.IsEmpty ? null : context.Digest.ToString(), context.Versions), context.Index);
 
         public int CompareTo(ISearchTreeNode? other) => 1;
     }
