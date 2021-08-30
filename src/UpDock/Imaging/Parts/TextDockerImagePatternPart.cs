@@ -33,6 +33,6 @@ namespace UpDock.Imaging.Parts
             return Equals(Text, part.Text) && Equals(Next, part.Next);
         }
 
-        public void Accept(IDockerImagePatternPartVisitor visitor) => visitor.VisitTextDockerImagePatternPart(this);
+        public void Accept(IDockerImagePatternPartVisitor visitor) => visitor.Visit(this);
     }
 }

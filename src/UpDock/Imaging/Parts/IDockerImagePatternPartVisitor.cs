@@ -2,12 +2,12 @@
 {
     public interface IDockerImagePatternPartVisitor
     {
-        void VisitEmptyDockerImagePatternPart(EmptyDockerImagePatternPart part);
+        void Visit(EmptyDockerImagePatternPart part);
 
-        void VisitVersionDockerImagePatternPart(VersionDockerImagePatternPart part);
+        void Visit(VersionDockerImagePatternPart part);
 
-        void VisitDigestDockerImagePatternPart(DigestDockerImagePatternPart part);
+        void Visit(DigestDockerImagePatternPart part);
 
-        void VisitTextDockerImagePatternPart(TextDockerImagePatternPart part);
+        void Visit(TextDockerImagePatternPart part);
     }
 }

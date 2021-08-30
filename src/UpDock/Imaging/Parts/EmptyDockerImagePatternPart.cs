@@ -22,6 +22,6 @@ namespace UpDock.Imaging.Parts
 
         public override string ToString() => string.Empty;
 
-        public void Accept(IDockerImagePatternPartVisitor visitor) => visitor.VisitEmptyDockerImagePatternPart(this);
+        public void Accept(IDockerImagePatternPartVisitor visitor) => visitor.Visit(this);
     }
 }

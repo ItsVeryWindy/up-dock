@@ -173,7 +173,7 @@ namespace UpDock.Nodes
                     _node = node;
                 }
 
-                public void VisitDigestDockerImagePatternPart(DigestDockerImagePatternPart part)
+                public void Visit(DigestDockerImagePatternPart part)
                 {
                     var digestNode = _node.Children.FirstOrDefault(x => x.Type == TreeNodeType.Digest);
 
@@ -187,7 +187,7 @@ namespace UpDock.Nodes
                     digestNode.Add(_pattern, part.Next);
                 }
 
-                public void VisitEmptyDockerImagePatternPart(EmptyDockerImagePatternPart part)
+                public void Visit(EmptyDockerImagePatternPart part)
                 {
                     if (!_node.Children.Any(x => x.Type == TreeNodeType.End && x.Pattern == _pattern))
                     {
@@ -197,9 +197,9 @@ namespace UpDock.Nodes
                     return;
                 }
 
-                public void VisitTextDockerImagePatternPart(TextDockerImagePatternPart part) => _node.Add(_pattern, part, part.Text.AsSpan());
+                public void Visit(TextDockerImagePatternPart part) => _node.Add(_pattern, part, part.Text.AsSpan());
 
-                public void VisitVersionDockerImagePatternPart(VersionDockerImagePatternPart part)
+                public void Visit(VersionDockerImagePatternPart part)
                 {
                     var versionNode = _node.Children.FirstOrDefault(x => x.Type == TreeNodeType.Version);
 
