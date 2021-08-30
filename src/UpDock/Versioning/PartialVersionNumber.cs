@@ -40,32 +40,32 @@ namespace UpDock.Versioning
         {
             var sb = new StringBuilder();
 
-            if(Major != PartialValue<int>.Unspecified)
+            if(!Major.IsUnspecified)
             {
                 sb.Append(Major.ToString());
             }
 
-            if (Minor != PartialValue<int>.Unspecified)
+            if (!Minor.IsUnspecified)
             {
                 sb.Append($".{Minor}");
             }
 
-            if (Patch != PartialValue<int>.Unspecified)
+            if (!Patch.IsUnspecified)
             {
                 sb.Append($".{Patch}");
             }
 
-            if (Revision != PartialValue<int>.Unspecified)
+            if (!Revision.IsUnspecified)
             {
                 sb.Append($".{Revision}");
             }
 
-            if (Prerelease != PartialValue<Prerelease>.Unspecified)
+            if (!Prerelease.IsUnspecified)
             {
                 sb.Append($"-{Prerelease}");
             }
 
-            if (Build != PartialValue<Build>.Unspecified)
+            if (!Build.IsUnspecified)
             {
                 sb.Append($"+{Build}");
             }
@@ -292,7 +292,12 @@ namespace UpDock.Versioning
         public static PartialValue<T> Unspecified { get; } = new(default!);
         public static PartialValue<T> Any { get; } = new(default!);
 
+        [MemberNotNullWhen(true, nameof(Value))]
         public bool HasValue => this != Unspecified && this != Any;
+
+        public bool IsUnspecified => this == Unspecified;
+
+        public bool IsAny => this == Any;
 
         public T? Value { get; }
 

@@ -286,33 +286,14 @@ namespace UpDock.Versioning
                 var minor = CreateMinimumNumber(partial.Minor);
                 var patch = CreateMinimumNumber(partial.Patch);
                 var revision = CreateMinimumNumber(partial.Revision);
-                var build = Build.None;
                 var prerelease = CreateMinimumPrerelease(partial.Prerelease);
 
-                return new(major, minor, patch, revision, build, prerelease);
+                return new(major, minor, patch, revision, Build.None, prerelease);
             }
 
-            private static int CreateMinimumNumber(PartialValue<int> number)
-            {
-                if (number == PartialValue<int>.Unspecified)
-                    return 0;
+            private static int CreateMinimumNumber(PartialValue<int> number) => number.HasValue ? number.Value : 0;
 
-                if (number == PartialValue<int>.Any)
-                    return 0;
-
-                return number.Value;
-            }
-
-            private static Prerelease CreateMinimumPrerelease(PartialValue<Prerelease> prerelease)
-            {
-                if (prerelease == PartialValue<Prerelease>.Unspecified)
-                    return Prerelease.Minimum;
-
-                if (prerelease == PartialValue<Prerelease>.Any)
-                    return Prerelease.Minimum;
-
-                return prerelease.Value!;
-            }
+            private static Prerelease CreateMinimumPrerelease(PartialValue<Prerelease> prerelease) => prerelease.Value ?? Prerelease.Minimum;
 
             private static VersionNumber CreateMaximum(PartialVersionNumber partial)
             {
@@ -320,37 +301,18 @@ namespace UpDock.Versioning
                 var minor = CreateMaximumNumber(partial.Minor);
                 var patch = CreateMaximumNumber(partial.Patch);
                 var revision = CreateMaximumNumber(partial.Revision);
-                var build = Build.None;
                 var prerelease = CreateMaximumPrerelease(partial.Prerelease);
 
-                return new(major, minor, patch, revision, build, prerelease);
+                return new(major, minor, patch, revision, Build.None, prerelease);
             }
 
-            private static int CreateMaximumNumber(PartialValue<int> number)
-            {
-                if (number == PartialValue<int>.Unspecified)
-                    return int.MaxValue;
+            private static int CreateMaximumNumber(PartialValue<int> number) => number.HasValue ? number.Value : int.MaxValue;
 
-                if (number == PartialValue<int>.Any)
-                    return int.MaxValue;
-
-                return number.Value;
-            }
-
-            private static Prerelease CreateMaximumPrerelease(PartialValue<Prerelease> prerelease)
-            {
-                if (prerelease == PartialValue<Prerelease>.Unspecified)
-                    return Prerelease.None;
-
-                if (prerelease == PartialValue<Prerelease>.Any)
-                    return Prerelease.None;
-
-                return prerelease.Value!;
-            }
+            private static Prerelease CreateMaximumPrerelease(PartialValue<Prerelease> prerelease) => prerelease.Value ?? Prerelease.None;
 
             public bool Satisfies(VersionNumber version)
             {
-                if (_a.Prerelease == PartialValue<Prerelease>.Unspecified && version.Prerelease != Prerelease.None)
+                if (_a.Prerelease.IsUnspecified && version.Prerelease != Prerelease.None)
                     return false;
 
                 return version >= _minimum && version <= _maximum;
@@ -378,33 +340,14 @@ namespace UpDock.Versioning
                 var minor = CreateMinimumNumber(partial.Minor);
                 var patch = CreateMinimumNumber(partial.Patch);
                 var revision = CreateMinimumNumber(partial.Revision);
-                var build = Build.None;
                 var prerelease = CreateMinimumPrerelease(partial.Prerelease);
 
-                return new(major, minor, patch, revision, build, prerelease);
+                return new(major, minor, patch, revision, Build.None, prerelease);
             }
 
-            private static int CreateMinimumNumber(PartialValue<int> number)
-            {
-                if (number == PartialValue<int>.Unspecified)
-                    return 0;
+            private static int CreateMinimumNumber(PartialValue<int> number) => number.HasValue ? number.Value : 0;
 
-                if (number == PartialValue<int>.Any)
-                    return 0;
-
-                return number.Value;
-            }
-
-            private static Prerelease CreateMinimumPrerelease(PartialValue<Prerelease> prerelease)
-            {
-                if (prerelease == PartialValue<Prerelease>.Unspecified)
-                    return Prerelease.Minimum;
-
-                if (prerelease == PartialValue<Prerelease>.Any)
-                    return Prerelease.Minimum;
-
-                return prerelease.Value!;
-            }
+            private static Prerelease CreateMinimumPrerelease(PartialValue<Prerelease> prerelease) => prerelease.HasValue ? prerelease.Value : Prerelease.Minimum;
 
             private static VersionNumber CreateMaximum(PartialVersionNumber partial)
             {
@@ -412,37 +355,18 @@ namespace UpDock.Versioning
                 var minor = CreateMaximumNumber(partial.Minor);
                 var patch = CreateMaximumNumber(partial.Patch);
                 var revision = CreateMaximumNumber(partial.Revision);
-                var build = Build.None;
                 var prerelease = CreateMaximumPrerelease(partial.Prerelease);
 
-                return new(major, minor, patch, revision, build, prerelease);
+                return new(major, minor, patch, revision, Build.None, prerelease);
             }
 
-            private static int CreateMaximumNumber(PartialValue<int> number)
-            {
-                if (number == PartialValue<int>.Unspecified)
-                    return int.MaxValue;
+            private static int CreateMaximumNumber(PartialValue<int> number) => number.HasValue ? number.Value : int.MaxValue;
 
-                if (number == PartialValue<int>.Any)
-                    return int.MaxValue;
-
-                return number.Value;
-            }
-
-            private static Prerelease CreateMaximumPrerelease(PartialValue<Prerelease> prerelease)
-            {
-                if (prerelease == PartialValue<Prerelease>.Unspecified)
-                    return Prerelease.None;
-
-                if (prerelease == PartialValue<Prerelease>.Any)
-                    return Prerelease.None;
-
-                return prerelease.Value!;
-            }
+            private static Prerelease CreateMaximumPrerelease(PartialValue<Prerelease> prerelease) => prerelease.HasValue ? prerelease.Value : Prerelease.None;
 
             public bool Satisfies(VersionNumber version)
             {
-                if (_partial.Prerelease == PartialValue<Prerelease>.Unspecified && version.Prerelease != Prerelease.None)
+                if (_partial.Prerelease.IsUnspecified && version.Prerelease != Prerelease.None)
                     return false;
 
                 return version >= _minimum && version <= _maximum;
@@ -470,29 +394,19 @@ namespace UpDock.Versioning
                 var minor = CreateMinimumNumber(partial.Minor);
                 var patch = CreateMinimumNumber(partial.Patch);
                 var revision = CreateMinimumNumber(partial.Revision);
-                var build = Build.None;
                 var prerelease = CreateMinimumPrerelease(partial.Prerelease);
 
-                return new(major, minor, patch, revision, build, prerelease);
+                return new(major, minor, patch, revision, Build.None, prerelease);
             }
 
-            private static int CreateMinimumNumber(PartialValue<int> number)
-            {
-                if (number == PartialValue<int>.Unspecified)
-                    return 0;
-
-                if (number == PartialValue<int>.Any)
-                    return 0;
-
-                return number.Value;
-            }
+            private static int CreateMinimumNumber(PartialValue<int> number) => number.HasValue ? number.Value : 0;
 
             private static Prerelease CreateMinimumPrerelease(PartialValue<Prerelease> prerelease)
             {
-                if (prerelease == PartialValue<Prerelease>.Unspecified)
+                if (prerelease.IsUnspecified)
                     return Prerelease.None;
 
-                if (prerelease == PartialValue<Prerelease>.Any)
+                if (prerelease.IsAny)
                     return Prerelease.Minimum;
 
                 return prerelease.Value!;
@@ -508,13 +422,10 @@ namespace UpDock.Versioning
 
             private static int CreateMaximumMajorNumber(PartialVersionNumber partial)
             {
-                if (partial.Major == PartialValue<int>.Unspecified)
+                if (!partial.Major.HasValue)
                     return int.MaxValue;
 
-                if (partial.Major == PartialValue<int>.Any)
-                    return int.MaxValue;
-
-                if (partial.Minor == PartialValue<int>.Unspecified)
+                if (partial.Minor.IsUnspecified)
                     return partial.Major.Value + 1;
 
                 return partial.Major.Value;
@@ -522,10 +433,10 @@ namespace UpDock.Versioning
 
             private static int CreateMaximumMinorNumber(PartialVersionNumber partial)
             {
-                if (partial.Minor == PartialValue<int>.Unspecified)
+                if (partial.Minor.IsUnspecified)
                     return 0;
 
-                if (partial.Minor == PartialValue<int>.Any)
+                if (partial.Minor.IsAny)
                     return int.MaxValue;
 
                 return partial.Minor.Value + 1;
@@ -533,7 +444,7 @@ namespace UpDock.Versioning
 
             public bool Satisfies(VersionNumber version)
             {
-                if (_partial.Prerelease == PartialValue<Prerelease>.Unspecified && version.Prerelease != Prerelease.None)
+                if (_partial.Prerelease.IsUnspecified && version.Prerelease != Prerelease.None)
                     return false;
 
                 return version >= _minimum && version < _maximum;
@@ -561,29 +472,19 @@ namespace UpDock.Versioning
                 var minor = CreateMinimumNumber(partial.Minor);
                 var patch = CreateMinimumNumber(partial.Patch);
                 var revision = CreateMinimumNumber(partial.Revision);
-                var build = Build.None;
                 var prerelease = CreateMinimumPrerelease(partial.Prerelease);
 
-                return new(major, minor, patch, revision, build, prerelease);
+                return new(major, minor, patch, revision, Build.None, prerelease);
             }
 
-            private static int CreateMinimumNumber(PartialValue<int> number)
-            {
-                if (number == PartialValue<int>.Unspecified)
-                    return 0;
-
-                if (number == PartialValue<int>.Any)
-                    return 0;
-
-                return number.Value;
-            }
+            private static int CreateMinimumNumber(PartialValue<int> number) => number.HasValue ? number.Value : 0;
 
             private static Prerelease CreateMinimumPrerelease(PartialValue<Prerelease> prerelease)
             {
-                if (prerelease == PartialValue<Prerelease>.Unspecified)
+                if (prerelease.IsUnspecified)
                     return Prerelease.None;
 
-                if (prerelease == PartialValue<Prerelease>.Any)
+                if (prerelease.IsAny)
                     return Prerelease.Minimum;
 
                 return prerelease.Value!;
@@ -596,32 +497,23 @@ namespace UpDock.Versioning
                 var patch = CreateMaximumPatchNumber(partial);
                 var revision = CreateMaximumRevisionNumber(partial);
 
-                return new(major, minor, patch, 0, Build.None, Prerelease.Minimum);
+                return new(major, minor, patch, revision, Build.None, Prerelease.Minimum);
             }
 
             private static int CreateMaximumMajorNumber(PartialVersionNumber partial)
             {
-                if (partial.Major == PartialValue<int>.Unspecified)
+                if (partial.Major.IsUnspecified)
                     return 0;
 
-                if (partial.Major == PartialValue<int>.Any)
+                if (partial.Major.IsAny)
                     return int.MaxValue;
 
-                if (partial.Minor == PartialValue<int>.Unspecified || partial.Minor == PartialValue<int>.Any)
-                    return partial.Major.Value + 1;
-
-                return partial.Major.Value == 0 ? partial.Major.Value : partial.Major.Value + 1;
+                return partial.Minor.HasValue && partial.Major.Value == 0 ? partial.Major.Value : partial.Major.Value + 1;
             }
 
             private static int CreateMaximumMinorNumber(PartialVersionNumber partial)
             {
-                if (partial.Minor == PartialValue<int>.Unspecified)
-                    return 0;
-
-                if (partial.Minor == PartialValue<int>.Any)
-                    return 0;
-
-                if (partial.Minor.Value == 0)
+                if (partial.Minor.HasValue || partial.Minor.Value == 0)
                     return 0;
 
                 return partial.Major.Value == 0 ? partial.Minor.Value + 1 : 0;
@@ -629,10 +521,7 @@ namespace UpDock.Versioning
 
             private static int CreateMaximumPatchNumber(PartialVersionNumber partial)
             {
-                if (partial.Minor == PartialValue<int>.Unspecified)
-                    return 0;
-
-                if (partial.Minor == PartialValue<int>.Any)
+                if (partial.Minor.HasValue)
                     return 0;
 
                 return partial.Major.Value == 0 && partial.Minor.Value == 0 ? partial.Patch.Value + 1 : 0;
@@ -640,10 +529,7 @@ namespace UpDock.Versioning
 
             private static int CreateMaximumRevisionNumber(PartialVersionNumber partial)
             {
-                if (partial.Patch == PartialValue<int>.Unspecified)
-                    return 0;
-
-                if (partial.Patch == PartialValue<int>.Any)
+                if (partial.Patch.HasValue)
                     return 0;
 
                 return partial.Major.Value == 0 && partial.Minor.Value == 0 && partial.Patch.Value == 0 ? partial.Revision.Value + 1 : 0;
@@ -651,7 +537,7 @@ namespace UpDock.Versioning
 
             public bool Satisfies(VersionNumber version)
             {
-                if (_partial.Prerelease == PartialValue<Prerelease>.Unspecified && version.Prerelease != Prerelease.None)
+                if (_partial.Prerelease.IsUnspecified && version.Prerelease != Prerelease.None)
                     return false;
 
                 return version >= _minimum && version < _maximum;
@@ -676,18 +562,17 @@ namespace UpDock.Versioning
                 var minor = CreateNumber(partial.Minor, int.MaxValue);
                 var patch = CreateNumber(partial.Patch, int.MaxValue);
                 var revision = CreateNumber(partial.Revision, 0);
-                var build = Build.None;
                 var prerelease = CreatePrerelease(partial.Prerelease);
 
-                return new(major, minor, patch, revision, build, prerelease);
+                return new(major, minor, patch, revision, Build.None, prerelease);
             }
 
             private static int CreateNumber(PartialValue<int> number, int unspecfied)
             {
-                if (number == PartialValue<int>.Unspecified)
+                if (number.IsUnspecified)
                     return unspecfied;
 
-                if (number == PartialValue<int>.Any)
+                if (number.IsAny)
                     return 0;
 
                 return number.Value;
@@ -695,10 +580,10 @@ namespace UpDock.Versioning
 
             private static Prerelease CreatePrerelease(PartialValue<Prerelease> prerelease)
             {
-                if (prerelease == PartialValue<Prerelease>.Unspecified)
+                if (prerelease.IsUnspecified)
                     return Prerelease.None;
 
-                if (prerelease == PartialValue<Prerelease>.Any)
+                if (prerelease.IsAny)
                     return Prerelease.Minimum;
 
                 return prerelease.Value!;
@@ -706,7 +591,7 @@ namespace UpDock.Versioning
 
             public bool Satisfies(VersionNumber version)
             {
-                if (_partial.Prerelease == PartialValue<Prerelease>.Unspecified && version.Prerelease != Prerelease.None)
+                if (_partial.Prerelease.IsUnspecified && version.Prerelease != Prerelease.None)
                     return false;
 
                 if(_partial.Prerelease.HasValue && version.Prerelease != Prerelease.None)
@@ -747,37 +632,18 @@ namespace UpDock.Versioning
                 var minor = CreateNumber(partial.Minor);
                 var patch = CreateNumber(partial.Patch);
                 var revision = CreateNumber(partial.Revision);
-                var build = Build.None;
                 var prerelease = CreatePrerelease(partial.Prerelease);
 
-                return new(major, minor, patch, revision, build, prerelease);
+                return new(major, minor, patch, revision, Build.None, prerelease);
             }
 
-            private static int CreateNumber(PartialValue<int> number)
-            {
-                if (number == PartialValue<int>.Unspecified)
-                    return 0;
+            private static int CreateNumber(PartialValue<int> number) => number.HasValue ? number.Value : 0;
 
-                if (number == PartialValue<int>.Any)
-                    return 0;
-
-                return number.Value;
-            }
-
-            private static Prerelease CreatePrerelease(PartialValue<Prerelease> prerelease)
-            {
-                if (prerelease == PartialValue<Prerelease>.Unspecified)
-                    return Prerelease.Minimum;
-
-                if (prerelease == PartialValue<Prerelease>.Any)
-                    return Prerelease.Minimum;
-
-                return prerelease.Value!;
-            }
+            private static Prerelease CreatePrerelease(PartialValue<Prerelease> prerelease) => prerelease.Value ?? Prerelease.Minimum;
 
             public bool Satisfies(VersionNumber version)
             {
-                if (_partial.Prerelease == PartialValue<Prerelease>.Unspecified && version.Prerelease != Prerelease.None)
+                if (_partial.Prerelease.IsUnspecified && version.Prerelease != Prerelease.None)
                     return false;
 
                 if (_partial.Prerelease.HasValue && version.Prerelease != Prerelease.None)
@@ -818,37 +684,18 @@ namespace UpDock.Versioning
                 var minor = CreateNumber(partial.Minor);
                 var patch = CreateNumber(partial.Patch);
                 var revision = CreateNumber(partial.Revision);
-                var build = Build.None;
                 var prerelease = CreatePrerelease(partial.Prerelease);
 
-                return new(major, minor, patch, revision, build, prerelease);
+                return new(major, minor, patch, revision, Build.None, prerelease);
             }
 
-            private static int CreateNumber(PartialValue<int> number)
-            {
-                if (number == PartialValue<int>.Unspecified)
-                    return 0;
+            private static int CreateNumber(PartialValue<int> number) => number.HasValue ? number.Value : 0;
 
-                if (number == PartialValue<int>.Any)
-                    return 0;
-
-                return number.Value;
-            }
-
-            private static Prerelease CreatePrerelease(PartialValue<Prerelease> prerelease)
-            {
-                if (prerelease == PartialValue<Prerelease>.Unspecified)
-                    return Prerelease.Minimum;
-
-                if (prerelease == PartialValue<Prerelease>.Any)
-                    return Prerelease.Minimum;
-
-                return prerelease.Value!;
-            }
+            private static Prerelease CreatePrerelease(PartialValue<Prerelease> prerelease) => prerelease.Value ?? Prerelease.Minimum;
 
             public bool Satisfies(VersionNumber version)
             {
-                if (_partial.Prerelease == PartialValue<Prerelease>.Unspecified && version.Prerelease != Prerelease.None)
+                if (_partial.Prerelease.IsUnspecified && version.Prerelease != Prerelease.None)
                     return false;
 
                 return version < _maximum;
@@ -874,37 +721,27 @@ namespace UpDock.Versioning
                 var minor = CreateNumber(partial.Minor);
                 var patch = CreateNumber(partial.Patch);
                 var revision = CreateNumber(partial.Revision);
-                var build = Build.None;
                 var prerelease = CreatePrerelease(partial.Prerelease);
 
-                return new(major, minor, patch, revision, build, prerelease);
+                return new(major, minor, patch, revision, Build.None, prerelease);
             }
 
             private static int CreateNumber(PartialValue<int> number)
             {
-                if (number == PartialValue<int>.Unspecified)
+                if (number.IsUnspecified)
                     return 0;
 
-                if (number == PartialValue<int>.Any)
+                if (number.IsAny)
                     return int.MaxValue;
 
                 return number.Value;
             }
 
-            private static Prerelease CreatePrerelease(PartialValue<Prerelease> prerelease)
-            {
-                if (prerelease == PartialValue<Prerelease>.Unspecified)
-                    return Prerelease.None;
-
-                if (prerelease == PartialValue<Prerelease>.Any)
-                    return Prerelease.None;
-
-                return prerelease.Value!;
-            }
+            private static Prerelease CreatePrerelease(PartialValue<Prerelease> prerelease) => prerelease.Value ?? Prerelease.None;
 
             public bool Satisfies(VersionNumber version)
             {
-                if (_partial.Prerelease == PartialValue<Prerelease>.Unspecified && version.Prerelease != Prerelease.None)
+                if (_partial.Prerelease.IsUnspecified && version.Prerelease != Prerelease.None)
                     return false;
 
                 return version <= _maximum;
