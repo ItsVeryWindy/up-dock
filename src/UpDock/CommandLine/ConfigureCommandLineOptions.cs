@@ -21,7 +21,7 @@ namespace UpDock.CommandLine
             options.Token ??= _options.Token;
             options.DryRun = _options.DryRun;
 
-            if (_options.Templates != null)
+            if (_options.Templates is not null)
             {
                 foreach (var template in _options.Templates)
                 {
@@ -29,11 +29,11 @@ namespace UpDock.CommandLine
                 }
             }
 
-            if (_options.Config != null)
+            if (_options.Config is not null)
             {
-                var stream = _provider.GetFile(_options.Config)?.CreateReadStream();
+                var stream = _provider.GetFile(_options.Config).CreateReadStream();
 
-                if (stream != null)
+                if (stream is not null)
                 {
                     options.Populate(stream);
                 }

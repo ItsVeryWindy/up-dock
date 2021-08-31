@@ -1,4 +1,6 @@
-﻿namespace UpDock.Files
+﻿using System.Diagnostics.CodeAnalysis;
+
+namespace UpDock.Files
 {
     public interface IFileProvider
     {
@@ -8,6 +10,7 @@
 
         IFileInfo CreateTemporaryFile();
 
+        [return: NotNullIfNotNull("path")]
         IFileInfo? GetFile(string? path);
     }
 }

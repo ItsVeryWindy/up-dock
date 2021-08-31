@@ -17,7 +17,7 @@ namespace UpDock.Nodes
             {
                 var childResult = child.Search(context);
 
-                if (childResult.Pattern != null)
+                if (childResult.Pattern is not null)
                     return childResult;
             }
 

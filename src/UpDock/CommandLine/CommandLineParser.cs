@@ -95,7 +95,7 @@ namespace UpDock.CommandLine
 
             var requiredArguments = typeof(T)
                 .GetProperties()
-                .Where(x => x.GetCustomAttribute<RequiredAttribute>() != null && arguments.All(y => y.Property != x))
+                .Where(x => x.GetCustomAttribute<RequiredAttribute>() is not null && arguments.All(y => y.Property != x))
                 .Select(x => new CommandLineArgument(Formatter.FormatShortcut(x), null, null, x, 0));
 
             arguments.AddRange(requiredArguments);
@@ -114,9 +114,9 @@ namespace UpDock.CommandLine
         {
             var converterName = property.GetCustomAttribute<TypeConverterAttribute>()?.ConverterTypeName;
 
-            var type = converterName == null ? GetCorrectTypeToConvert(property.PropertyType) : Type.GetType(converterName);
+            var type = converterName is null ? GetCorrectTypeToConvert(property.PropertyType) : Type.GetType(converterName);
 
-            if (converterName == null)
+            if (converterName is null)
                 return TypeDescriptor.GetConverter(type);
 
             return (TypeConverter)Activator.CreateInstance(type!)!;

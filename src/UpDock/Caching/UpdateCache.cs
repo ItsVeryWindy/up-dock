@@ -196,7 +196,7 @@ namespace UpDock.Caching
                 .Distinct()
                 .ToList();
 
-            var file = _provider.GetFile(_options.Cache)!;
+            var file = _provider.GetFile(_options.Cache);
 
             await using var stream = file.CreateWriteStream();
 

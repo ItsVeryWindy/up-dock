@@ -78,7 +78,7 @@ namespace UpDock.Tests
 
             var repository = await driver.CloneAsync(remoteDirectory.AbsolutePath, provider.GetDirectory("/clone"), null, CancellationToken.None);
 
-            var stream = TestUtilities.GetResource($"Files.{resource}")!;
+            var stream = TestUtilities.GetResource($"Files.{resource}");
 
             var file = provider.GetFile("/clone/file/path");
 

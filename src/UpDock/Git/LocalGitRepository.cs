@@ -97,7 +97,7 @@ namespace UpDock.Git
         {
             var existingRemote = (await _localRepository.GetRemotesAsync(cancellationToken)).FirstOrDefault(x => x.Name == remoteName);
 
-            if (existingRemote != null)
+            if (existingRemote is not null)
                 return existingRemote;
 
             var newRemote = await _localRepository.CreateRemoteAsync(remoteName, repository, cancellationToken);

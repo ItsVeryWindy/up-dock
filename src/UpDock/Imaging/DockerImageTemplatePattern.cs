@@ -50,7 +50,7 @@ namespace UpDock.Imaging
                     continue;
                 }
 
-                if(i != strStart)
+                if (i != strStart)
                 {
                     parts.Add(span[strStart..i].ToString());
                 }

@@ -40,7 +40,7 @@ namespace UpDock.Files
         {
             var parent = file.Parent;
 
-            while(parent != null && parent.AbsolutePath != directory.AbsolutePath)
+            while(parent is not null && parent.AbsolutePath != directory.AbsolutePath)
             {
                 if (parent.Name == ".git")
                     return true;

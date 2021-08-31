@@ -6,9 +6,15 @@ namespace UpDock.Registry
     public class TagList
     {
         [JsonPropertyName("name")]
-        public string Name { get; set; } = null!;
+        public string Name { get; }
 
         [JsonPropertyName("tags")]
-        public IReadOnlyList<string> Tags { get; set; } = null!;
+        public IReadOnlyCollection<string> Tags { get; }
+
+        public TagList(string name, IReadOnlyCollection<string> tags)
+        {
+            Name = name;
+            Tags = tags;
+        }
     }
 }

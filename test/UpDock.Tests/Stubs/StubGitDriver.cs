@@ -267,7 +267,7 @@ namespace UpDock.Tests.Stubs
                     _repository.RemoteRepository!.Branches.Add(Name, remoteBranch);
                 }
 
-                var name = $"{_remote!.Name}/{Name}";
+                var name = $"{_remote.Name}/{Name}";
 
                 if (!_repository.Branches.ContainsKey(name))
                 {

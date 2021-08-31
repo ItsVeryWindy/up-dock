@@ -170,7 +170,7 @@ namespace UpDock.Imaging
         {
             var imageSplit = str.Split('/', 2);
 
-            if (imageSplit.Length == 1 || !imageSplit[0].Contains("."))
+            if (imageSplit.Length == 1 || !imageSplit[0].Contains('.'))
             {
                 return (null, str);
             }
@@ -212,7 +212,7 @@ namespace UpDock.Imaging
             if (splitTag.Length == 1)
                 return (image, hasDigest, "{v}");
 
-            if(splitTag.Length != 2)
+            if (splitTag.Length != 2)
                 throw new FormatException("The image name for a template should only have one colon.");
 
             return (image, hasDigest, splitTag[1]);
@@ -250,7 +250,7 @@ namespace UpDock.Imaging
         {
             var sb = new StringBuilder();
 
-            if(Repository != DefaultRepository)
+            if (Repository != DefaultRepository)
             {
                 sb.Append(Repository.Host).Append('/');
             }
@@ -271,7 +271,7 @@ namespace UpDock.Imaging
         {
             var sb = new StringBuilder();
 
-            if(Repository != DefaultRepository)
+            if (Repository != DefaultRepository)
             {
                 sb.Append(Repository.Host).Append('/');
             }
@@ -288,7 +288,7 @@ namespace UpDock.Imaging
         {
             var sb = new StringBuilder();
 
-            if(Repository != DefaultRepository && includeRepository)
+            if (Repository != DefaultRepository && includeRepository)
             {
                 sb.Append(Repository.Host).Append('/');
             }
@@ -310,7 +310,7 @@ namespace UpDock.Imaging
                 sb.Append("{digest}");
             }
             
-            if(!canIncludeDigest || includeTag)
+            if (!canIncludeDigest || includeTag)
             {
                 if (includeImage || canIncludeDigest)
                 {

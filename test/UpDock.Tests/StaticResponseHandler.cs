@@ -22,12 +22,12 @@ namespace UpDock.Tests
 
             if(request.RequestUri == AuthenticationUri)
             {
-                var stream = typeof(StaticResponseHandler).Assembly.GetManifestResourceStream("UpDock.Tests.token_response.json");
+                var stream = TestUtilities.GetResource("token_response.json");
 
                 return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
                 {
                     RequestMessage = request,
-                    Content = new StreamContent(stream!)
+                    Content = new StreamContent(stream)
                 });
             }
 
@@ -51,12 +51,12 @@ namespace UpDock.Tests
 
             if (request.RequestUri?.AbsolutePath.Contains("tags") == true)
             {
-                var stream = typeof(StaticResponseHandler).Assembly.GetManifestResourceStream("UpDock.Tests.tags_response.json");
+                var stream = TestUtilities.GetResource("tags_response.json");
 
                 return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
                 {
                     RequestMessage = request,
-                    Content = new StreamContent(stream!)
+                    Content = new StreamContent(stream)
                 });
             }
 

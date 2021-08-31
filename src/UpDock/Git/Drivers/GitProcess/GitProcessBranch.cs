@@ -39,8 +39,6 @@ namespace UpDock.Git.Drivers
                 var result = await _process.ExecuteAsync(cancellationToken, "push", "-u", _remote!.Name, Name);
 
                 await result.EnsureSuccessExitCodeAsync();
-
-                var c = await result.ReadContentAsync();
             }
             catch (Exception ex)
             {

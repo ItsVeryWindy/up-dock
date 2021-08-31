@@ -35,7 +35,7 @@ namespace UpDock
             string? line;
             var lineNumber = 0;
 
-            while ((line = await sr.ReadLineAsync()) != null)
+            while ((line = await sr.ReadLineAsync()) is not null)
             {
                 for (var i = 0; i < line.Length;)
                 {

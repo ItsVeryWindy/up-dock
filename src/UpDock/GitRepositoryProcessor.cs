@@ -153,7 +153,7 @@ namespace UpDock
 
             var isFiltered = await filter.FilterAsync(file, cancellationToken);
 
-            if(!isFiltered)
+            if (!isFiltered)
                 return;
 
             var plan = await _planner.GetReplacementPlanAsync(file, node, _options.AllowDowngrade, cancellationToken);

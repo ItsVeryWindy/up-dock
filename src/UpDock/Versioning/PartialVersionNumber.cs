@@ -18,10 +18,6 @@ namespace UpDock.Versioning
 
         public PartialValue<Prerelease> Prerelease { get; }
 
-        //public VersionNumber MinimumVersion { get; }
-
-        //public VersionNumber MaximumVersion { get; }
-
         public PartialVersionNumber(PartialValue<int> major, PartialValue<int> minor, PartialValue<int> patch, PartialValue<int> revision, PartialValue<Build> build, PartialValue<Prerelease> prerelease)
         {
             Major = major;
@@ -30,17 +26,15 @@ namespace UpDock.Versioning
             Revision = revision;
             Build = build;
             Prerelease = prerelease;
-            //MinimumVersion = new(Major ?? 0, Minor ?? 0, Patch ?? 0, Revision ?? 0, Build ?? Build.None, Prerelease ?? Prerelease.Minimum);
-            //MaximumVersion = new(Major ?? int.MaxValue, Minor ?? int.MaxValue, Patch ?? int.MaxValue, Revision ?? int.MaxValue, Build ?? Build.None, Prerelease ?? Prerelease.None);
         }
 
-    public static PartialVersionNumber Parse(string s) => TryParse(s, out var version) ? version! : throw new FormatException();
+    public static PartialVersionNumber Parse(string s) => TryParse(s, out var version) ? version : throw new FormatException();
 
         public override string ToString()
         {
             var sb = new StringBuilder();
 
-            if(!Major.IsUnspecified)
+            if (!Major.IsUnspecified)
             {
                 sb.Append(Major.ToString());
             }
@@ -72,8 +66,6 @@ namespace UpDock.Versioning
 
             return sb.ToString();
         }
-
-        private static string VersionToString(int? number) => number is null ? "*" : number.ToString()!;
 
         public override bool Equals(object? obj)
         {

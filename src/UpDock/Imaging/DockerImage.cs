@@ -56,13 +56,13 @@ namespace UpDock.Nodes
             if (other == null)
                 return 1;
 
-            if (Repository == null && other.Repository != null)
+            if (Repository is null && other.Repository is not null)
                 return -1;
 
-            if (Repository != null && other.Repository == null)
+            if (Repository is not null && other.Repository is null)
                 return 1;
 
-            if (Repository != null && other.Repository != null)
+            if (Repository is not null && other.Repository is not null)
             {
                 var repository = string.Compare(Repository.Host, other.Repository.Host,
                     StringComparison.InvariantCultureIgnoreCase);
@@ -118,7 +118,7 @@ namespace UpDock.Nodes
         {
             var sb = new StringBuilder();
 
-            if(Repository != null)
+            if (Repository is not null)
             {
                 sb.Append(Repository.Host).Append('/');
             }

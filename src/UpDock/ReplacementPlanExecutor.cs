@@ -51,7 +51,7 @@ namespace UpDock
             string? line;
             var lineNumber = 0;
 
-            while ((line = await sr.ReadLineAsync()) != null)
+            while ((line = await sr.ReadLineAsync()) is not null)
             {
                 var lineReplacements = replacements
                     .Where(x => x.LineNumber == lineNumber)

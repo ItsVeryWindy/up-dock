@@ -396,7 +396,7 @@ namespace UpDock
             {
                 var result = node.Search(tag);
 
-                if(result.Pattern != null && result.EndIndex == tag.Length)
+                if(result.Pattern is not null && result.EndIndex == tag.Length)
                 {
                     versions.Add(result.Pattern.Image);
                 }

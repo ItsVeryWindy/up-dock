@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 
@@ -42,6 +43,7 @@ namespace UpDock.Git.Drivers
             return 1;
         }
 
+        [DoesNotReturn]
         public Task CauseFailureAsync(string message)
         {
             _logger.LogError("Git command failure: {Message}", message);
@@ -49,6 +51,7 @@ namespace UpDock.Git.Drivers
             return HandleFailureAsync();
         }
 
+        [DoesNotReturn]
         private async Task HandleFailureAsync()
         {
             var outStr = await _process.StandardOutput.ReadToEndAsync();

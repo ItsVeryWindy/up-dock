@@ -27,7 +27,7 @@ namespace UpDock.Versioning
             Prerelease = prerelease;
         }
 
-        public static VersionNumber Parse(string s) => TryParse(s, out var version) ? version! : throw new FormatException();
+        public static VersionNumber Parse(string s) => TryParse(s, out var version) ? version : throw new FormatException();
 
         public override string ToString() => $"{Major}.{Minor}.{Patch}.{Revision}{Build}{Prerelease}";
 

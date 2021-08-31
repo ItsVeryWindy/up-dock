@@ -19,7 +19,7 @@ namespace UpDock
 
         public void EnsureExecution(string? digest, IEnumerable<NuGetVersion> versions)
         {
-            if(!versions.Any())
+            if (!versions.Any())
                 throw new ArgumentException("Pattern does not have the same number versions as the image", nameof(versions));
 
             Next.EnsureExecution(digest, versions.Skip(1));
