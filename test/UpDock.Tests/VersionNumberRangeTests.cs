@@ -1,11 +1,74 @@
-﻿using System.Collections.Generic;
-using NUnit.Framework;
+﻿using NUnit.Framework;
 using UpDock.Versioning;
 
 namespace UpDock.Tests
 {
     public class VersionNumberRangeTests
     {
+        [TestCase("^x", "0.0.0", "9999.9999.9999")]
+        [TestCase("^x.x", "0.0.0", "9999.9999.9999")]
+        [TestCase("^x.x.x", "0.0.0", "9999.9999.9999")]
+        [TestCase("^x.x.x.x", "0.0.0.0", "9999.9999.9999.9999")]
+        [TestCase("^2", "2.0.0", "2.9999.9999")]
+        [TestCase("^2.x", "2.0.0", "2.9999.9999")]
+        [TestCase("^2.*", "2.0.0", "2.9999.9999")]
+        [TestCase("^2.x.x", "2.0.0", "2.9999.9999")]
+        [TestCase("^2.*.*", "2.0.0", "2.9999.9999")]
+        [TestCase("^2.x.x.x", "2.0.0.0", "2.9999.9999")]
+        [TestCase("^2.*.*.*", "2.0.0.0", "2.9999.9999.9999")]
+        [TestCase("^2.0.0-*", "2.0.0-0", "2.9999.9999-z")]
+        [TestCase("^2.0.0-rc.2", "2.0.0-rc.2", "2.0.0")]
+        [TestCase("^2.0.0.0-rc.2", "2.0.0.0-rc.2", "2.0.0.0")]
+        [TestCase("^0.2", "0.2.0", "0.2.9999")]
+        [TestCase("^0.x", "0.0.0", "0.9999.9999")]
+        [TestCase("^0.*", "0.0.0", "0.9999.9999")]
+        [TestCase("^0.0.2", "0.0.2", "0.0.2")]
+        [TestCase("^0.0.x", "0.0.0", "0.0.9999")]
+        [TestCase("^0.0.*", "0.0.0", "0.0.9999")]
+        [TestCase("^0.0.0.2", "0.0.0.2", "0.0.0.2")]
+        [TestCase("^0.0.0.x", "0.0.0.0", "0.0.0.9999")]
+        [TestCase("^0.0.0.*", "0.0.0.0", "0.0.0.9999")]
+        public void ShouldSatisfyCaretRange(string rangeStr, string minStr, string maxStr)
+        {
+            var range = VersionNumberRange.Parse(rangeStr);
+
+            var min = VersionNumber.Parse(minStr);
+            var max = VersionNumber.Parse(maxStr);
+
+            Assert.That(range.Satisfies(min), Is.True);
+            Assert.That(range.Satisfies(max), Is.True);
+        }
+
+        [TestCase("^2", "1.9.9", "3.0.0")]
+        [TestCase("^2.x", "1.9.9", "3.0.0")]
+        [TestCase("^2.*", "1.9.9", "3.0.0")]
+        [TestCase("^2.x.x", "1.9.9", "3.0.0")]
+        [TestCase("^2.*.*", "1.9.9", "3.0.0")]
+        [TestCase("^2.x.x.x", "1.9.9.9", "3.0.0.0")]
+        [TestCase("^2.*.*.*", "1.9.9.9", "3.0.0.0")]
+        [TestCase("^2.0.0-*", "1.9.9", "3.0.0-0")]
+        [TestCase("^2.0.0-rc.2", "2.0.0-rc.1", "2.0.1")]
+        [TestCase("^2.0.0.0-rc.2", "2.0.0.0-rc.1", "2.0.0.1")]
+        [TestCase("^0.2", "0.1.9", "0.3.0")]
+        [TestCase("^0.x", "0.0.0-z", "1.0.0")]
+        [TestCase("^0.*", "0.0.0-z", "1.0.0")]
+        [TestCase("^0.0.2", "0.0.1", "0.0.3")]
+        [TestCase("^0.0.x", "0.0.0-z", "0.1.0")]
+        [TestCase("^0.0.*", "0.0.0-z", "0.1.0")]
+        [TestCase("^0.0.0.2", "0.0.0.1", "0.0.1.0")]
+        [TestCase("^0.0.0.x", "0.0.0.0-z", "0.0.1.0")]
+        [TestCase("^0.0.0.*", "0.0.0.0-z", "0.0.1.0")]
+        public void ShouldNotSatisfyCaretRange(string rangeStr, string minStr, string maxStr)
+        {
+            var range = VersionNumberRange.Parse(rangeStr);
+
+            var min = VersionNumber.Parse(minStr);
+            var max = VersionNumber.Parse(maxStr);
+
+            Assert.That(range.Satisfies(min), Is.False);
+            Assert.That(range.Satisfies(max), Is.False);
+        }
+
         [TestCase("* || >=2", "0.0.0")]
         [TestCase("*", "0.0.0")]
         [TestCase("*", "1.2.3")]
@@ -20,9 +83,7 @@ namespace UpDock.Tests
         [TestCase("^0.1.2", "0.1.2")]
         [TestCase("^1.0.0-*", "1.0.1-rc1")]
         [TestCase("^1.0.0-*", "1.1.0-rc1")]
-        [TestCase("^1.0.0-0", "1.0.1-rc1")]
         [TestCase("^1.0.0-alpha", "1.0.0-beta")]
-        [TestCase("^1.0.0-rc2", "1.0.1-rc1")]
         [TestCase("^1.1.1 || >=2", "1.1.1")]
         [TestCase("^1.1.1", "1.1.1")]
         [TestCase("^1.1.1-beta", "1.1.1-beta")]

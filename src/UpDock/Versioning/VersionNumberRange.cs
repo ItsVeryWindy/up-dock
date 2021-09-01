@@ -513,32 +513,101 @@ namespace UpDock.Versioning
 
             private static int CreateMaximumMinorNumber(PartialVersionNumber partial)
             {
-                if (partial.Minor.HasValue || partial.Minor.Value == 0)
+                if (!partial.Major.HasValue)
                     return 0;
 
-                return partial.Major.Value == 0 ? partial.Minor.Value + 1 : 0;
+                if (partial.Major.Value != 0)
+                    return 0;
+
+                if (!partial.Minor.HasValue)
+                    return 0;
+
+                if (partial.Minor.Value == 0)
+                    return 0;
+
+                return partial.Minor.Value + 1;
             }
 
             private static int CreateMaximumPatchNumber(PartialVersionNumber partial)
             {
-                if (partial.Minor.HasValue)
+                if (!partial.Major.HasValue)
                     return 0;
 
-                return partial.Major.Value == 0 && partial.Minor.Value == 0 ? partial.Patch.Value + 1 : 0;
+                if (partial.Major.Value != 0)
+                    return 0;
+
+                if (!partial.Minor.HasValue)
+                    return 0;
+
+                if (partial.Minor.Value != 0)
+                    return 0;
+
+                if (!partial.Revision.IsUnspecified)
+                {
+                    if (!partial.Patch.HasValue)
+                        return 0;
+
+                    if (partial.Patch.Value == 0)
+                        return 0;
+                }
+
+                if (partial.Patch.IsUnspecified)
+                    return 0;
+
+                if (partial.Patch.IsAny)
+                    return int.MaxValue;
+
+                return partial.Patch.Value + 1;
             }
 
             private static int CreateMaximumRevisionNumber(PartialVersionNumber partial)
             {
-                if (partial.Patch.HasValue)
+                if (!partial.Major.HasValue)
                     return 0;
 
-                return partial.Major.Value == 0 && partial.Minor.Value == 0 && partial.Patch.Value == 0 ? partial.Revision.Value + 1 : 0;
+                if (partial.Major.Value != 0)
+                    return 0;
+
+                if (!partial.Minor.HasValue)
+                    return 0;
+
+                if (partial.Minor.Value != 0)
+                    return 0;
+
+                if (!partial.Patch.HasValue)
+                    return 0;
+
+                if (partial.Patch.Value != 0)
+                    return 0;
+
+                if (partial.Revision.IsUnspecified)
+                    return 0;
+
+                if (partial.Revision.IsAny)
+                    return int.MaxValue;
+
+                return partial.Revision.Value + 1;
             }
 
             public bool Satisfies(VersionNumber version)
             {
                 if (_partial.Prerelease.IsUnspecified && version.Prerelease != Prerelease.None)
                     return false;
+
+                if(_partial.Major.HasValue && _partial.Minor.HasValue && _partial.Patch.HasValue && _partial.Prerelease.HasValue)
+                {
+                    if (_partial.Major.Value != version.Major)
+                        return false;
+
+                    if (_partial.Minor.Value != version.Minor)
+                        return false;
+
+                    if (_partial.Patch.Value != version.Patch)
+                        return false;
+
+                    if (_partial.Revision.HasValue && _partial.Revision.Value != version.Revision)
+                        return false;
+                }
 
                 return version >= _minimum && version < _maximum;
             }
